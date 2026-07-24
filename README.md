@@ -26,7 +26,7 @@ Tidak ada framework, dependency, proses build, atau backend. Cukup buka game di 
 
 ### Cara paling cepat
 
-Unduh repository ini, lalu buka [`dragonrealm.html`](./dragonrealm.html) menggunakan browser modern seperti Chrome, Edge, atau Firefox.
+Unduh repository ini, lalu buka [`index.html`](./index.html) menggunakan browser modern seperti Chrome, Edge, atau Firefox.
 
 ### Menjalankan melalui local server
 
@@ -39,7 +39,7 @@ python -m http.server 8000
 Kemudian buka:
 
 ```text
-http://localhost:8000/dragonrealm.html
+http://localhost:8000/
 ```
 
 Alternatifnya, gunakan extension seperti Live Server di Visual Studio Code.
@@ -122,8 +122,8 @@ Shortcut diabaikan ketika pemain sedang mengetik dan tidak akan menjalankan tomb
 
 ```text
 dragon-realm/
-├── dragonrealm.html   # Seluruh HTML, CSS, data, dan logika game
-└── README.md          # Dokumentasi proyek
+├── index.html   # Seluruh HTML, CSS, data, dan logika game
+└── README.md    # Dokumentasi proyek
 ```
 
 ## Deploy ke GitHub Pages
@@ -132,20 +132,32 @@ dragon-realm/
 2. Buka **Settings → Pages**.
 3. Pada **Build and deployment**, pilih **Deploy from a branch**.
 4. Pilih branch `main`, folder `/ (root)`, lalu simpan.
-5. Setelah deployment selesai, buka:
+5. Setelah deployment selesai, buka root URL proyek:
 
 ```text
-https://<username>.github.io/<repository>/dragonrealm.html
+https://<username>.github.io/<repository>/
 ```
 
-Jika ingin game terbuka langsung dari root URL GitHub Pages, ubah nama `dragonrealm.html` menjadi `index.html` dan perbarui tautan dokumentasi yang mengarah ke file tersebut.
+## Deploy ke Vercel
+
+1. Import repository GitHub ke Vercel.
+2. Pilih **Framework Preset: Other**.
+3. Pastikan **Root Directory** menunjuk ke root repository.
+4. Biarkan Build Command dan Output Directory kosong.
+5. Tekan **Deploy**.
+
+Vercel akan menyajikan `index.html` langsung pada root domain:
+
+```text
+https://<project-name>.vercel.app/
+```
 
 > [!NOTE]
 > Proyek ini adalah game single-player statis. Mode multiplayer/LAN belum termasuk dalam build saat ini karena fitur tersebut memerlukan lapisan jaringan atau server tambahan.
 
 ## Pengembangan
 
-Semua tampilan, data, dan logika berada di dalam `dragonrealm.html`. Saat melakukan perubahan:
+Semua tampilan, data, dan logika berada di dalam `index.html`. Saat melakukan perubahan:
 
 - Pertahankan format satu file jika ingin menjaga game tetap portabel.
 - Uji new game, equip/unequip, Shop, Tavern, Blacksmith, battle, save/load, dan World Reset.
