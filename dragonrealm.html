@@ -1,0 +1,4109 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon Realm Adventure</title>
+    <style>
+        /* --- General Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #e94560;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            /* Menggunakan Grid */
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .main-panel,
+        .side-panel {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #e94560;
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 15px rgba(233, 69, 96, 0.5);
+            overflow-y: auto;
+            /* For scrollable content */
+        }
+
+        .main-panel {
+            grid-column: 1 / 2;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-panel {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #e94560;
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            /* main-panel tidak memiliki display: flex; atau display: block; secara eksplisit */
+            /* Namun, ini adalah item dalam grid, jadi perilakunya dipengaruhi oleh grid container */
+        }
+
+        .side-panel {
+            grid-column: 2 / 3;
+        }
+
+        h2,
+        h3 {
+            color: #e94560;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(233, 69, 96, 0.3);
+            padding-bottom: 5px;
+        }
+
+        p {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        /* --- Buttons --- */
+        button {
+            background: #e94560;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1em;
+            transition: background-color 0.2s, transform 0.1s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #ff6f8a;
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background-color: #555;
+            color: #aaa;
+            cursor: not-allowed;
+        }
+
+        /* --- Player Info --- */
+        #playerInfo {
+            margin-bottom: 20px;
+            border-bottom: 1px dashed rgba(233, 69, 96, 0.3);
+            padding-bottom: 15px;
+        }
+
+        .player-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .player-stat span:first-child {
+            font-weight: bold;
+            color: #79d70f;
+        }
+
+        #playerOrigin,
+        #playerTitle {
+            max-width: 72%;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        .player-name-value {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .name-edit-button {
+            padding: 2px 6px;
+            margin: 0;
+            min-width: auto;
+            font-size: 0.85em;
+        }
+
+        .name-dialog-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+        }
+
+        .name-dialog {
+            width: min(420px, 100%);
+            padding: 24px;
+            background: #10182f;
+            border: 2px solid #e94560;
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgba(233, 69, 96, 0.6);
+        }
+
+        .name-dialog input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            color: #fff;
+            background: #080d1d;
+            border: 1px solid #00bfff;
+            border-radius: 5px;
+            font: inherit;
+        }
+
+        #playerNameError {
+            min-height: 1.5em;
+            color: #ff6f8a;
+        }
+
+        /* --- Game Log --- */
+
+
+        #gameLog {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #e94560;
+            padding: 15px;
+            border-radius: 8px;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.4;
+
+            /* Tambahkan ini untuk memastikan entri log disusun secara vertikal */
+            display: block !important;
+            flex-direction: column;
+        }
+
+        .log {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #e94560;
+            padding: 15px;
+            border-radius: 8px;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+
+        .log-entry {
+            margin-bottom: 5px;
+            color: #c0c0c0;
+        }
+
+        .log-battle {
+            color: #ffbf00;
+        }
+
+        .log-damage {
+            color: #ff4500;
+        }
+
+        .log-heal {
+            color: #79d70f;
+        }
+
+        .log-level-up {
+            color: #00bfff;
+            font-weight: bold;
+        }
+
+        .log-gold {
+            color: #ffd700;
+        }
+
+        .log-item {
+            color: #9370db;
+        }
+
+        .log-quest {
+            color: #ff8c00;
+        }
+
+        .log-error {
+            color: #dc143c;
+        }
+
+        /* --- Battle Section --- */
+        #battleSection {
+            margin-top: 20px;
+            border-top: 1px dashed rgba(233, 69, 96, 0.3);
+            padding-top: 15px;
+        }
+
+        #monsterInfo {
+            margin-bottom: 10px;
+            color: #ffbf00;
+        }
+
+        .health-bar-container {
+            width: 100%;
+            background-color: #333;
+            border: 1px solid #0f3460;
+            border-radius: 3px;
+            margin-top: 5px;
+        }
+
+        .health-bar {
+            height: 15px;
+            background-color: #79d70f;
+            width: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease-in-out;
+            text-align: center;
+            color: white;
+            font-size: 0.8em;
+            line-height: 15px;
+        }
+
+        /* --- Controls --- */
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            border-top: 1px dashed rgba(233, 69, 96, 0.3);
+            padding-top: 15px;
+        }
+
+        .shortcut-help {
+            margin-top: 8px;
+        }
+
+        .shortcut-help-toggle {
+            padding: 6px 10px;
+            font-size: 0.85em;
+            background: rgba(0, 191, 255, 0.25);
+            color: #cceeff;
+            border: 1px solid rgba(0, 191, 255, 0.5);
+        }
+
+        .shortcut-help-panel {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 10px;
+            padding: 12px;
+            color: #c0c0c0;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(0, 191, 255, 0.35);
+            border-radius: 6px;
+        }
+
+        .shortcut-help-panel strong {
+            display: block;
+            margin-bottom: 6px;
+            color: #79d70f;
+        }
+
+        .shortcut-help-panel span {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        kbd {
+            display: inline-block;
+            min-width: 24px;
+            padding: 2px 6px;
+            margin-right: 4px;
+            color: #fff;
+            text-align: center;
+            background: #18213c;
+            border: 1px solid #4c5d82;
+            border-bottom-width: 2px;
+            border-radius: 4px;
+            font: inherit;
+            font-size: 0.85em;
+        }
+
+        /* --- Side Panel Sections --- */
+        .side-panel section {
+            margin-bottom: 20px;
+        }
+
+        #unlockedTitleSummary {
+            color: #ffd700;
+            font-size: 0.9em;
+        }
+
+        .title-quest-entry {
+            padding: 7px 0;
+            border-bottom: 1px dotted rgba(233, 69, 96, 0.2);
+        }
+
+        .title-quest-entry:last-child {
+            border-bottom: none;
+        }
+
+        .title-quest-entry.unlocked {
+            color: #79d70f;
+        }
+
+        .title-quest-entry small {
+            display: block;
+            color: #c0c0c0;
+        }
+
+        /* --- Inventory --- */
+        #inventoryList {
+            max-height: 300px;
+            /* Limit height for scrolling */
+            overflow-y: auto;
+            border: 1px solid rgba(233, 69, 96, 0.2);
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .inventory-item {
+            background-color: rgba(233, 69, 96, 0.1);
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .inventory-item:hover {
+            background-color: rgba(233, 69, 96, 0.2);
+            border-color: #e94560;
+        }
+
+        .inventory-item strong {
+            color: #79d70f;
+        }
+
+        .inventory-item small {
+            color: #c0c0c0;
+        }
+
+        .inventory-equip-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .inventory-equip-actions button {
+            padding: 5px 8px;
+            margin: 0;
+            font-size: 0.8em;
+        }
+
+        /* --- Shop Cards --- */
+        #shopList,
+        #sellList {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 10px;
+            background-color: rgba(233, 69, 96, 0.08);
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            border-radius: 6px;
+        }
+
+        .list-item-content {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .list-item-title {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-bottom: 4px;
+        }
+
+        .list-item-price {
+            color: #ffd700;
+            white-space: nowrap;
+        }
+
+        .list-item-meta,
+        .list-item-description {
+            display: block;
+            color: #c0c0c0;
+            line-height: 1.4;
+        }
+
+        .list-item-meta {
+            color: #79d70f;
+            text-transform: capitalize;
+        }
+
+        .list-item button {
+            flex-shrink: 0;
+            align-self: center;
+            min-width: 72px;
+            margin: 0;
+        }
+
+        @media (max-width: 560px) {
+            .list-item {
+                flex-direction: column;
+            }
+
+            .list-item button {
+                align-self: stretch;
+                width: 100%;
+            }
+        }
+
+        /* Rarity colors */
+        .item-rarity-common {
+            color: #aaa;
+        }
+
+        .item-rarity-uncommon {
+            color: #00bfff;
+        }
+
+        .item-rarity-rare {
+            color: #9370db;
+        }
+
+        .item-rarity-epic {
+            color: #ff8c00;
+        }
+
+        .item-rarity-legendary {
+            color: #ffd700;
+        }
+
+        /* --- Equipped Gear --- */
+        #equippedGearList div {
+            padding: 5px 0;
+            border-bottom: 1px dotted rgba(233, 69, 96, 0.1);
+        }
+
+        #equippedGearList div:last-child {
+            border-bottom: none;
+        }
+
+        .equipped-slot {
+            font-weight: bold;
+            color: #00bfff;
+        }
+
+        /* --- Monster Codex --- */
+        #monsterCodexList {
+            max-height: 250px;
+            /* Limit height for scrolling */
+            overflow-y: auto;
+            border: 1px solid rgba(233, 69, 96, 0.2);
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .codex-entry {
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px dotted rgba(233, 69, 96, 0.1);
+        }
+
+        .codex-entry:last-child {
+            border-bottom: none;
+        }
+
+        .codex-entry strong {
+            color: #ffbf00;
+        }
+
+        /* --- Quest Log --- */
+        #questLogList {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .quest-entry {
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px dotted rgba(233, 69, 96, 0.1);
+        }
+
+        .quest-entry.completed {
+            text-decoration: line-through;
+            color: #777;
+        }
+
+        .quest-entry:last-child {
+            border-bottom: none;
+        }
+
+        /* --- Tavern Section --- */
+        #tavernSection {
+            margin-top: 20px;
+            border-top: 1px dashed rgba(233, 69, 96, 0.3);
+            padding-top: 15px;
+            display: none;
+            /* Hidden by default */
+        }
+
+        #availableQuestsList {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid rgba(233, 69, 96, 0.2);
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        #tavernRefreshInfo {
+            color: #00bfff;
+            background: rgba(0, 191, 255, 0.08);
+            border: 1px solid rgba(0, 191, 255, 0.3);
+            border-radius: 5px;
+            padding: 8px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .tavern-quest-entry {
+            background-color: rgba(233, 69, 96, 0.1);
+            border: 1px solid rgba(233, 69, 96, 0.3);
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+
+        .tavern-quest-entry strong {
+            color: #ffbf00;
+        }
+
+        .tavern-quest-entry button {
+            margin-top: 5px;
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .game-container {
+                grid-template-columns: 1fr;
+            }
+
+            .main-panel,
+            .side-panel {
+                grid-column: 1 / 2;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="main-panel">
+            <h1>Dragon Realm Adventure</h1>
+
+            <div id="playerInfo">
+                <h2>Player Info</h2>
+                <div class="player-stat">
+                    <span>Name:</span>
+                    <span class="player-name-value">
+                        <span id="playerName"></span>
+                        <button id="editPlayerNameBtn" class="name-edit-button" type="button"
+                            title="Change player name">✏️</button>
+                    </span>
+                </div>
+                <div class="player-stat"><span>Origin:</span> <span id="playerOrigin"></span></div>
+                <div class="player-stat"><span>Title:</span> <span id="playerTitle"></span></div>
+                <div class="player-stat"><span>Level:</span> <span id="playerLevel"></span></div>
+                <div class="player-stat"><span>Area:</span> <span id="currentArea"></span></div>
+                <div class="player-stat"><span>Victories:</span> <span id="totalVictories"></span></div>
+                <div class="player-stat"><span>World Tier:</span> <span id="worldResetCount"></span></div>
+                <div class="player-stat"><span>Permanent Bonus:</span> <span id="worldResetBonus"></span></div>
+                <div class="player-stat"><span>EXP:</span> <span id="playerExp"></span> / <span
+                        id="playerExpToNextLevel"></span></div>
+                <div class="health-bar-container">
+                    <div id="playerHpBar" class="health-bar"></div>
+                </div>
+                <div class="health-bar-container"
+                    style="background-color: #333; border: 1px solid #0f3460; margin-top: 5px; margin-bottom: 15px;">
+                    <div id="playerMpBar" class="health-bar" style="background-color: #00bfff;"></div>
+                </div>
+                <div class="player-stat"><span>Attack:</span> <span id="playerAtk"></span></div>
+                <div class="player-stat"><span>Defense:</span> <span id="playerDef"></span></div>
+                <div class="player-stat"><span>Gold:</span> <span id="playerGold"></span></div>
+                <div class="player-stat"><span>Potions:</span> <span id="playerPotions"></span></div>
+            </div>
+
+            <div id="gameLog" style="display: block !important;">
+            </div>
+
+            <div id="battleSection" style="display: none;">
+                <h2>Battle!</h2>
+                <div id="monsterInfo">
+                    <p>Monster: <span id="monsterName"></span> (Level <span id="monsterLevel"></span>)</p>
+                    <p>Ability: <span id="monsterAbility"></span></p>
+                    <div class="health-bar-container">
+                        <div id="monsterHpBar" class="health-bar"></div>
+                    </div>
+                </div>
+                <div id="battleControls">
+                    <button id="attackBtn">Attack!</button>
+                    <button id="usePotionBtn">Use Potion (<span id="potionCount">0</span>)</button>
+                    <button id="fleeBtn">Flee!</button>
+                    <button id="magicStrikeBtn">Magic Strike (<span id="magicStrikeCost"></span> MP)</button>
+                </div>
+            </div>
+
+            <div id="tavernSection">
+                <h2>The Rusty Flagon Tavern</h2>
+                <p>A grizzled adventurer points to a quest board:</p>
+                <p id="tavernRefreshInfo">Quest board status is loading...</p>
+                <div id="availableQuestsList">
+                </div>
+                <button id="leaveTavernBtn">Leave Tavern</button>
+            </div>
+
+            <!-- SHOP UI -->
+            <div id="shopSection" style="display:none;" class="list-section">
+                <h3>Shop - Buy Items</h3>
+                <div id="shopList"></div>
+                <h3>Your Inventory - Sell Items</h3>
+                <div id="sellList"></div>
+                <button onclick="closeShop()">Close Shop</button>
+            </div>
+
+            <!-- BLACKSMITH UI -->
+            <div id="blacksmithSection" style="display:none;" class="list-section">
+                <h2>Blacksmith</h2>
+                <h3>Your Materials</h3>
+                <div id="materialList"></div>
+                <h3>Equipped Gear</h3>
+                <div id="upgradeList"></div>
+                <button onclick="closeBlacksmith()">Leave Blacksmith</button>
+            </div>
+
+            <div id="controls">
+                <button id="exploreBtn">Explore Dungeon</button>
+                <button id="restBtn">Rest (Heal HP/MP)</button>
+                <button id="shopBtn">Visit Shop</button>
+                <button id="tavernBtn">Visit Tavern</button>
+                <button id="worldResetBtn" style="display: none;">World Reset</button>
+            </div>
+            <div class="shortcut-help">
+                <button id="shortcutHelpBtn" class="shortcut-help-toggle" type="button"
+                    aria-expanded="false" aria-controls="shortcutHelpPanel">⌨ Keyboard Shortcuts (?)</button>
+                <div id="shortcutHelpPanel" class="shortcut-help-panel">
+                    <div>
+                        <strong>Town</strong>
+                        <span><kbd>E</kbd> Explore</span>
+                        <span><kbd>R</kbd> Rest</span>
+                        <span><kbd>S</kbd> Shop</span>
+                        <span><kbd>T</kbd> Tavern</span>
+                        <span><kbd>B</kbd> Blacksmith</span>
+                    </div>
+                    <div>
+                        <strong>Battle</strong>
+                        <span><kbd>A</kbd> / <kbd>1</kbd> Attack</span>
+                        <span><kbd>M</kbd> / <kbd>2</kbd> Magic Strike</span>
+                        <span><kbd>P</kbd> / <kbd>3</kbd> Potion</span>
+                        <span><kbd>F</kbd> Flee</span>
+                    </div>
+                    <div>
+                        <strong>Global</strong>
+                        <span><kbd>Ctrl</kbd> + <kbd>S</kbd> Save</span>
+                        <span><kbd>Esc</kbd> Close location/help</span>
+                        <span><kbd>?</kbd> Toggle this panel</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <section>
+                <h3>Equipped Gear</h3>
+                <div id="equippedGearList">
+                </div>
+            </section>
+
+            <section id="titleSection">
+                <h3>Titles</h3>
+                <p id="unlockedTitleSummary">No titles unlocked.</p>
+                <div id="titleQuestList"></div>
+            </section>
+
+            <section>
+                <h3>Inventory</h3>
+                <div id="inventoryList">
+                </div>
+            </section>
+
+            <section>
+                <h3>Quest Log</h3>
+                <div id="questLogList">
+                </div>
+            </section>
+
+            <section>
+                <h3>Monster Codex</h3>
+                <div id="monsterCodexList">
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="playerNameDialogOverlay" class="name-dialog-overlay" role="dialog" aria-modal="true"
+        aria-labelledby="playerNameDialogTitle">
+        <div class="name-dialog">
+            <h2 id="playerNameDialogTitle">Choose Your Name</h2>
+            <p id="playerNameDialogDescription">Enter the name your adventurer will use in Dragon Realm.</p>
+            <input id="playerNameInput" type="text" maxlength="20" autocomplete="off"
+                placeholder="Adventurer name">
+            <p id="playerNameError"></p>
+            <button id="confirmPlayerNameBtn" type="button">Confirm Name</button>
+            <button id="cancelPlayerNameBtn" type="button">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Game State Initialization ---
+        const gameState = {
+            player: {
+                name: "Hero",
+                hasChosenName: true,
+                nameChangesRemaining: 1,
+                originAssigned: true,
+                originName: "Balanced",
+                originStats: { hp: 100, mp: 50, atk: 10, def: 5 },
+                level: 1,
+                exp: 0,
+                expToNextLevel: 100,
+                baseHp: 100,
+                hp: 100,
+                baseMp: 50,
+                mp: 50,
+                baseAtk: 10,
+                baseDef: 5,
+                gold: 1000,
+                potions: 3,
+                equipped: { weapon: null, armor: null, accessory: null, accessory2: null },
+                currentAtk: 0,
+                currentDef: 0,
+                maxHp: 100,
+                maxMp: 50
+            },
+            inventory: [],
+            quests: [],
+            monsterCodex: {},
+            currentMonster: null,
+            inBattle: false,
+            areaLevel: 1,
+            totalVictories: 0,
+            defeatedBosses: [],
+            worldResetCount: 0,
+            worldStatBonus: 0,
+            titleProgress: {
+                monsterKills: 0,
+                goblinsDefeated: 0,
+                questsCompleted: 0,
+                bossesDefeated: 0,
+                upgradesSucceeded: 0,
+                worldResets: 0,
+                primordialDragonsDefeated: 0
+            },
+            unlockedTitles: [],
+            equipmentStateVersion: 6,
+            progressionStateVersion: 2,
+            currentLocation: "town",
+            lastTavernVisit: null,
+            tavernQuestOffers: [],
+            blacksmithMaterials: { ore: 0 },
+            shopInventory: [
+                { id: "hp_potion_small", name: "Small HP Potion", icon: "🧪", type: "consumable", rarity: "common", priceBuy: 25, priceSell: 12, effect: "heal", value: 30 },
+                { id: "mp_potion_small", name: "Small MP Potion", icon: "🔵", type: "consumable", rarity: "common", priceBuy: 20, priceSell: 10, effect: "mana", value: 20 },
+                { id: "hp_potion_large", name: "Large HP Potion", icon: "❤️", type: "consumable", rarity: "uncommon", priceBuy: 65, priceSell: 32, effect: "heal", value: 75 },
+                { id: "mp_potion_large", name: "Large MP Potion", icon: "✨", type: "consumable", rarity: "uncommon", priceBuy: 55, priceSell: 27, effect: "mana", value: 50 },
+                { id: "iron_sword", name: "Iron Sword", icon: "⚔️", type: "weapon", rarity: "uncommon", priceBuy: 75, priceSell: 37, atkBonus: 10 },
+                { id: "chainmail_armor", name: "Chainmail Armor", icon: "🛡️", type: "armor", rarity: "uncommon", priceBuy: 100, priceSell: 50, defBonus: 7 },
+                { id: "hunter_bow", name: "Hunter Bow", icon: "🏹", type: "weapon", rarity: "common", priceBuy: 60, priceSell: 30, atkBonus: 7 },
+                { id: "mage_robe", name: "Mage Robe", icon: "🧙", type: "armor", rarity: "uncommon", priceBuy: 125, priceSell: 62, defBonus: 5, mpBonus: 15 }
+            ]
+        };
+
+        const WORLD_RESET_LEVEL_REQUIREMENT = 100;
+        const WORLD_RESET_BASE_COST = 10000;
+        const WORLD_RESET_STAT_BONUS = 10;
+        const WORLD_RESET_AEGIS_STAT_BONUS = 15;
+        const WORLD_RESET_MONSTER_SCALING = 0.25;
+        const WORLD_RESET_SHOP_SCALING = 0.20;
+        const WORLD_RESET_COST_SCALING = 1.5;
+        const WORLD_RESET_NO_AEGIS_MULTIPLIER = 1.5;
+        const WORLD_RESET_CATALYST_ID = "primordial_aegis";
+
+        const DEFAULT_ORIGIN_STATS = { hp: 100, mp: 50, atk: 10, def: 5 };
+        const ORIGIN_STAT_MINIMUMS = { hp: 90, mp: 40, atk: 8, def: 3 };
+        const ORIGIN_TOKEN_VALUES = { hp: 5, mp: 5, atk: 1, def: 1 };
+        const ORIGIN_TOKEN_CAPS = { hp: 5, mp: 5, atk: 4, def: 4 };
+        const ORIGIN_TOKEN_COUNT = 8;
+
+        const TITLE_QUESTS = [
+            {
+                id: "goblin_slayer",
+                title: "Goblin Slayer",
+                description: "Defeat 1,000 Goblin-kind enemies across all worlds.",
+                progressKey: "goblinsDefeated",
+                target: 1000,
+                effect: { hpBonus: 100 }
+            },
+            {
+                id: "monster_hunter",
+                title: "Monster Hunter",
+                description: "Defeat 10,000 monsters across all worlds.",
+                progressKey: "monsterKills",
+                target: 10000,
+                effect: { atkBonus: 10 }
+            },
+            {
+                id: "guild_champion",
+                title: "Guild Champion",
+                description: "Complete 5000 quests.",
+                progressKey: "questsCompleted",
+                target: 5000,
+                effect: { mpBonus: 100 }
+            },
+            {
+                id: "boss_slayer",
+                title: "Boss Slayer",
+                description: "Defeat 1000 bosses across all worlds.",
+                progressKey: "bossesDefeated",
+                target: 1000,
+                effect: { hpBonus: 50, defBonus: 10 }
+            },
+            {
+                id: "forge_master",
+                title: "Forge Master",
+                description: "Successfully upgrade equipment 250 times.",
+                progressKey: "upgradesSucceeded",
+                target: 250,
+                effect: { defBonus: 10 }
+            },
+            {
+                id: "worldwalker",
+                title: "Worldwalker",
+                description: "Complete 100 World Resets.",
+                progressKey: "worldResets",
+                target: 100,
+                effect: { atkBonus: 5, defBonus: 5, hpBonus: 50, mpBonus: 50 }
+            },
+            {
+                id: "dragonbane",
+                title: "Dragonbane",
+                description: "Defeat the Primordial Dragon in 10 different world cycles.",
+                progressKey: "primordialDragonsDefeated",
+                target: 10,
+                effect: { atkBonus: 15, defBonus: 15 }
+            },
+            {
+                id: "goblin_king_conqueror",
+                title: "King's Fall",
+                description: "Defeat the Goblin King.",
+                progressKey: "boss_goblin_king",
+                target: 10,
+                effect: { hpBonus: 5 }
+            },
+            {
+                id: "spider_queen_conqueror",
+                title: "Arachnid Bane",
+                description: "Defeat the Spider Queen.",
+                progressKey: "boss_spider_queen",
+                target: 10,
+                effect: { mpBonus: 5 }
+            },
+            {
+                id: "frost_wyrm_conqueror",
+                title: "Frostbreaker",
+                description: "Defeat the Frost Wyrm.",
+                progressKey: "boss_frost_wyrm",
+                target: 10,
+                effect: { defBonus: 1 }
+            },
+            {
+                id: "minotaur_warlord_conqueror",
+                title: "Labyrinth Conqueror",
+                description: "Defeat the Minotaur Warlord.",
+                progressKey: "boss_minotaur_warlord",
+                target: 10,
+                effect: { atkBonus: 1 }
+            },
+            {
+                id: "ancient_dragon_conqueror",
+                title: "Ancient Dragonslayer",
+                description: "Defeat the Ancient Dragon.",
+                progressKey: "boss_ancient_dragon",
+                target: 10,
+                effect: { hpBonus: 10 }
+            },
+            {
+                id: "lich_king_conqueror",
+                title: "Lichbane",
+                description: "Defeat the Lich King.",
+                progressKey: "boss_lich_king",
+                target: 10,
+                effect: { mpBonus: 10 }
+            },
+            {
+                id: "inferno_dragon_conqueror",
+                title: "Flameforged",
+                description: "Defeat the Inferno Dragon.",
+                progressKey: "boss_inferno_dragon",
+                target: 10,
+                effect: { atkBonus: 1, defBonus: 1 }
+            },
+            {
+                id: "void_sovereign_conqueror",
+                title: "Void Conqueror",
+                description: "Defeat the Void Sovereign.",
+                progressKey: "boss_void_sovereign",
+                target: 10,
+                effect: { atkBonus: 2 }
+            },
+            {
+                id: "storm_colossus_conqueror",
+                title: "Stormbreaker",
+                description: "Defeat the Storm Colossus.",
+                progressKey: "boss_storm_colossus",
+                target: 10,
+                effect: { defBonus: 2 }
+            },
+            {
+                id: "celestial_hydra_conqueror",
+                title: "Hydra Slayer",
+                description: "Defeat the Celestial Hydra.",
+                progressKey: "boss_celestial_hydra",
+                target: 10,
+                effect: { hpBonus: 20, mpBonus: 10 }
+            },
+            {
+                id: "world_eater_conqueror",
+                title: "Worldbreaker",
+                description: "Defeat the World Eater.",
+                progressKey: "boss_world_eater",
+                target: 5,
+                effect: { atkBonus: 3 }
+            },
+            {
+                id: "primordial_dragon_conqueror",
+                title: "Primordial Victor",
+                description: "Defeat the Primordial Dragon once.",
+                progressKey: "boss_primordial_dragon",
+                target: 1,
+                effect: { atkBonus: 3, defBonus: 3 }
+            }
+        ];
+
+        function getDefaultTitleProgress() {
+            return Object.fromEntries(
+                [...new Set(TITLE_QUESTS.map(titleQuest => titleQuest.progressKey))]
+                    .map(progressKey => [progressKey, 0])
+            );
+        }
+
+        function normalizeOriginStats(originStats, fallback = DEFAULT_ORIGIN_STATS) {
+            const normalized = {};
+            ["hp", "mp", "atk", "def"].forEach(field => {
+                normalized[field] = Number.isFinite(originStats?.[field])
+                    ? Math.max(1, Math.floor(originStats[field]))
+                    : fallback[field];
+            });
+            return normalized;
+        }
+
+        function generateOrigin(random = Math.random) {
+            const allocations = { hp: 0, mp: 0, atk: 0, def: 0 };
+            const fields = Object.keys(allocations);
+            for (let token = 0; token < ORIGIN_TOKEN_COUNT; token++) {
+                const availableFields = fields.filter(field => allocations[field] < ORIGIN_TOKEN_CAPS[field]);
+                const selectedField = availableFields[Math.floor(random() * availableFields.length)];
+                allocations[selectedField]++;
+            }
+
+            const stats = Object.fromEntries(fields.map(field => {
+                return [field, ORIGIN_STAT_MINIMUMS[field] + allocations[field] * ORIGIN_TOKEN_VALUES[field]];
+            }));
+            const highestAllocation = Math.max(...Object.values(allocations));
+            const dominantFields = fields.filter(field => allocations[field] === highestAllocation);
+            const originNames = {
+                hp: "Vitalborn",
+                mp: "Aetherborn",
+                atk: "Warborn",
+                def: "Ironborn"
+            };
+            const name = dominantFields.length === 1 ? originNames[dominantFields[0]] : "Versatile";
+            return { name, stats, allocations };
+        }
+
+        function assignRandomOriginToPlayer(random = Math.random) {
+            const player = gameState.player;
+            if (player.originAssigned) return false;
+
+            const origin = generateOrigin(random);
+            const completedLevels = Math.max(0, player.level - 1);
+            const permanentBonus = getWorldStatBonus();
+            player.originAssigned = true;
+            player.originName = origin.name;
+            player.originStats = normalizeOriginStats(origin.stats);
+            player.originAllocations = { ...origin.allocations };
+            player.baseHp = player.originStats.hp + completedLevels * 10 + permanentBonus;
+            player.baseMp = player.originStats.mp + completedLevels * 5 + permanentBonus;
+            player.baseAtk = player.originStats.atk + completedLevels * 2 + permanentBonus;
+            player.baseDef = player.originStats.def + completedLevels + permanentBonus;
+            player.hp = player.baseHp;
+            player.mp = player.baseMp;
+            updatePlayerStatsFromEquipment();
+            player.hp = player.maxHp;
+            player.mp = player.maxMp;
+            addLogEntry(
+                `✨ Origin awakened: ${origin.name} — ${player.originStats.hp} HP, ${player.originStats.mp} MP, ${player.originStats.atk} ATK, ${player.originStats.def} DEF.`,
+                "log-level-up"
+            );
+            return true;
+        }
+
+        function getTitleDefinition(titleId) {
+            return TITLE_QUESTS.find(titleQuest => titleQuest.id === titleId) || null;
+        }
+
+        function getActiveTitleEffect() {
+            const combinedEffect = {
+                atkBonus: 0,
+                defBonus: 0,
+                hpBonus: 0,
+                mpBonus: 0
+            };
+            gameState.unlockedTitles.forEach(titleId => {
+                const effect = getTitleDefinition(titleId)?.effect || {};
+                Object.keys(combinedEffect).forEach(field => {
+                    combinedEffect[field] += effect[field] || 0;
+                });
+            });
+            return combinedEffect;
+        }
+
+        function formatStatEffect(effect = {}) {
+            const labels = {
+                atkBonus: "ATK",
+                defBonus: "DEF",
+                hpBonus: "HP",
+                mpBonus: "MP"
+            };
+            const parts = Object.entries(labels)
+                .filter(([field]) => (effect[field] || 0) !== 0)
+                .map(([field, label]) => `${effect[field] > 0 ? "+" : ""}${effect[field]} ${label}`);
+            return parts.length > 0 ? parts.join(", ") : "No stat effect";
+        }
+
+        function checkTitleQuestUnlocks() {
+            const newlyUnlocked = [];
+            TITLE_QUESTS.forEach(titleQuest => {
+                const progress = gameState.titleProgress?.[titleQuest.progressKey] || 0;
+                if (progress < titleQuest.target || gameState.unlockedTitles.includes(titleQuest.id)) return;
+                gameState.unlockedTitles.push(titleQuest.id);
+                newlyUnlocked.push(titleQuest.id);
+                addLogEntry(
+                    `🏅 Title unlocked: ${titleQuest.title} [${formatStatEffect(titleQuest.effect)}]`,
+                    "log-level-up"
+                );
+            });
+            return newlyUnlocked;
+        }
+
+        function recordTitleProgress(progressKey, amount = 1) {
+            if (!Object.hasOwn(getDefaultTitleProgress(), progressKey)) return false;
+            gameState.titleProgress[progressKey] = Math.max(
+                0,
+                Math.floor((gameState.titleProgress[progressKey] || 0) + amount)
+            );
+            const newlyUnlocked = checkTitleQuestUnlocks();
+            if (newlyUnlocked.length > 0) {
+                updatePlayerStatsFromEquipment();
+            } else {
+                updateTitleUI();
+            }
+            return true;
+        }
+
+        function updateTitleUI() {
+            const summaryElement = document.getElementById('unlockedTitleSummary');
+            const questList = document.getElementById('titleQuestList');
+            if (!summaryElement || !questList) return;
+
+            const unlockedDefinitions = gameState.unlockedTitles
+                .map(getTitleDefinition)
+                .filter(Boolean);
+            summaryElement.textContent = unlockedDefinitions.length > 0
+                ? `All active: ${unlockedDefinitions.map(title => `${title.title} [${formatStatEffect(title.effect)}]`).join(", ")}`
+                : "No titles unlocked.";
+
+            questList.innerHTML = '';
+            TITLE_QUESTS.forEach(titleQuest => {
+                const progress = Math.min(
+                    titleQuest.target,
+                    gameState.titleProgress?.[titleQuest.progressKey] || 0
+                );
+                const unlocked = gameState.unlockedTitles.includes(titleQuest.id);
+                const entry = document.createElement('div');
+                entry.className = `title-quest-entry ${unlocked ? "unlocked" : ""}`;
+                entry.innerHTML = `
+                    <strong>${unlocked ? "✓" : "○"} ${titleQuest.title}</strong>
+                    <small>${titleQuest.description} (${progress}/${titleQuest.target})</small>
+                    <small>Effect: ${formatStatEffect(titleQuest.effect)}</small>
+                `;
+                questList.appendChild(entry);
+            });
+        }
+
+        function hasPrimordialAegis() {
+            const matchesAegis = item => item
+                && (item.id === WORLD_RESET_CATALYST_ID || item.baseItemId === WORLD_RESET_CATALYST_ID);
+            return gameState.inventory.some(matchesAegis)
+                || Object.values(gameState.player.equipped || {}).some(matchesAegis);
+        }
+
+        function consumePrimordialAegis() {
+            const inventoryIndex = gameState.inventory.findIndex(item => item
+                && (item.id === WORLD_RESET_CATALYST_ID || item.baseItemId === WORLD_RESET_CATALYST_ID));
+            if (inventoryIndex !== -1) {
+                gameState.inventory.splice(inventoryIndex, 1);
+                return true;
+            }
+
+            const equipped = gameState.player.equipped || {};
+            const equippedSlot = Object.keys(equipped).find(slot => {
+                const item = equipped[slot];
+                return item
+                    && (item.id === WORLD_RESET_CATALYST_ID || item.baseItemId === WORLD_RESET_CATALYST_ID);
+            });
+            if (equippedSlot) {
+                equipped[equippedSlot] = null;
+                return true;
+            }
+            return false;
+        }
+
+        function getWorldResetBaseCost(resetCount = gameState.worldResetCount) {
+            return Math.round(WORLD_RESET_BASE_COST * Math.pow(WORLD_RESET_COST_SCALING, resetCount));
+        }
+
+        function getWorldResetCost(
+            resetCount = gameState.worldResetCount,
+            includesAegis = hasPrimordialAegis()
+        ) {
+            const baseCost = getWorldResetBaseCost(resetCount);
+            return includesAegis
+                ? baseCost
+                : Math.round(baseCost * WORLD_RESET_NO_AEGIS_MULTIPLIER);
+        }
+
+        function getWorldStatBonus() {
+            return Number.isFinite(gameState.worldStatBonus)
+                ? Math.max(0, Math.floor(gameState.worldStatBonus))
+                : Math.max(0, Math.floor(gameState.worldResetCount || 0)) * WORLD_RESET_STAT_BONUS;
+        }
+
+        function getWorldDifficultyMultiplier(resetCount = gameState.worldResetCount) {
+            return 1 + resetCount * WORLD_RESET_MONSTER_SCALING;
+        }
+
+        function getShopPriceMultiplier(resetCount = gameState.worldResetCount) {
+            return 1 + resetCount * WORLD_RESET_SHOP_SCALING;
+        }
+
+        function getShopBuyPrice(item) {
+            return Math.ceil(item.priceBuy * getShopPriceMultiplier());
+        }
+
+        function calculateExpToNextLevel(level) {
+            const safeLevel = Math.max(1, Math.floor(Number(level) || 1));
+            const completedLevels = safeLevel - 1;
+            return Math.floor(100 + completedLevels * 40 + completedLevels * completedLevels * 15);
+        }
+
+        function buyItem(id) {
+            const item = gameState.shopInventory.find(i => i.id === id);
+            if (!item) {
+                alert("Item tidak ditemukan.");
+                return false;
+            }
+            const buyPrice = getShopBuyPrice(item);
+            if (gameState.player.gold < buyPrice) {
+                alert("Gold tidak cukup.");
+                return false;
+            }
+
+            gameState.player.gold -= buyPrice;
+            const purchasedItem = createItemInstance(item);
+            gameState.inventory.push(purchasedItem);
+            alert(`Membeli ${item.name} seharga ${buyPrice} gold.`);
+            addLogEntry(`🛒 You bought ${item.name} for ${buyPrice} gold.`, 'log-gold');
+            refreshShopTransactionUI();
+            return true;
+        }
+
+        function refreshShopTransactionUI() {
+            updateDisplay();
+            updateInventoryDisplay();
+            renderShopUI();
+            renderSellUI();
+        }
+
+        function sellItem(inventoryIndex) {
+            if (!Number.isInteger(inventoryIndex)
+                || inventoryIndex < 0
+                || inventoryIndex >= gameState.inventory.length) {
+                alert("Item tidak ditemukan di inventory.");
+                return false;
+            }
+
+            const item = gameState.inventory[inventoryIndex];
+            const sellPrice = calculateSellPrice(item);
+            gameState.player.gold += sellPrice;
+            const soldItem = gameState.inventory.splice(inventoryIndex, 1)[0];
+            alert(`Menjual ${soldItem.name} seharga ${sellPrice} gold.`);
+            addLogEntry(`💰 You sold ${soldItem.name} for ${sellPrice} gold.`, 'log-gold');
+            refreshShopTransactionUI();
+            return true;
+        }
+
+        function getItemDescription(item) {
+            if (isEquipmentItem(item)) {
+                const stats = [
+                    item.atkBonus ? `ATK +${item.atkBonus}` : null,
+                    item.defBonus ? `DEF +${item.defBonus}` : null,
+                    item.hpBonus ? `HP +${item.hpBonus}` : null,
+                    item.mpBonus ? `MP +${item.mpBonus}` : null
+                ].filter(Boolean);
+                const upgradeText = item.upgradeLevel
+                    ? ` Current upgrade: +${item.upgradeLevel}.`
+                    : " Can be upgraded at the Blacksmith.";
+                return `${stats.join(", ") || "No stat bonus"}.${upgradeText}`;
+            }
+
+            const effectDescriptions = {
+                heal: `Restores ${item.value || 0} HP.`,
+                mana: `Restores ${item.value || 0} MP.`,
+                full_heal: "Fully restores HP.",
+                full_mana: "Fully restores MP."
+            };
+            return effectDescriptions[item.effect] || "A useful adventuring item.";
+        }
+
+        function getItemMetaLabel(item) {
+            const rarity = item.rarity || "common";
+            const type = item.type || "item";
+            return `${rarity} ${type}`;
+        }
+
+        function renderShopUI() {
+            const shopList = document.getElementById('shopList');
+            shopList.innerHTML = '';
+            gameState.shopInventory.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                const buyPrice = getShopBuyPrice(item);
+                const sellPrice = calculateSellPrice(item);
+                div.innerHTML = `
+                    <div class="list-item-content">
+                        <div class="list-item-title">
+                            ${item.icon ? `<span class="list-item-icon">${item.icon}</span>` : ''}
+                            <strong class="item-rarity-${item.rarity || 'common'}">${item.name}</strong>
+                            <span class="list-item-price">${buyPrice}g</span>
+                        </div>
+                        <small class="list-item-meta">${getItemMetaLabel(item)}</small>
+                        <small class="list-item-description">${getItemDescription(item)} Sell value: ${sellPrice}g.</small>
+                    </div>
+                `;
+                const btn = document.createElement('button');
+                btn.textContent = 'Buy';
+                btn.className = 'shop-action-button';
+                btn.disabled = gameState.player.gold < buyPrice;
+                btn.title = btn.disabled
+                    ? `Need ${buyPrice - gameState.player.gold} more gold.`
+                    : `Buy ${item.name} for ${buyPrice} gold.`;
+                btn.onclick = () => buyItem(item.id);
+                div.appendChild(btn);
+                shopList.appendChild(div);
+            });
+        }
+
+        function renderSellUI() {
+            const sellList = document.getElementById('sellList');
+            sellList.innerHTML = '';
+            gameState.inventory.forEach((item, i) => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                const sellPrice = calculateSellPrice(item);
+                div.innerHTML = `
+                    <div class="list-item-content">
+                        <div class="list-item-title">
+                            ${item.icon ? `<span class="list-item-icon">${item.icon}</span>` : ''}
+                            <strong class="item-rarity-${item.rarity || 'common'}">${item.name}</strong>
+                            <span class="list-item-price">Sell: ${sellPrice}g</span>
+                        </div>
+                        <small class="list-item-meta">${getItemMetaLabel(item)}</small>
+                        <small class="list-item-description">${getItemDescription(item)}</small>
+                    </div>
+                `;
+                const btn = document.createElement('button');
+                btn.textContent = 'Sell';
+                btn.className = 'shop-action-button';
+                btn.title = `Sell ${item.name} for ${sellPrice} gold.`;
+                btn.onclick = () => sellItem(i);
+                div.appendChild(btn);
+                sellList.appendChild(div);
+            });
+        }
+
+        function openShop() {
+            gameState.currentLocation = 'shop';
+            updateLocationUI();
+            renderShopUI();
+            renderSellUI();
+        }
+
+        function closeShop() {
+            gameState.currentLocation = 'town';
+            updateLocationUI();
+        }
+
+        // --- Templates ---
+        const areaTemplates = [
+            { level: 1, name: "Whispering Woods" },
+            { level: 2, name: "Ashen Caverns" },
+            { level: 3, name: "Wyrmspire Ruins" },
+            { level: 4, name: "Dragon's Crown" }
+        ];
+
+        function getCurrentArea() {
+            return areaTemplates[Math.min(gameState.areaLevel, areaTemplates.length) - 1];
+        }
+
+        const MONSTER_ABILITY_LABELS = {
+            heavy_strike: "Heavy Strike",
+            venom: "Venom",
+            mana_burn: "Mana Burn",
+            regenerate: "Regeneration",
+            life_drain: "Life Drain"
+        };
+
+        function getMonsterAbilityLabel(monster) {
+            return MONSTER_ABILITY_LABELS[monster?.ability] || "None";
+        }
+
+        const monsterTemplates = [
+            { name: "Slime", hp: 40, atk: 8, exp: 15, gold: 3, minLevel: 1, maxLevel: 3 },
+            { name: "Goblin", hp: 50, atk: 10, exp: 20, gold: 5, minLevel: 1, maxLevel: 3 },
+            { name: "Venomous Toad", hp: 48, atk: 9, exp: 19, gold: 5, minLevel: 1, maxLevel: 4, ability: "venom", abilityChance: 0.2 },
+            { name: "Wolf", hp: 60, atk: 12, exp: 25, gold: 7, minLevel: 1, maxLevel: 4 },
+            { name: "Forest Bandit", hp: 58, atk: 13, exp: 28, gold: 12, minLevel: 1, maxLevel: 4, ability: "heavy_strike", abilityChance: 0.15 },
+            { name: "Wild Boar", hp: 78, atk: 13, exp: 31, gold: 8, minLevel: 2, maxLevel: 5, ability: "heavy_strike", abilityChance: 0.2 },
+            { name: "Giant Spider", hp: 70, atk: 14, exp: 35, gold: 9, minLevel: 2, maxLevel: 5, ability: "venom", abilityChance: 0.25 },
+            { name: "Goblin Shaman", hp: 62, atk: 16, exp: 38, gold: 13, minLevel: 2, maxLevel: 6, ability: "mana_burn", abilityChance: 0.25 },
+            { name: "Orc", hp: 80, atk: 15, exp: 30, gold: 10, minLevel: 3, maxLevel: 6 },
+            { name: "Dire Wolf", hp: 90, atk: 18, exp: 40, gold: 12, minLevel: 4, maxLevel: 7 },
+            { name: "Skeleton Knight", hp: 105, atk: 20, exp: 48, gold: 15, minLevel: 4, maxLevel: 7 },
+            { name: "Wraith", hp: 92, atk: 22, exp: 55, gold: 19, minLevel: 4, maxLevel: 8, ability: "life_drain", abilityChance: 0.2 },
+            { name: "Lizardman", hp: 118, atk: 21, exp: 56, gold: 18, minLevel: 4, maxLevel: 8, ability: "venom", abilityChance: 0.2 },
+            { name: "Cave Troll", hp: 145, atk: 23, exp: 62, gold: 20, minLevel: 5, maxLevel: 9, ability: "regenerate", abilityChance: 0.25 },
+            { name: "Dark Mage", hp: 100, atk: 27, exp: 72, gold: 24, minLevel: 6, maxLevel: 10, ability: "mana_burn", abilityChance: 0.3 },
+            { name: "Minotaur", hp: 175, atk: 27, exp: 78, gold: 27, minLevel: 6, maxLevel: 11, ability: "heavy_strike", abilityChance: 0.25 },
+            { name: "Necromancer", hp: 125, atk: 29, exp: 82, gold: 30, minLevel: 6, maxLevel: 11, ability: "life_drain", abilityChance: 0.25 },
+            { name: "Wyvern", hp: 170, atk: 31, exp: 90, gold: 32, minLevel: 8, maxLevel: 12 },
+            { name: "Harpy Matriarch", hp: 155, atk: 33, exp: 98, gold: 35, minLevel: 8, maxLevel: 13, ability: "mana_burn", abilityChance: 0.2 },
+            { name: "Stone Golem", hp: 220, atk: 29, exp: 105, gold: 38, minLevel: 9, maxLevel: 13, ability: "heavy_strike", abilityChance: 0.25 },
+            { name: "Chimera", hp: 205, atk: 35, exp: 118, gold: 44, minLevel: 9, maxLevel: 14, ability: "venom", abilityChance: 0.3 },
+            { name: "Vampire Lord", hp: 190, atk: 36, exp: 125, gold: 48, minLevel: 10, maxLevel: 15, ability: "life_drain", abilityChance: 0.3 },
+            { name: "Demon Knight", hp: 250, atk: 41, exp: 155, gold: 60, minLevel: 12, maxLevel: 18 },
+            { name: "Abyssal Hound", hp: 230, atk: 43, exp: 165, gold: 64, minLevel: 12, maxLevel: 18, ability: "life_drain", abilityChance: 0.25 },
+            { name: "Fire Elemental", hp: 215, atk: 45, exp: 175, gold: 68, minLevel: 12, maxLevel: 19, ability: "mana_burn", abilityChance: 0.25 },
+            { name: "Elder Dragon", hp: 340, atk: 48, exp: 210, gold: 85, minLevel: 15, maxLevel: 99, ability: "heavy_strike", abilityChance: 0.3 },
+            { name: "Shadow Dragon", hp: 320, atk: 51, exp: 225, gold: 92, minLevel: 15, maxLevel: 99, ability: "life_drain", abilityChance: 0.3 },
+            { name: "Ancient Titan", hp: 430, atk: 49, exp: 245, gold: 105, minLevel: 17, maxLevel: 99, ability: "regenerate", abilityChance: 0.3 }
+        ];
+
+        const bossTemplates = [
+            {
+                id: "goblin_king",
+                name: "Goblin King",
+                requiredLevel: 3,
+                hp: 165,
+                atk: 19,
+                exp: 120,
+                gold: 100,
+                rewardItemId: "royal_goblin_blade",
+                ability: "heavy_strike",
+                abilityChance: 0.3
+            },
+            {
+                id: "spider_queen",
+                name: "Spider Queen",
+                requiredLevel: 5,
+                hp: 240,
+                atk: 25,
+                exp: 190,
+                gold: 155,
+                rewardItemId: "venom_fang",
+                ability: "venom",
+                abilityChance: 0.4
+            },
+            {
+                id: "frost_wyrm",
+                name: "Frost Wyrm",
+                requiredLevel: 7,
+                hp: 310,
+                atk: 32,
+                exp: 280,
+                gold: 220,
+                rewardItemId: "wyrmscale_armor",
+                ability: "regenerate",
+                abilityChance: 0.3
+            },
+            {
+                id: "minotaur_warlord",
+                name: "Minotaur Warlord",
+                requiredLevel: 9,
+                hp: 390,
+                atk: 38,
+                exp: 390,
+                gold: 310,
+                rewardItemId: "labyrinth_axe",
+                ability: "heavy_strike",
+                abilityChance: 0.4
+            },
+            {
+                id: "ancient_dragon",
+                name: "Ancient Dragon",
+                requiredLevel: 12,
+                hp: 540,
+                atk: 47,
+                exp: 550,
+                gold: 450,
+                rewardItemId: "dragonbone_greatsword",
+                ability: "mana_burn",
+                abilityChance: 0.35
+            },
+            {
+                id: "lich_king",
+                name: "Lich King",
+                requiredLevel: 15,
+                hp: 690,
+                atk: 56,
+                exp: 780,
+                gold: 620,
+                rewardItemId: "lich_crown",
+                ability: "life_drain",
+                abilityChance: 0.4
+            },
+            {
+                id: "inferno_dragon",
+                name: "Inferno Dragon",
+                requiredLevel: 20,
+                hp: 920,
+                atk: 68,
+                exp: 1100,
+                gold: 900,
+                rewardItemId: "inferno_plate",
+                ability: "heavy_strike",
+                abilityChance: 0.45
+            },
+            {
+                id: "void_sovereign",
+                name: "Void Sovereign",
+                requiredLevel: 30,
+                hp: 1250,
+                atk: 70,
+                exp: 1800,
+                gold: 1500,
+                rewardItemId: "void_reaper_scythe",
+                ability: "life_drain",
+                abilityChance: 0.4
+            },
+            {
+                id: "storm_colossus",
+                name: "Storm Colossus",
+                requiredLevel: 45,
+                hp: 1900,
+                atk: 85,
+                exp: 3000,
+                gold: 2800,
+                rewardItemId: "stormforged_plate",
+                ability: "heavy_strike",
+                abilityChance: 0.4
+            },
+            {
+                id: "celestial_hydra",
+                name: "Celestial Hydra",
+                requiredLevel: 60,
+                hp: 2500,
+                atk: 100,
+                exp: 4800,
+                gold: 4800,
+                rewardItemId: "hydra_heart",
+                ability: "regenerate",
+                abilityChance: 0.4
+            },
+            {
+                id: "world_eater",
+                name: "World Eater",
+                requiredLevel: 80,
+                hp: 3200,
+                atk: 115,
+                exp: 7500,
+                gold: 7500,
+                rewardItemId: "worldbreaker_blade",
+                ability: "mana_burn",
+                abilityChance: 0.4
+            },
+            {
+                id: "primordial_dragon",
+                name: "Primordial Dragon",
+                requiredLevel: 100,
+                hp: 4000,
+                atk: 130,
+                exp: 12000,
+                gold: 12000,
+                rewardItemId: "primordial_aegis",
+                ability: "heavy_strike",
+                abilityChance: 0.45
+            }
+        ];
+
+        const itemTemplates = [
+            // Consumables
+            { id: "hp_potion_small", name: "Small HP Potion", type: "consumable", rarity: "common", value: 30, effect: "heal" },
+            { id: "mp_potion_small", name: "Small MP Potion", type: "consumable", rarity: "common", value: 20, effect: "mana" },
+            { id: "hp_potion_large", name: "Large HP Potion", type: "consumable", rarity: "uncommon", value: 75, effect: "heal" },
+            { id: "mp_potion_large", name: "Large MP Potion", type: "consumable", rarity: "uncommon", value: 50, effect: "mana" },
+            { id: "hp_potion_greater", name: "Greater HP Potion", type: "consumable", rarity: "rare", value: 120, effect: "heal" },
+            { id: "mp_potion_greater", name: "Greater MP Potion", type: "consumable", rarity: "rare", value: 80, effect: "mana" },
+            { id: "elixir_full_hp", name: "Elixir of Life", type: "consumable", rarity: "rare", value: 0, effect: "full_heal" },
+            { id: "elixir_full_mp", name: "Elixir of Mana", type: "consumable", rarity: "rare", value: 0, effect: "full_mana" },
+
+            // Weapons
+            { id: "wooden_sword", name: "Wooden Sword", type: "weapon", rarity: "common", atkBonus: 5 },
+            { id: "rusty_dagger", name: "Rusty Dagger", type: "weapon", rarity: "common", atkBonus: 4 },
+            { id: "hunter_bow", name: "Hunter Bow", type: "weapon", rarity: "common", atkBonus: 7 },
+            { id: "iron_sword", name: "Iron Sword", type: "weapon", rarity: "uncommon", atkBonus: 10 },
+            { id: "steel_axe", name: "Steel Axe", type: "weapon", rarity: "uncommon", atkBonus: 12 },
+            { id: "obsidian_blade", name: "Obsidian Blade", type: "weapon", rarity: "uncommon", atkBonus: 16 },
+            { id: "broadsword", name: "Broadsword", type: "weapon", rarity: "rare", atkBonus: 20 },
+            { id: "enchanted_staff", name: "Enchanted Staff", type: "weapon", rarity: "rare", atkBonus: 15, mpBonus: 10 },
+            { id: "royal_goblin_blade", name: "Royal Goblin Blade", type: "weapon", rarity: "rare", atkBonus: 22, hpBonus: 10, bossOnly: true },
+            { id: "venom_fang", name: "Venom Fang", type: "weapon", rarity: "rare", atkBonus: 19, hpBonus: 15, bossOnly: true },
+            { id: "labyrinth_axe", name: "Labyrinth Axe", type: "weapon", rarity: "epic", atkBonus: 28, hpBonus: 25, bossOnly: true },
+            { id: "dragonbone_greatsword", name: "Dragonbone Greatsword", type: "weapon", rarity: "rare", atkBonus: 30, bossOnly: true },
+            { id: "void_reaper_scythe", name: "Void Reaper Scythe", type: "weapon", rarity: "epic", atkBonus: 42, mpBonus: 25, bossOnly: true },
+            { id: "worldbreaker_blade", name: "Worldbreaker Blade", type: "weapon", rarity: "legendary", atkBonus: 70, hpBonus: 50, bossOnly: true },
+
+            // Armors
+            { id: "leather_vest", name: "Leather Vest", type: "armor", rarity: "common", defBonus: 3 },
+            { id: "chainmail_armor", name: "Chainmail Armor", type: "armor", rarity: "uncommon", defBonus: 7 },
+            { id: "mage_robe", name: "Mage Robe", type: "armor", rarity: "uncommon", defBonus: 5, mpBonus: 15 },
+            { id: "plate_armor", name: "Plate Armor", type: "armor", rarity: "rare", defBonus: 15 },
+            { id: "wyrmscale_armor", name: "Wyrmscale Armor", type: "armor", rarity: "rare", defBonus: 20, hpBonus: 25, bossOnly: true },
+            { id: "inferno_plate", name: "Inferno Plate", type: "armor", rarity: "legendary", defBonus: 32, hpBonus: 55, bossOnly: true },
+            { id: "stormforged_plate", name: "Stormforged Plate", type: "armor", rarity: "epic", defBonus: 38, hpBonus: 60, bossOnly: true },
+            { id: "primordial_aegis", name: "Primordial Aegis", type: "armor", rarity: "legendary", defBonus: 55, hpBonus: 120, mpBonus: 40, bossOnly: true },
+
+            // Accessories
+            { id: "bone_charm", name: "Bone Charm", type: "accessory", rarity: "common", hpBonus: 10 },
+            { id: "ring_of_might", name: "Ring of Might", type: "accessory", rarity: "uncommon", atkBonus: 3 },
+            { id: "amulet_of_defense", name: "Amulet of Defense", type: "accessory", rarity: "uncommon", defBonus: 3 },
+            { id: "emerald_pendant", name: "Emerald Pendant", type: "accessory", rarity: "uncommon", hpBonus: 15, mpBonus: 10 },
+            { id: "mana_crystal", name: "Mana Crystal", type: "accessory", rarity: "rare", mpBonus: 20 },
+            { id: "hp_amulet", name: "Amulet of Vitality", type: "accessory", rarity: "rare", hpBonus: 30 },
+            { id: "phoenix_sigil", name: "Phoenix Sigil", type: "accessory", rarity: "rare", atkBonus: 5, hpBonus: 20, mpBonus: 20 },
+            { id: "lich_crown", name: "Lich Crown", type: "accessory", rarity: "epic", atkBonus: 7, defBonus: 7, mpBonus: 40, bossOnly: true },
+            { id: "hydra_heart", name: "Hydra Heart", type: "accessory", rarity: "legendary", hpBonus: 90, mpBonus: 60, bossOnly: true }
+        ];
+
+        // Dynamic quest objectives. Counts stay bounded; rewards scale separately.
+        const questTemplates = [
+            {
+                type: "kill_specific_monster",
+                name: "Hunt the {monsterName}s",
+                description: "Defeat {count} {monsterName}s.",
+                minCount: 5,
+                maxCount: 10,
+                expShare: 0.10,
+                goldMultiplier: 1
+            },
+            {
+                type: "kill_any_monster",
+                name: "Clear the Perils",
+                description: "Defeat {count} monsters of any type.",
+                minCount: 8,
+                maxCount: 14,
+                expShare: 0.12,
+                goldMultiplier: 1.15
+            },
+            {
+                type: "elite_hunt",
+                name: "Elite Hunt: {monsterName}",
+                description: "Defeat {count} powerful {monsterName}s.",
+                minLevel: 20,
+                minCount: 3,
+                maxCount: 6,
+                expShare: 0.15,
+                goldMultiplier: 1.35
+            },
+            {
+                type: "boss_hunt",
+                name: "Boss Bounty: {monsterName}",
+                description: "Defeat {monsterName}, the next threat to the realm.",
+                minLevel: 20,
+                minCount: 1,
+                maxCount: 1,
+                expShare: 0.18,
+                goldMultiplier: 1.6
+            }
+        ];
+
+        const QUEST_TIER_CONFIGS = [
+            {
+                minLevel: 1,
+                label: "Bronze",
+                itemChance: 0.45,
+                ore: 0,
+                rewardItemPool: ["hp_potion_large", "mp_potion_large", "iron_sword", "chainmail_armor", "ring_of_might", "bone_charm"]
+            },
+            {
+                minLevel: 20,
+                label: "Silver",
+                itemChance: 0.55,
+                ore: 1,
+                rewardItemPool: ["hp_potion_greater", "mp_potion_greater", "steel_axe", "mage_robe", "emerald_pendant", "mana_crystal"]
+            },
+            {
+                minLevel: 40,
+                label: "Gold",
+                itemChance: 0.65,
+                ore: 2,
+                rewardItemPool: ["hp_potion_greater", "mp_potion_greater", "obsidian_blade", "broadsword", "plate_armor", "phoenix_sigil"]
+            },
+            {
+                minLevel: 60,
+                label: "Mythic",
+                itemChance: 0.75,
+                ore: 3,
+                rewardItemPool: ["elixir_full_hp", "elixir_full_mp", "broadsword", "enchanted_staff", "plate_armor", "phoenix_sigil"]
+            },
+            {
+                minLevel: 80,
+                label: "Primordial",
+                itemChance: 1,
+                ore: 4,
+                rewardItemPool: ["elixir_full_hp", "elixir_full_mp", "broadsword", "enchanted_staff", "plate_armor", "phoenix_sigil"]
+            }
+        ];
+
+        let playerNameDialogMode = "initial";
+
+        function sanitizePlayerName(value) {
+            return String(value || "").trim().replace(/\s+/g, " ");
+        }
+
+        function updatePlayerNameControls() {
+            const editButton = document.getElementById('editPlayerNameBtn');
+            if (!editButton) return;
+
+            const player = gameState.player;
+            const remainingChanges = Number.isFinite(player.nameChangesRemaining)
+                ? Math.max(0, Math.floor(player.nameChangesRemaining))
+                : 0;
+            player.nameChangesRemaining = remainingChanges;
+            editButton.disabled = !player.hasChosenName || remainingChanges <= 0;
+            editButton.title = remainingChanges > 0
+                ? `Change player name (${remainingChanges} remaining)`
+                : "Player name can no longer be changed";
+        }
+
+        function openPlayerNameDialog(isInitial = false) {
+            const player = gameState.player;
+            if (!isInitial && (!player.hasChosenName || player.nameChangesRemaining <= 0)) {
+                addLogEntry("You have already used your one name change.", 'log-error');
+                updatePlayerNameControls();
+                return false;
+            }
+
+            playerNameDialogMode = isInitial ? "initial" : "rename";
+            const overlay = document.getElementById('playerNameDialogOverlay');
+            const title = document.getElementById('playerNameDialogTitle');
+            const description = document.getElementById('playerNameDialogDescription');
+            const input = document.getElementById('playerNameInput');
+            const error = document.getElementById('playerNameError');
+            const cancelButton = document.getElementById('cancelPlayerNameBtn');
+
+            title.textContent = isInitial ? "Choose Your Name" : "Change Your Name";
+            description.textContent = isInitial
+                ? "Choose your adventurer name. You may change it only once afterward."
+                : "This is your only remaining name change. Choose carefully.";
+            input.value = isInitial ? "" : player.name;
+            error.textContent = "";
+            cancelButton.style.display = isInitial ? "none" : "inline-block";
+            overlay.style.display = "flex";
+            input.focus?.();
+            input.select?.();
+            return true;
+        }
+
+        function closePlayerNameDialog() {
+            if (playerNameDialogMode === "initial" && !gameState.player.hasChosenName) {
+                return false;
+            }
+            document.getElementById('playerNameDialogOverlay').style.display = "none";
+            document.getElementById('playerNameError').textContent = "";
+            return true;
+        }
+
+        function submitPlayerName() {
+            const input = document.getElementById('playerNameInput');
+            const error = document.getElementById('playerNameError');
+            const newName = sanitizePlayerName(input.value);
+
+            if (newName.length < 1 || newName.length > 20) {
+                error.textContent = "Name must contain between 1 and 20 characters.";
+                return false;
+            }
+            if (/[\u0000-\u001F\u007F]/.test(newName)) {
+                error.textContent = "Name contains unsupported characters.";
+                return false;
+            }
+
+            const player = gameState.player;
+            if (playerNameDialogMode === "rename") {
+                if (newName === player.name) {
+                    error.textContent = "Enter a different name.";
+                    return false;
+                }
+                if (player.nameChangesRemaining <= 0) {
+                    error.textContent = "Your name change has already been used.";
+                    updatePlayerNameControls();
+                    return false;
+                }
+                const previousName = player.name;
+                player.name = newName;
+                player.nameChangesRemaining = Math.max(0, player.nameChangesRemaining - 1);
+                addLogEntry(`${previousName} is now known as ${newName}.`, 'log-level-up');
+            } else {
+                player.name = newName;
+                player.hasChosenName = true;
+                player.nameChangesRemaining = 1;
+                assignRandomOriginToPlayer();
+                addLogEntry(`Welcome, ${newName}! Your adventure begins.`, 'log-level-up');
+            }
+
+            closePlayerNameDialog();
+            updateDisplay();
+            saveGame();
+            return true;
+        }
+
+        function updateWorldResetUI() {
+            const resetButton = document.getElementById('worldResetBtn');
+            const tierElement = document.getElementById('worldResetCount');
+            const bonusElement = document.getElementById('worldResetBonus');
+            if (!resetButton || !tierElement || !bonusElement) return;
+
+            const hasAegis = hasPrimordialAegis();
+            const resetCost = getWorldResetCost(gameState.worldResetCount, hasAegis);
+            const statBonus = getWorldStatBonus();
+            const player = gameState.player;
+            const meetsLevel = player.level >= WORLD_RESET_LEVEL_REQUIREMENT;
+            const meetsGold = player.gold >= resetCost;
+
+            tierElement.textContent = gameState.worldResetCount;
+            bonusElement.textContent = `+${statBonus} All Base Stats`;
+            const catalystLabel = hasAegis ? "Aegis · +15 Stats" : "No Aegis ×1.5 · +10 Stats";
+            resetButton.textContent = `World Reset (${resetCost.toLocaleString('en-US')} Gold · ${catalystLabel})`;
+            resetButton.style.display = meetsLevel ? "inline-block" : "none";
+            resetButton.disabled = gameState.inBattle || !player.hasChosenName || !meetsLevel || !meetsGold;
+
+            if (!meetsLevel) {
+                resetButton.title = `Reach level ${WORLD_RESET_LEVEL_REQUIREMENT} to unlock World Reset.`;
+            } else if (!meetsGold) {
+                resetButton.title = `You need ${resetCost.toLocaleString('en-US')} gold.`;
+            } else if (hasAegis) {
+                resetButton.title = "Primordial Aegis will be consumed: normal price and +15 permanent stats.";
+            } else {
+                resetButton.title = "Without Primordial Aegis: ×1.5 price and +10 permanent stats.";
+            }
+        }
+
+        function performWorldReset() {
+            const player = gameState.player;
+            const hasAegis = hasPrimordialAegis();
+            const resetCost = getWorldResetCost(gameState.worldResetCount, hasAegis);
+            if (gameState.inBattle) {
+                addLogEntry("World Reset is unavailable during battle.", 'log-error');
+                return false;
+            }
+            if (player.level < WORLD_RESET_LEVEL_REQUIREMENT) {
+                addLogEntry(`Reach level ${WORLD_RESET_LEVEL_REQUIREMENT} before resetting the world.`, 'log-error');
+                return false;
+            }
+            if (player.gold < resetCost) {
+                addLogEntry(`You need ${resetCost} gold for the next World Reset.`, 'log-error');
+                return false;
+            }
+
+            const nextTier = gameState.worldResetCount + 1;
+            const earnedStatBonus = hasAegis
+                ? WORLD_RESET_AEGIS_STAT_BONUS
+                : WORLD_RESET_STAT_BONUS;
+            const catalystMessage = hasAegis
+                ? `Primordial Aegis will be consumed. The reset uses its normal price and grants +${earnedStatBonus} permanent stats.\n\n`
+                : `Without Primordial Aegis, the reset costs ×${WORLD_RESET_NO_AEGIS_MULTIPLIER} and grants +${earnedStatBonus} permanent stats.\n\n`;
+            const confirmed = confirm(
+                `Reset the world for ${resetCost.toLocaleString('en-US')} gold?\n\n`
+                + catalystMessage
+                + `All progression, inventory, equipment, quests, codex, and boss victories will be reset. `
+                + `Your name will remain. `
+                + `You will enter World Tier ${nextTier}.`
+            );
+            if (!confirmed) return false;
+
+            player.gold -= resetCost;
+            if (hasAegis) {
+                consumePrimordialAegis();
+            }
+            gameState.worldStatBonus = getWorldStatBonus() + earnedStatBonus;
+            gameState.worldResetCount = nextTier;
+            recordTitleProgress("worldResets", 1);
+            initGame({ preserveIdentity: true, preserveWorldReset: true });
+            addLogEntry(
+                `🌎 World Reset complete! This reset grants +${earnedStatBonus}; total permanent bonus is +${getWorldStatBonus()} to all base stats.`
+                + (hasAegis ? " Primordial Aegis was consumed." : " The no-Aegis ×1.5 surcharge was paid."),
+                'log-level-up'
+            );
+            saveGame();
+            return true;
+        }
+
+        // --- Game Initialization ---
+        function initGame(options = {}) {
+            const previousPlayer = gameState.player || {};
+            const preserveIdentity = Boolean(options.preserveIdentity && previousPlayer.hasChosenName);
+            const preservedWorldResetCount = options.preserveWorldReset
+                && Number.isFinite(gameState.worldResetCount)
+                ? Math.max(0, Math.floor(gameState.worldResetCount))
+                : 0;
+            const preservedWorldStatBonus = options.preserveWorldReset
+                && Number.isFinite(gameState.worldStatBonus)
+                ? Math.max(0, Math.floor(gameState.worldStatBonus))
+                : preservedWorldResetCount * WORLD_RESET_STAT_BONUS;
+            const permanentStatBonus = preservedWorldStatBonus;
+            const preservedOriginStats = preserveIdentity && previousPlayer.originAssigned
+                ? normalizeOriginStats(previousPlayer.originStats)
+                : { ...DEFAULT_ORIGIN_STATS };
+            const preservedOriginName = preserveIdentity && previousPlayer.originAssigned
+                ? previousPlayer.originName || "Legacy"
+                : "Unawakened";
+            const preservedOriginAssigned = Boolean(preserveIdentity && previousPlayer.originAssigned);
+            const preservedTitleProgress = preserveIdentity
+                ? { ...getDefaultTitleProgress(), ...(gameState.titleProgress || {}) }
+                : getDefaultTitleProgress();
+            const preservedUnlockedTitles = preserveIdentity && Array.isArray(gameState.unlockedTitles)
+                ? gameState.unlockedTitles.filter(titleId => TITLE_QUESTS.some(title => title.id === titleId))
+                : [];
+            const identity = preserveIdentity
+                ? {
+                    name: previousPlayer.name,
+                    hasChosenName: true,
+                    nameChangesRemaining: Number.isFinite(previousPlayer.nameChangesRemaining)
+                        ? previousPlayer.nameChangesRemaining
+                        : 1,
+                    originAssigned: preservedOriginAssigned,
+                    originName: preservedOriginName,
+                    originStats: preservedOriginStats,
+                    originAllocations: previousPlayer.originAllocations
+                        ? { ...previousPlayer.originAllocations }
+                        : null
+                }
+                : {
+                    name: "",
+                    hasChosenName: false,
+                    nameChangesRemaining: 1,
+                    originAssigned: false,
+                    originName: "Unawakened",
+                    originStats: { ...DEFAULT_ORIGIN_STATS },
+                    originAllocations: null
+                };
+
+            gameState.player = {
+                ...identity,
+                level: 1,
+                exp: 0,
+                expToNextLevel: calculateExpToNextLevel(1),
+                baseHp: preservedOriginStats.hp + permanentStatBonus,
+                hp: preservedOriginStats.hp + permanentStatBonus,
+                baseMp: preservedOriginStats.mp + permanentStatBonus,
+                mp: preservedOriginStats.mp + permanentStatBonus,
+                baseAtk: preservedOriginStats.atk + permanentStatBonus,
+                baseDef: preservedOriginStats.def + permanentStatBonus,
+                gold: 0,
+                potions: 3,
+                equipped: {
+                    weapon: null,
+                    armor: null,
+                    accessory: null,
+                    accessory2: null
+                },
+                currentAtk: 0, // Will be calculated by updatePlayerStatsFromEquipment
+                currentDef: 0,
+                maxHp: 0,
+                maxMp: 0
+            };
+            gameState.inventory = [];
+            gameState.quests = [];
+            gameState.monsterCodex = {};
+            gameState.currentMonster = null;
+            gameState.inBattle = false;
+            gameState.areaLevel = 1;
+            gameState.totalVictories = 0;
+            gameState.defeatedBosses = [];
+            gameState.worldResetCount = preservedWorldResetCount;
+            gameState.worldStatBonus = preservedWorldStatBonus;
+            gameState.titleProgress = preservedTitleProgress;
+            gameState.unlockedTitles = preservedUnlockedTitles;
+            gameState.equipmentStateVersion = 6;
+            gameState.progressionStateVersion = 2;
+            gameState.currentLocation = "town";
+            gameState.lastTavernVisit = null;
+            gameState.tavernQuestOffers = [];
+            gameState.blacksmithMaterials = { ore: 0 };
+
+            addLogEntry("Welcome to Dragon Realm Adventure!");
+            addLogEntry("Explore dungeons, defeat monsters, grow stronger!");
+
+            // Give starting equipment and items
+            addItemToInventory(getItemTemplate("wooden_sword"));
+            addItemToInventory(getItemTemplate("leather_vest"));
+            addItemToInventory(getItemTemplate("hp_potion_small")); // Give an item version of potion
+            addItemToInventory(getItemTemplate("hp_potion_small"));
+            addItemToInventory(getItemTemplate("mp_potion_small"));
+
+
+            // Automatically equip starting gear by moving it out of inventory.
+            equipInventoryItemById("wooden_sword");
+            equipInventoryItemById("leather_vest");
+
+            // Add first quest (can be a fixed starting quest)
+            addQuest({
+                id: "starting_quest_1",
+                name: "First Steps",
+                description: "Defeat 1 monster.",
+                target: { type: "monster_kill", count: 1, current: 0 },
+                reward: { gold: 50, exp: 20, item: getItemTemplate("hp_potion_large") },
+                completed: false
+            });
+
+            updatePlayerStatsFromEquipment(); // Calculate initial stats
+            updateDisplay();
+            updateInventoryDisplay();
+            updateEquippedGearDisplay(); // NEW: Display equipped gear
+            updateQuestDisplay();
+            updateMonsterCodex();
+            updateBattleButtons();
+            updateLocationUI(); // NEW: Update UI based on location
+            updatePlayerNameControls();
+            if (!gameState.player.hasChosenName) {
+                openPlayerNameDialog(true);
+            }
+        }
+
+        // --- Game Loop / Update Display ---
+        function updateDisplay() {
+            const p = gameState.player;
+            document.getElementById('playerName').textContent = p.name || "Unnamed Adventurer";
+            document.getElementById('playerOrigin').textContent = p.originAssigned
+                ? `${p.originName} (${p.originStats.hp} HP · ${p.originStats.mp} MP · ${p.originStats.atk} ATK · ${p.originStats.def} DEF)`
+                : "Not assigned";
+            const unlockedTitleDefinitions = gameState.unlockedTitles
+                .map(getTitleDefinition)
+                .filter(Boolean);
+            document.getElementById('playerTitle').textContent = unlockedTitleDefinitions.length > 0
+                ? unlockedTitleDefinitions
+                    .map(title => `${title.title}, [${formatStatEffect(title.effect)}]`)
+                    .join(" · ")
+                : "None";
+            updatePlayerNameControls();
+            updateWorldResetUI();
+            updateTitleUI();
+            document.getElementById('playerLevel').textContent = p.level;
+            document.getElementById('currentArea').textContent = getCurrentArea().name;
+            document.getElementById('totalVictories').textContent = gameState.totalVictories;
+            document.getElementById('playerExp').textContent = p.exp;
+            document.getElementById('playerExpToNextLevel').textContent = p.expToNextLevel;
+
+            // HP Bar
+            const playerHpBar = document.getElementById('playerHpBar');
+            const hpPercentage = (p.hp / p.maxHp) * 100;
+            playerHpBar.style.width = hpPercentage + '%';
+            playerHpBar.textContent = `${p.hp}/${p.maxHp} HP`;
+            playerHpBar.style.backgroundColor = hpPercentage > 30 ? '#79d70f' : '#ff4500'; // Green to Red
+
+            // MP Bar
+            const playerMpBar = document.getElementById('playerMpBar');
+            const mpPercentage = (p.mp / p.maxMp) * 100;
+            playerMpBar.style.width = mpPercentage + '%';
+            playerMpBar.textContent = `${p.mp}/${p.maxMp} MP`;
+
+            document.getElementById('playerAtk').textContent = p.currentAtk; // Use currentAtk
+            document.getElementById('playerDef').textContent = p.currentDef; // Use currentDef
+            document.getElementById('playerGold').textContent = p.gold;
+            document.getElementById('playerPotions').textContent = p.potions; // Keep for potion button for now
+            document.getElementById('potionCount').textContent = p.potions; // For battle button
+
+            // Update battle UI
+            if (gameState.inBattle && gameState.currentMonster) {
+                document.getElementById('battleSection').style.display = 'block';
+                const m = gameState.currentMonster;
+                document.getElementById('monsterName').textContent = m.name;
+                document.getElementById('monsterLevel').textContent = m.level;
+                document.getElementById('monsterAbility').textContent = getMonsterAbilityLabel(m);
+
+                const monsterHpBar = document.getElementById('monsterHpBar');
+                const monsterHpPercentage = (m.hp / m.maxHp) * 100;
+                monsterHpBar.style.width = monsterHpPercentage + '%';
+                monsterHpBar.textContent = `${m.hp}/${m.maxHp} HP`;
+                monsterHpBar.style.backgroundColor = monsterHpPercentage > 30 ? '#79d70f' : '#ff4500';
+
+                // Update MP cost for Magic Strike
+                document.getElementById('magicStrikeCost').textContent = getMagicStrikeCost();
+
+            } else {
+                document.getElementById('battleSection').style.display = 'none';
+            }
+            updateBattleButtons();
+        }
+
+        function addLogEntry(message, type = 'log-entry') {
+            const gameLog = document.getElementById('gameLog');
+            const entry = document.createElement('p');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = message;
+            gameLog.prepend(entry); // Add to top
+            if (gameLog.children.length > 50) { // Keep log from getting too long
+                gameLog.removeChild(gameLog.lastChild);
+            }
+        }
+
+        // Keep all location-specific panels mutually exclusive.
+        function updateLocationUI() {
+            const battleSection = document.getElementById('battleSection');
+            const controlsSection = document.getElementById('controls');
+            const tavernSection = document.getElementById('tavernSection');
+            const shopSection = document.getElementById('shopSection');
+            const blacksmithSection = document.getElementById('blacksmithSection');
+            const playerInfo = document.getElementById('playerInfo');
+            const gameLog = document.getElementById('gameLog');
+
+            battleSection.style.display = 'none';
+            controlsSection.style.display = 'none';
+            tavernSection.style.display = 'none';
+            shopSection.style.display = 'none';
+            blacksmithSection.style.display = 'none';
+
+            playerInfo.style.display = 'block';
+            gameLog.style.display = 'block';
+
+            switch (gameState.currentLocation) {
+                case "town":
+                    controlsSection.style.display = 'flex';
+                    break;
+                case "battle":
+                    battleSection.style.display = 'block';
+                    break;
+                case "tavern":
+                    tavernSection.style.display = 'block';
+                    break;
+                case "shop":
+                    shopSection.style.display = 'block';
+                    break;
+                case "blacksmith":
+                    blacksmithSection.style.display = 'block';
+                    break;
+                default:
+                    gameState.currentLocation = "town";
+                    controlsSection.style.display = 'flex';
+            }
+        }
+
+
+        // --- Player Actions ---
+
+        // NEW: Calculate player's effective stats based on base stats and equipped items
+        function updatePlayerStatsFromEquipment() {
+            const p = gameState.player;
+            const previousMaxHp = Number.isFinite(p.maxHp) && p.maxHp > 0 ? p.maxHp : p.baseHp;
+            const previousMaxMp = Number.isFinite(p.maxMp) && p.maxMp > 0 ? p.maxMp : p.baseMp;
+            const hpRatio = previousMaxHp > 0 && Number.isFinite(p.hp)
+                ? Math.max(0, Math.min(1, p.hp / previousMaxHp))
+                : 1;
+            const mpRatio = previousMaxMp > 0 && Number.isFinite(p.mp)
+                ? Math.max(0, Math.min(1, p.mp / previousMaxMp))
+                : 1;
+            let totalAtkBonus = 0;
+            let totalDefBonus = 0;
+            let totalHpBonus = 0;
+            let totalMpBonus = 0;
+
+            for (const slot in p.equipped) {
+                const item = p.equipped[slot];
+                if (item) {
+                    totalAtkBonus += item.atkBonus || 0;
+                    totalDefBonus += item.defBonus || 0;
+                    totalHpBonus += item.hpBonus || 0;
+                    totalMpBonus += item.mpBonus || 0;
+                }
+            }
+            const titleEffect = getActiveTitleEffect();
+            totalAtkBonus += titleEffect.atkBonus || 0;
+            totalDefBonus += titleEffect.defBonus || 0;
+            totalHpBonus += titleEffect.hpBonus || 0;
+            totalMpBonus += titleEffect.mpBonus || 0;
+
+            p.currentAtk = p.baseAtk + totalAtkBonus;
+            p.currentDef = p.baseDef + totalDefBonus;
+            p.maxHp = p.baseHp + totalHpBonus;
+            p.maxMp = p.baseMp + totalMpBonus;
+
+            // Preserve the current HP/MP percentage when maximum values change.
+            // This makes HP/MP accessories immediately visible without creating an equip-heal exploit.
+            p.hp = Math.max(0, Math.min(p.maxHp, Math.round(p.maxHp * hpRatio)));
+            p.mp = Math.max(0, Math.min(p.maxMp, Math.round(p.maxMp * mpRatio)));
+
+            updateDisplay(); // Refresh display after stats change
+        }
+
+        function refreshEquipmentUI() {
+            updatePlayerStatsFromEquipment();
+            updateEquippedGearDisplay();
+            updateInventoryDisplay();
+            if (gameState.currentLocation === "blacksmith") {
+                renderBlacksmithUI();
+            }
+        }
+
+        const EQUIPMENT_SLOT_LABELS = {
+            weapon: "Weapon",
+            armor: "Armor",
+            accessory: "Accessory 1",
+            accessory2: "Accessory 2"
+        };
+
+        function getEquipmentSlotLabel(slotType) {
+            return EQUIPMENT_SLOT_LABELS[slotType] || slotType;
+        }
+
+        function resolveEquipmentSlot(item, preferredSlot = null) {
+            if (!item) return null;
+            if (item.type !== "accessory") return item.type;
+
+            const accessorySlots = ["accessory", "accessory2"];
+            if (preferredSlot && accessorySlots.includes(preferredSlot)) {
+                return preferredSlot;
+            }
+            return accessorySlots.find(slot => !gameState.player.equipped[slot])
+                || accessorySlots[0];
+        }
+
+        function equipItem(item, inventoryIndex, preferredSlot = null) {
+            const p = gameState.player;
+            if (gameState.inBattle) {
+                addLogEntry("You cannot change equipment during battle.", 'log-error');
+                return false;
+            }
+            if (!item || !Number.isInteger(inventoryIndex)
+                || inventoryIndex < 0
+                || gameState.inventory[inventoryIndex] !== item) {
+                addLogEntry("Cannot equip item: inventory entry is no longer available.", 'log-error');
+                return false;
+            }
+
+            const slotType = resolveEquipmentSlot(item, preferredSlot);
+
+            if (!slotType || !p.equipped.hasOwnProperty(slotType)) {
+                addLogEntry(`Cannot equip ${item.name}: Unknown equipment type.`, 'log-error');
+                return false;
+            }
+
+            if (!Number.isFinite(item.upgradeLevel) || item.upgradeLevel < 0) {
+                item.upgradeLevel = 0;
+            }
+
+            const currentlyEquipped = p.equipped[slotType];
+            const [itemToEquip] = gameState.inventory.splice(inventoryIndex, 1);
+            p.equipped[slotType] = itemToEquip;
+
+            if (currentlyEquipped) {
+                gameState.inventory.push(currentlyEquipped);
+                addLogEntry(`You unequipped ${currentlyEquipped.name} from ${getEquipmentSlotLabel(slotType)}.`, 'log-item');
+            }
+
+            addLogEntry(`⚔️ You equipped ${itemToEquip.name} in ${getEquipmentSlotLabel(slotType)}!`, 'log-item');
+            refreshEquipmentUI();
+            return true;
+        }
+
+        function equipInventoryItemById(itemId, preferredSlot = null) {
+            const inventoryIndex = gameState.inventory.findIndex(item => item.id === itemId);
+            if (inventoryIndex === -1) {
+                addLogEntry(`Cannot equip ${itemId}: item is not in inventory.`, 'log-error');
+                return false;
+            }
+            return equipItem(gameState.inventory[inventoryIndex], inventoryIndex, preferredSlot);
+        }
+
+        function useItem(item, index) {
+            const p = gameState.player;
+
+            // Cannot use items during battle unless it's a battle-specific consumable/scroll
+            if (gameState.inBattle && item.type !== "consumable" && item.type !== "scroll") {
+                addLogEntry("You can only use potions or scrolls during battle!", 'log-error');
+                return;
+            }
+
+
+            switch (item.type) {
+                case "weapon":
+                case "armor":
+                case "accessory":
+                    equipItem(item, index);
+                    break;
+
+                case "consumable":
+                    if (item.effect === "heal") {
+                        if (p.hp === p.maxHp) {
+                            addLogEntry(`Your HP is already full!`, 'log-error');
+                            return; // Don't consume item
+                        }
+                        const healAmount = item.value;
+                        p.hp = Math.min(p.maxHp, p.hp + healAmount);
+                        addLogEntry(`🧪 You use ${item.name} and recover ${healAmount} HP!`, 'log-heal');
+                    } else if (item.effect === "mana") {
+                        if (p.mp === p.maxMp) {
+                            addLogEntry(`Your MP is already full!`, 'log-error');
+                            return; // Don't consume item
+                        }
+                        const manaAmount = item.value;
+                        p.mp = Math.min(p.maxMp, p.mp + manaAmount);
+                        addLogEntry(`✨ You use ${item.name} and recover ${manaAmount} MP!`, 'log-heal');
+                    } else if (item.effect === "full_heal") {
+                        if (p.hp === p.maxHp) {
+                            addLogEntry(`Your HP is already full!`, 'log-error');
+                            return; // Don't consume item
+                        }
+                        p.hp = p.maxHp;
+                        addLogEntry(`🧪 You use ${item.name} and fully recover your HP!`, 'log-heal');
+                    } else if (item.effect === "full_mana") {
+                        if (p.mp === p.maxMp) {
+                            addLogEntry(`Your MP is already full!`, 'log-error');
+                            return; // Don't consume item
+                        }
+                        p.mp = p.maxMp;
+                        addLogEntry(`✨ You use ${item.name} and fully recover your MP!`, 'log-heal');
+                    }
+                    // Add more consumable effects as needed (e.g., temp_atk, temp_def, cure_poison)
+
+                    // Remove consumed item from inventory
+                    gameState.inventory.splice(index, 1);
+                    break;
+
+                case "scroll":
+                    // Implement scroll effects (e.g., damage, heal, escape)
+                    addLogEntry(`You read ${item.name}. (Scroll effects need implementation!)`);
+                    // Example: if (item.effect === "damage" && gameState.inBattle) { ... }
+                    gameState.inventory.splice(index, 1); // Remove scroll after use
+                    break;
+
+                case "material":
+                case "key":
+                case "quest":
+                    addLogEntry(`You can't "use" ${item.name} directly. It might be for crafting or a quest.`);
+                    break;
+
+                default:
+                    addLogEntry(`You attempt to use ${item.name}, but nothing happens.`);
+                    break;
+            }
+
+            updateDisplay(); // Refresh display after using item
+            updateInventoryDisplay(); // Refresh inventory display
+        }
+
+        function grantBossRewards(monster) {
+            if (!monster.isBoss || gameState.defeatedBosses.includes(monster.id)) return;
+
+            gameState.defeatedBosses.push(monster.id);
+            const bonusOre = monster.level >= 100 ? 25
+                : monster.level >= 80 ? 20
+                    : monster.level >= 60 ? 16
+                        : monster.level >= 45 ? 13
+                            : monster.level >= 30 ? 10
+                                : monster.level >= 12 ? 8
+                                    : monster.level >= 7 ? 5
+                                        : 3;
+            gameState.blacksmithMaterials.ore += bonusOre;
+            addLogEntry(`🏆 Boss defeated! You claim ${bonusOre} bonus ore.`, 'log-level-up');
+
+            const rewardItem = getItemTemplate(monster.rewardItemId);
+            if (rewardItem) {
+                addItemToInventory(rewardItem);
+                addLogEntry(`🎁 Boss reward: ${rewardItem.name}!`, 'log-item');
+            }
+        }
+
+        function resolveMonsterVictory(monster) {
+            addLogEntry(`💀 You defeated the ${monster.name}!`, 'log-battle');
+            gameState.totalVictories++;
+            recordTitleProgress("monsterKills", 1);
+            if (/goblin/i.test(monster.name)) {
+                recordTitleProgress("goblinsDefeated", 1);
+            }
+            if (monster.isBoss) {
+                recordTitleProgress("bossesDefeated", 1);
+                recordTitleProgress(`boss_${monster.id}`, 1);
+                if (monster.id === "primordial_dragon") {
+                    recordTitleProgress("primordialDragonsDefeated", 1);
+                }
+            }
+            grantBossRewards(monster);
+            gainExp(monster.exp);
+            gainGold(monster.gold);
+            trackMonsterKill(monster.name);
+            lootMonster(monster);
+            endBattle();
+        }
+
+        function performMonsterAttack(monster, attackContext = "attacks you", random = Math.random) {
+            const player = gameState.player;
+            let damage = Math.max(1, monster.atk - Math.floor(player.currentDef / 2));
+            let abilityTriggered = Boolean(monster.ability)
+                && random() < (monster.abilityChance || 0);
+            let mpDrained = 0;
+            let monsterHealed = 0;
+            let attackMessage = `💔 The ${monster.name} ${attackContext} for ${damage} damage!`;
+
+            if (abilityTriggered) {
+                switch (monster.ability) {
+                    case "heavy_strike":
+                        damage = Math.max(1, Math.floor(damage * 1.5));
+                        attackMessage = `💢 The ${monster.name} lands a Heavy Strike for ${damage} damage!`;
+                        break;
+                    case "venom":
+                        damage += Math.max(2, Math.floor(monster.atk * 0.25));
+                        attackMessage = `☠️ The ${monster.name} injects venom for ${damage} damage!`;
+                        break;
+                    case "mana_burn":
+                        mpDrained = Math.min(player.mp, 8 + Math.floor(monster.level / 3));
+                        player.mp -= mpDrained;
+                        attackMessage = `🔮 The ${monster.name} burns ${mpDrained} MP and deals ${damage} damage!`;
+                        break;
+                    case "regenerate":
+                        monsterHealed = Math.min(
+                            monster.maxHp - monster.hp,
+                            Math.max(1, Math.floor(monster.maxHp * 0.08))
+                        );
+                        monster.hp += monsterHealed;
+                        attackMessage = `🌿 The ${monster.name} regenerates ${monsterHealed} HP and deals ${damage} damage!`;
+                        break;
+                    case "life_drain":
+                        break;
+                    default:
+                        abilityTriggered = false;
+                }
+            }
+
+            const actualDamage = Math.min(player.hp, damage);
+            player.hp = Math.max(0, player.hp - damage);
+            if (abilityTriggered && monster.ability === "life_drain") {
+                monsterHealed = Math.min(
+                    monster.maxHp - monster.hp,
+                    Math.max(1, Math.floor(actualDamage * 0.5))
+                );
+                monster.hp += monsterHealed;
+                attackMessage = `🩸 The ${monster.name} drains ${actualDamage} HP and heals ${monsterHealed} HP!`;
+            }
+
+            addLogEntry(attackMessage, 'log-damage');
+            updateDisplay();
+
+            const defeated = player.hp <= 0;
+            if (defeated) {
+                addLogEntry("☠️ You have been defeated!", 'log-error');
+                endBattle();
+                initGame({ preserveIdentity: true, preserveWorldReset: true });
+            }
+
+            return { damage: actualDamage, abilityTriggered, mpDrained, monsterHealed, defeated };
+        }
+
+        function attack() {
+            if (!gameState.inBattle) return;
+
+            const p = gameState.player;
+            const m = gameState.currentMonster;
+
+            // Player attacks monster
+            const playerDamage = Math.max(1, p.currentAtk - Math.floor(m.atk / 2)); // Monster's def is implied from its atk
+            m.hp = Math.max(0, m.hp - playerDamage);
+            addLogEntry(`💥 You attack the ${m.name} for ${playerDamage} damage!`, 'log-damage');
+
+            updateDisplay();
+
+            if (m.hp <= 0) {
+                resolveMonsterVictory(m);
+            } else {
+                performMonsterAttack(m);
+            }
+        }
+
+        // Use potion from quick slot (the old way, now it can be removed or adapted)
+        function usePotion() {
+            const p = gameState.player;
+            // Find a small HP potion in inventory if the player.potions count is gone
+            // For now, keeping the simplified count:
+            if (p.potions > 0 && p.hp < p.maxHp) {
+                p.hp = Math.min(p.maxHp, p.hp + 30);
+                p.potions--;
+                addLogEntry("🧪 You use a basic potion and recover 30 HP!", 'log-heal');
+            } else if (p.hp === p.maxHp) {
+                addLogEntry("Your HP is already full!", 'log-error');
+            } else {
+                addLogEntry("You don't have any basic potions!", 'log-error');
+            }
+            updateDisplay();
+        }
+
+        function flee() {
+            if (!gameState.inBattle) return;
+
+            if (Math.random() < 0.5) { // 50% chance to flee
+                addLogEntry("🏃 You successfully fled from battle!", 'log-battle');
+                endBattle();
+            } else {
+                addLogEntry("🚫 You failed to flee!", 'log-battle');
+                performMonsterAttack(gameState.currentMonster, "attacks you while you try to escape");
+            }
+        }
+
+        const MAGIC_STRIKE_MP_COST = 10; // Define MP cost for Magic Strike
+        function getMagicStrikeCost() {
+            return MAGIC_STRIKE_MP_COST;
+        }
+
+        function magicStrike() {
+            const p = gameState.player;
+            const m = gameState.currentMonster;
+
+            if (!gameState.inBattle) {
+                addLogEntry("You can only use Magic Strike in battle!", 'log-error');
+                return;
+            }
+
+            if (p.mp < getMagicStrikeCost()) {
+                addLogEntry("Not enough MP to use Magic Strike!", 'log-error');
+                return;
+            }
+
+            p.mp -= getMagicStrikeCost();
+            const magicDamage = p.currentAtk * 1.5; // Deals 150% of current attack as magic damage
+            m.hp = Math.max(0, m.hp - magicDamage);
+            addLogEntry(`✨ You unleash a Magic Strike on the ${m.name} for ${magicDamage.toFixed(0)} damage!`, 'log-damage');
+
+            updateDisplay();
+
+            if (m.hp <= 0) {
+                resolveMonsterVictory(m);
+            } else {
+                performMonsterAttack(m);
+            }
+        }
+
+
+        // --- Battle Logic ---
+        function startBattle() {
+            gameState.inBattle = true;
+            gameState.currentLocation = "battle"; // Set location to battle
+            const encounterLabel = gameState.currentMonster.isBoss ? "⚠️ BOSS" : "A wild";
+            addLogEntry(`${encounterLabel} ${gameState.currentMonster.name} (Level ${gameState.currentMonster.level}) appears!`, 'log-battle');
+            updateDisplay();
+            updateLocationUI(); // Refresh UI for battle
+            updateBattleButtons();
+            updateEquippedGearDisplay();
+        }
+
+        function endBattle() {
+            gameState.inBattle = false;
+            gameState.currentMonster = null;
+            gameState.currentLocation = "town"; // Return to town after battle
+            updateDisplay();
+            updateLocationUI(); // Refresh UI for town
+            updateBattleButtons();
+            updateEquippedGearDisplay();
+        }
+
+        function updateBattleButtons() {
+            const inBattle = gameState.inBattle;
+            document.getElementById('exploreBtn').disabled = inBattle;
+            document.getElementById('restBtn').disabled = inBattle;
+            document.getElementById('shopBtn').disabled = inBattle;
+            document.getElementById('tavernBtn').disabled = inBattle; // Disable tavern during battle
+
+            document.getElementById('attackBtn').disabled = !inBattle;
+            document.getElementById('usePotionBtn').disabled = !inBattle;
+            document.getElementById('fleeBtn').disabled = !inBattle;
+            document.getElementById('magicStrikeBtn').disabled = !inBattle || gameState.player.mp < getMagicStrikeCost();
+        }
+
+        // --- Player Progression ---
+        function gainExp(exp) {
+            const p = gameState.player;
+            p.exp += exp;
+            addLogEntry(`🎉 You gained ${exp} EXP!`, 'log-level-up');
+            while (p.exp >= p.expToNextLevel) {
+                levelUp();
+            }
+        }
+
+        function levelUp() {
+            const p = gameState.player;
+            p.level++;
+            p.exp -= p.expToNextLevel; // Subtract required EXP
+            p.expToNextLevel = calculateExpToNextLevel(p.level);
+            p.baseHp += 10;
+            p.baseMp += 5;
+            p.baseAtk += 2;
+            p.baseDef += 1;
+            gameState.areaLevel = Math.max(1, Math.floor((p.level - 1) / 5) + 1);
+
+            // Restore HP/MP on level up
+            updatePlayerStatsFromEquipment(); // Re-calculate maxHp/maxMp
+            p.hp = p.maxHp;
+            p.mp = p.maxMp;
+
+            addLogEntry(`⬆️ You reached Level ${p.level}!`, 'log-level-up');
+            updateDisplay();
+        }
+
+        function gainGold(amount) {
+            gameState.player.gold += amount;
+            addLogEntry(`💰 You found ${amount} gold!`, 'log-gold');
+            updateDisplay();
+        }
+
+        // --- Inventory & Items ---
+
+        // NEW: Get item template by ID (or name for convenience, but ID is better)
+        function getItemTemplate(idOrName) {
+            return itemTemplates.find(item => item.id === idOrName || item.name === idOrName);
+        }
+
+        // NEW: Get an item object from player's inventory by its name
+        function getItemFromInventory(itemName) {
+            return gameState.inventory.find(item => item.name === itemName);
+        }
+
+        let equipmentInstanceCounter = 0;
+        const EQUIPMENT_STAT_FIELDS = ["atkBonus", "defBonus", "hpBonus", "mpBonus"];
+        const EQUIPMENT_RARITIES = {
+            common: { rank: 0, statMultiplier: 1, sellMultiplier: 1 },
+            uncommon: { rank: 1, statMultiplier: 1.25, sellMultiplier: 1.35 },
+            rare: { rank: 2, statMultiplier: 1.55, sellMultiplier: 1.8 },
+            epic: { rank: 3, statMultiplier: 1.95, sellMultiplier: 2.5 },
+            legendary: { rank: 4, statMultiplier: 2.5, sellMultiplier: 3.5 }
+        };
+
+        function isEquipmentItem(item) {
+            return item && ["weapon", "armor", "accessory"].includes(item.type);
+        }
+
+        function createEquipmentInstanceId() {
+            equipmentInstanceCounter++;
+            return `gear_${Date.now().toString(36)}_${equipmentInstanceCounter.toString(36)}`;
+        }
+
+        function getEquipmentBaseStats(item) {
+            return Object.fromEntries(EQUIPMENT_STAT_FIELDS.map(field => [field, item[field] || 0]));
+        }
+
+        function calculateEquipmentBaseValue(item) {
+            const stats = getEquipmentBaseStats(item);
+            return Math.max(10, Math.round(
+                10
+                + stats.atkBonus * 6
+                + stats.defBonus * 7
+                + stats.hpBonus * 0.6
+                + stats.mpBonus * 0.8
+            ));
+        }
+
+        function rollEquipmentRarity(monsterLevel, randomValue = Math.random()) {
+            let chances;
+            if (monsterLevel >= 15) {
+                chances = [["legendary", 0.07], ["epic", 0.18], ["rare", 0.30], ["uncommon", 0.30]];
+            } else if (monsterLevel >= 10) {
+                chances = [["legendary", 0.02], ["epic", 0.10], ["rare", 0.28], ["uncommon", 0.35]];
+            } else if (monsterLevel >= 5) {
+                chances = [["epic", 0.03], ["rare", 0.17], ["uncommon", 0.35]];
+            } else {
+                chances = [["rare", 0.05], ["uncommon", 0.25]];
+            }
+
+            let threshold = 0;
+            for (const [rarity, chance] of chances) {
+                threshold += chance;
+                if (randomValue < threshold) return rarity;
+            }
+            return "common";
+        }
+
+        function getHigherRarity(firstRarity = "common", secondRarity = "common") {
+            const first = EQUIPMENT_RARITIES[firstRarity] || EQUIPMENT_RARITIES.common;
+            const second = EQUIPMENT_RARITIES[secondRarity] || EQUIPMENT_RARITIES.common;
+            return first.rank >= second.rank ? firstRarity : secondRarity;
+        }
+
+        function calculateRarityStats(baseStats, rarity) {
+            const rarityConfig = EQUIPMENT_RARITIES[rarity] || EQUIPMENT_RARITIES.common;
+            return Object.fromEntries(EQUIPMENT_STAT_FIELDS.map(field => {
+                const baseValue = baseStats?.[field] || 0;
+                if (baseValue <= 0) return [field, 0];
+                const scaledValue = Math.round(baseValue * rarityConfig.statMultiplier);
+                return [field, Math.max(baseValue + rarityConfig.rank, scaledValue)];
+            }));
+        }
+
+        function getEquipmentUpgradeIncrement(item, field) {
+            const incrementsByType = {
+                weapon: { atkBonus: 5, defBonus: 2, hpBonus: 5, mpBonus: 5 },
+                armor: { atkBonus: 2, defBonus: 3, hpBonus: 5, mpBonus: 5 },
+                accessory: { atkBonus: 2, defBonus: 2, hpBonus: 5, mpBonus: 5 }
+            };
+            return incrementsByType[item.type]?.[field] || 0;
+        }
+
+        function getUpgradeStatBonus(item, field, upgradeLevel) {
+            if (upgradeLevel <= 0 || (item.baseStats?.[field] || 0) <= 0) return 0;
+            return getEquipmentUpgradeIncrement(item, field) * upgradeLevel;
+        }
+
+        function rollEquipmentStats(instance, rarity) {
+            const rolledStats = calculateRarityStats(instance.baseStats, rarity);
+            EQUIPMENT_STAT_FIELDS.forEach(field => {
+                instance[field] = rolledStats[field];
+            });
+            instance.statRollVersion = 2;
+        }
+
+        function createItemInstance(item, options = {}) {
+            const instance = { ...item };
+            if (isEquipmentItem(instance)) {
+                instance.baseItemId = instance.baseItemId || instance.id;
+                instance.baseStats = instance.baseStats || getEquipmentBaseStats(instance);
+                instance.baseValue = Number.isFinite(instance.baseValue)
+                    ? instance.baseValue
+                    : calculateEquipmentBaseValue(instance);
+                instance.upgradeLevel = Number.isFinite(instance.upgradeLevel)
+                    ? instance.upgradeLevel
+                    : 0;
+                instance.upgradeStatVersion = Number.isFinite(instance.upgradeStatVersion)
+                    ? instance.upgradeStatVersion
+                    : (instance.upgradeLevel > 0 ? 1 : 2);
+
+                if (options.rollRarity) {
+                    const random = options.random || Math.random;
+                    const rolledRarity = rollEquipmentRarity(options.monsterLevel || 1, random());
+                    instance.rarity = getHigherRarity(instance.rarity, rolledRarity);
+                    instance.dropLevel = options.monsterLevel || 1;
+                    instance.rolledStats = true;
+                    rollEquipmentStats(instance, instance.rarity, random);
+                }
+
+                if (!instance.instanceId) {
+                    instance.instanceId = createEquipmentInstanceId();
+                }
+            }
+            return instance;
+        }
+
+        function getEquipmentStatValue(stats) {
+            return Math.round(
+                (stats.atkBonus || 0) * 6
+                + (stats.defBonus || 0) * 7
+                + (stats.hpBonus || 0) * 0.6
+                + (stats.mpBonus || 0) * 0.8
+            );
+        }
+
+        function calculateSellPrice(item) {
+            if (isEquipmentItem(item)) {
+                const rarityConfig = EQUIPMENT_RARITIES[item.rarity] || EQUIPMENT_RARITIES.common;
+                const baseStats = item.baseStats || getEquipmentBaseStats(item);
+                const baseValue = Number.isFinite(item.baseValue)
+                    ? item.baseValue
+                    : calculateEquipmentBaseValue(item);
+                const rolledAndUpgradeValue = Math.max(
+                    0,
+                    getEquipmentStatValue(item) - getEquipmentStatValue(baseStats)
+                );
+                const upgradeMultiplier = 1 + (item.upgradeLevel || 0) * 0.12;
+                return Math.max(1, Math.floor(
+                    (baseValue + rolledAndUpgradeValue)
+                    * rarityConfig.sellMultiplier
+                    * upgradeMultiplier
+                    * 0.5
+                ));
+            }
+
+            const shopItem = gameState.shopInventory.find(shopEntry => shopEntry.id === item.id);
+            if (shopItem?.priceSell) return shopItem.priceSell;
+            const rarityFallback = {
+                common: 8,
+                uncommon: 20,
+                rare: 50,
+                epic: 100,
+                legendary: 200
+            }[item.rarity] || 5;
+            return Math.max(1, Math.floor((item.value || rarityFallback) * 0.4));
+        }
+
+        function addItemToInventory(item, options = {}) {
+            if (!item) {
+                addLogEntry("Error: Attempted to add null item to inventory.", 'log-error');
+                return;
+            }
+            const instance = createItemInstance(item, options);
+            gameState.inventory.push(instance);
+            const rarityLabel = isEquipmentItem(instance)
+                ? ` [${instance.rarity.toUpperCase()}]`
+                : "";
+            addLogEntry(`🎒 You obtained ${instance.name}${rarityLabel}!`, 'log-item');
+            updateInventoryDisplay();
+            return instance;
+        }
+
+        function updateInventoryDisplay() {
+            const inventoryList = document.getElementById('inventoryList');
+            inventoryList.innerHTML = '';
+
+            if (gameState.inventory.length === 0) {
+                inventoryList.innerHTML = '<p style="color:#aaa;">Inventory is empty.</p>';
+                return;
+            }
+
+            // Group items by name and count
+            const groupedInventory = {};
+            gameState.inventory.forEach((item, inventoryIndex) => {
+                const key = isEquipmentItem(item)
+                    ? item.instanceId || `legacy-equipment-${inventoryIndex}`
+                    : `${item.id || item.name}-${item.type}`;
+                if (!groupedInventory[key]) {
+                    groupedInventory[key] = { ...item, count: 0 };
+                }
+                groupedInventory[key].count++;
+            });
+
+            Object.values(groupedInventory).forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `inventory-item item-rarity-${item.rarity}`;
+                itemDiv.innerHTML = `
+                    <strong>${item.name}</strong>
+                    ${item.count > 1 ? ` (x${item.count})` : ''} <br>
+                    <small>${item.type.charAt(0).toUpperCase() + item.type.slice(1)} - ${item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)}</small>
+                `;
+                if (item.type === "weapon" || item.type === "armor" || item.type === "accessory") {
+                    itemDiv.innerHTML += `<br><small>ATK +${item.atkBonus || 0}, DEF +${item.defBonus || 0}, HP +${item.hpBonus || 0}, MP +${item.mpBonus || 0}</small>`;
+                    itemDiv.innerHTML += `<br><small>Sell Value: ${calculateSellPrice(item)} Gold</small>`;
+                } else if (item.type === "consumable" && item.effect === "heal") {
+                    itemDiv.innerHTML += `<br><small>Recovers ${item.value} HP</small>`;
+                } else if (item.type === "consumable" && item.effect === "mana") {
+                    itemDiv.innerHTML += `<br><small>Recovers ${item.value} MP</small>`;
+                } else if (item.type === "consumable" && item.effect === "full_heal") {
+                    itemDiv.innerHTML += `<br><small>Fully recovers HP</small>`;
+                } else if (item.type === "consumable" && item.effect === "full_mana") {
+                    itemDiv.innerHTML += `<br><small>Fully recovers MP</small>`;
+                }
+
+                if (item.type === "accessory") {
+                    const equipActions = document.createElement('div');
+                    equipActions.className = "inventory-equip-actions";
+                    ["accessory", "accessory2"].forEach(slotType => {
+                        const equipButton = document.createElement('button');
+                        equipButton.textContent = `Equip ${getEquipmentSlotLabel(slotType)}`;
+                        equipButton.disabled = gameState.inBattle;
+                        equipButton.onclick = event => {
+                            event.stopPropagation();
+                            const actualItemIndex = gameState.inventory.findIndex(invItem => {
+                                return invItem.instanceId === item.instanceId;
+                            });
+                            if (actualItemIndex !== -1) {
+                                equipItem(gameState.inventory[actualItemIndex], actualItemIndex, slotType);
+                            }
+                        };
+                        equipActions.appendChild(equipButton);
+                    });
+                    itemDiv.appendChild(equipActions);
+                }
+
+                itemDiv.onclick = () => {
+                    const actualItemIndexToUse = isEquipmentItem(item)
+                        ? gameState.inventory.findIndex(invItem => invItem.instanceId === item.instanceId)
+                        : gameState.inventory.findIndex(invItem => invItem.id === item.id && invItem.name === item.name);
+                    if (actualItemIndexToUse !== -1) {
+                        useItem(gameState.inventory[actualItemIndexToUse], actualItemIndexToUse);
+                    }
+                };
+                inventoryList.appendChild(itemDiv);
+            });
+        }
+
+        // NEW: Display equipped gear
+        function updateEquippedGearDisplay() {
+            const equippedGearList = document.getElementById('equippedGearList');
+            equippedGearList.innerHTML = ''; // Clear previous display
+
+            const p = gameState.player;
+            const slots = ['weapon', 'armor', 'accessory', 'accessory2'];
+
+            slots.forEach(slotType => {
+                const item = p.equipped[slotType];
+                const itemDiv = document.createElement('div');
+                itemDiv.innerHTML = `<span class="equipped-slot">${getEquipmentSlotLabel(slotType)}:</span> `;
+                if (item) {
+                    const upgradeLevel = Number.isFinite(item.upgradeLevel) ? item.upgradeLevel : 0;
+                    itemDiv.innerHTML += `<span class="item-rarity-${item.rarity}">${item.name} +${upgradeLevel}</span>`;
+                    itemDiv.innerHTML += `<br><small>ATK +${item.atkBonus || 0}, DEF +${item.defBonus || 0}, HP +${item.hpBonus || 0}, MP +${item.mpBonus || 0}</small>`;
+
+                    const unequipButton = document.createElement('button');
+                    unequipButton.textContent = 'Unequip';
+                    unequipButton.disabled = gameState.inBattle;
+                    unequipButton.onclick = () => unequipItem(slotType);
+                    itemDiv.appendChild(unequipButton);
+                } else {
+                    itemDiv.innerHTML += `<span style="color:#777;">(Empty)</span>`;
+                }
+                equippedGearList.appendChild(itemDiv);
+            });
+        }
+
+        function unequipItem(slotType) {
+            const p = gameState.player;
+            if (gameState.inBattle) {
+                addLogEntry("You cannot change equipment during battle.", 'log-error');
+                return false;
+            }
+            if (!p.equipped.hasOwnProperty(slotType)) {
+                addLogEntry(`Unknown equipment slot: ${slotType}.`, 'log-error');
+                return false;
+            }
+
+            const itemToUnequip = p.equipped[slotType];
+            if (itemToUnequip) {
+                const alreadyInInventory = itemToUnequip.instanceId
+                    ? gameState.inventory.some(item => item.instanceId === itemToUnequip.instanceId)
+                    : gameState.inventory.includes(itemToUnequip);
+                if (!alreadyInInventory) {
+                    gameState.inventory.push(itemToUnequip);
+                }
+                p.equipped[slotType] = null;
+                addLogEntry(`You unequipped ${itemToUnequip.name} from ${getEquipmentSlotLabel(slotType)}.`, 'log-item');
+                refreshEquipmentUI();
+                return true;
+            } else {
+                addLogEntry(`Nothing is equipped in the ${getEquipmentSlotLabel(slotType)} slot.`, 'log-error');
+                return false;
+            }
+        }
+
+        function awardBlacksmithOre(monster) {
+            if (Math.random() >= 0.35) return 0;
+
+            const oreFound = monster.level >= 5 ? 2 : 1;
+            gameState.blacksmithMaterials.ore += oreFound;
+            addLogEntry(`⛏️ You found ${oreFound} blacksmith ore!`, 'log-item');
+            return oreFound;
+        }
+
+        // Looting items from monsters
+        function lootMonster(monster) {
+            awardBlacksmithOre(monster);
+
+            if (Math.random() < 0.3) {
+                const commonItems = itemTemplates.filter(item => item.rarity === "common");
+                const uncommonItems = itemTemplates.filter(item => item.rarity === "uncommon");
+                const rareItems = itemTemplates.filter(item => item.rarity === "rare" && !item.bossOnly);
+
+                let possibleDrops = [];
+                if (monster.level >= 10) {
+                    possibleDrops = [...commonItems, ...uncommonItems, ...uncommonItems, ...rareItems];
+                } else if (monster.level >= 5) {
+                    possibleDrops = [...commonItems, ...uncommonItems, ...uncommonItems];
+                } else {
+                    possibleDrops = [...commonItems, ...uncommonItems.slice(0, 3)];
+                }
+
+                if (possibleDrops.length > 0) {
+                    const droppedItem = possibleDrops[Math.floor(Math.random() * possibleDrops.length)];
+                    addItemToInventory(droppedItem, {
+                        rollRarity: isEquipmentItem(droppedItem),
+                        monsterLevel: monster.level
+                    });
+                } else {
+                    addLogEntry("The monster dropped nothing interesting.", 'log-entry');
+                }
+            }
+        }
+
+
+        // --- Quest System ---
+        function addQuest(quest) {
+            // Check if quest with this ID already exists or is completed
+            if (gameState.quests.some(q => q.id === quest.id)) {
+                addLogEntry(`You already have "${quest.name}" or have completed it.`, 'log-error');
+                return false;
+            }
+            gameState.quests.push(quest);
+            addLogEntry(`📜 New Quest: "${quest.name}"!`, 'log-quest');
+            updateQuestDisplay();
+            return true;
+        }
+
+        function completeQuest(questId) {
+            const quest = gameState.quests.find(q => q.id === questId);
+            if (quest && !quest.completed) {
+                quest.completed = true;
+                addLogEntry(`✅ Quest Completed: "${quest.name}"!`, 'log-quest');
+                // Apply rewards
+                if (quest.reward.gold) {
+                    gainGold(quest.reward.gold);
+                }
+                if (quest.reward.exp) {
+                    gainExp(quest.reward.exp);
+                }
+                if (quest.reward.ore) {
+                    gameState.blacksmithMaterials.ore += quest.reward.ore;
+                    addLogEntry(`⛏️ Quest reward: ${quest.reward.ore} ore.`, 'log-item');
+                }
+                if (quest.reward.item) {
+                    addItemToInventory(quest.reward.item, {
+                        rollRarity: isEquipmentItem(quest.reward.item),
+                        monsterLevel: quest.reward.itemLevel || quest.level || gameState.player.level
+                    });
+                }
+                recordTitleProgress("questsCompleted", 1);
+                quest.completedAt = Date.now();
+                const activeQuests = gameState.quests.filter(entry => !entry.completed);
+                const recentCompletedQuests = gameState.quests
+                    .filter(entry => entry.completed)
+                    .sort((first, second) => (second.completedAt || 0) - (first.completedAt || 0))
+                    .slice(0, 5);
+                gameState.quests = [...activeQuests, ...recentCompletedQuests];
+                updateQuestDisplay();
+            }
+        }
+
+        function trackMonsterKill(monsterName) {
+            gameState.quests.forEach(quest => {
+                if (!quest.completed && quest.target.type === "monster_kill") {
+                    if (quest.target.monster && quest.target.monster === monsterName) {
+                        quest.target.current = (quest.target.current || 0) + 1;
+                        addLogEntry(`Progress on "${quest.name}": ${quest.target.current}/${quest.target.count} ${quest.target.monster} defeated.`, 'log-quest');
+                        if (quest.target.current >= quest.target.count) {
+                            completeQuest(quest.id);
+                        }
+                    } else if (!quest.target.monster) {
+                        // Generic monster kill quest (any monster)
+                        quest.target.current = (quest.target.current || 0) + 1;
+                        addLogEntry(`Progress on "${quest.name}": ${quest.target.current}/${quest.target.count} monsters defeated.`, 'log-quest');
+                        if (quest.target.current >= quest.target.count) {
+                            completeQuest(quest.id);
+                        }
+                    }
+                }
+            });
+            updateMonsterCodex(monsterName); // Also update codex
+        }
+
+        function updateQuestDisplay() {
+            const questLogList = document.getElementById('questLogList');
+            questLogList.innerHTML = '';
+            if (gameState.quests.length === 0) {
+                questLogList.innerHTML = '<p style="color:#aaa;">No active quests.</p>';
+                return;
+            }
+            // Sort active quests first, then completed ones
+            const sortedQuests = [...gameState.quests].sort((a, b) => {
+                if (a.completed === b.completed) return 0;
+                return a.completed ? 1 : -1;
+            });
+
+            sortedQuests.forEach(quest => {
+                const questDiv = document.createElement('div');
+                questDiv.className = `quest-entry ${quest.completed ? 'completed' : ''}`;
+                let progress = '';
+                if (quest.target && quest.target.type === "monster_kill") {
+                    progress = ` (${quest.target.current || 0}/${quest.target.count})`;
+                }
+                const rewardParts = [
+                    `${quest.reward?.gold || 0} Gold`,
+                    `${quest.reward?.exp || 0} EXP`
+                ];
+                if (quest.reward?.ore) rewardParts.push(`${quest.reward.ore} Ore`);
+                if (quest.reward?.item) rewardParts.push(quest.reward.item.name);
+                questDiv.innerHTML = `
+                    <strong>${quest.name}</strong> ${quest.completed ? '(Completed)' : ''}<br>
+                    <small>${quest.description}${progress}</small><br>
+                    <small>Reward: ${rewardParts.join(' · ')}</small>
+                `;
+                questLogList.appendChild(questDiv);
+            });
+        }
+
+        // --- Monster Codex ---
+        function updateMonsterCodex(monsterName = null) {
+            if (monsterName && !gameState.monsterCodex[monsterName]) {
+                const template = [...monsterTemplates, ...bossTemplates].find(m => m.name === monsterName);
+                if (template) {
+                    gameState.monsterCodex[monsterName] = { ...template, discovered: true };
+                    addLogEntry(`New entry added to Monster Codex: ${monsterName}!`);
+                }
+            }
+
+            const monsterCodexList = document.getElementById('monsterCodexList');
+            monsterCodexList.innerHTML = '';
+            const discoveredMonsters = Object.values(gameState.monsterCodex);
+            if (discoveredMonsters.length === 0) {
+                monsterCodexList.innerHTML = '<p style="color:#aaa;">No monsters discovered yet.</p>';
+                return;
+            }
+            discoveredMonsters.sort((a, b) => a.name.localeCompare(b.name)); // Sort alphabetically
+            discoveredMonsters.forEach(monster => {
+                const codexDiv = document.createElement('div');
+                codexDiv.className = 'codex-entry';
+                codexDiv.innerHTML = `
+                    <strong>${monster.name}</strong><br>
+                    <small>HP: ${monster.hp}, ATK: ${monster.atk}, EXP: ${monster.exp}, Gold: ${monster.gold}</small><br>
+                    <small>Ability: ${getMonsterAbilityLabel(monster)}</small>
+                `;
+                monsterCodexList.appendChild(codexDiv);
+            });
+        }
+
+
+        // --- Dungeon & Shop Actions ---
+        function exploreDungeon() {
+            if (gameState.inBattle) return;
+            addLogEntry(`You venture into ${getCurrentArea().name}...`, 'log-battle');
+            spawnMonster();
+        }
+
+        function rest() {
+            if (gameState.inBattle) return;
+            const p = gameState.player;
+            const hpRecovered = Math.floor(p.maxHp * 0.2); // Recover 20% HP
+            const mpRecovered = Math.floor(p.maxMp * 0.3); // Recover 30% MP
+            p.hp = Math.min(p.maxHp, p.hp + hpRecovered);
+            p.mp = Math.min(p.maxMp, p.mp + mpRecovered);
+            addLogEntry(`You rest and recover ${hpRecovered} HP and ${mpRecovered} MP.`, 'log-heal');
+            updateDisplay();
+        }
+
+        function leaveTavern() {
+            gameState.currentLocation = "town";
+            addLogEntry("You leave the tavern and return to town.", 'log-entry');
+            updateLocationUI();
+        }
+
+        function displayAvailableQuests() {
+            const availableQuestsList = document.getElementById('availableQuestsList');
+            availableQuestsList.innerHTML = '';
+            updateTavernCooldownDisplay();
+
+            const availableQuestOffers = gameState.tavernQuestOffers;
+
+            if (availableQuestOffers.length === 0) {
+                availableQuestsList.innerHTML = '<p style="color:#aaa;">No new quests available right now. Check back later!</p>';
+                return;
+            }
+
+            availableQuestOffers.forEach(questOffer => {
+                const questDiv = document.createElement('div');
+                questDiv.className = 'tavern-quest-entry';
+                questDiv.innerHTML = `
+                    <strong>${questOffer.name}</strong><br>
+                    <small>${questOffer.description}</small><br>
+                    <small>Reward: ${questOffer.reward.gold} Gold, ${questOffer.reward.exp} EXP${questOffer.reward.ore ? `, ${questOffer.reward.ore} Ore` : ''}</small>
+                    ${questOffer.reward.item ? `<br><small>Item Reward: ${questOffer.reward.item.name}</small>` : ''}
+                `;
+
+                // Add button to accept quest
+                const acceptBtn = document.createElement('button');
+                acceptBtn.textContent = 'Accept Quest';
+                acceptBtn.onclick = () => {
+                    if (addQuest(questOffer)) {
+                        gameState.tavernQuestOffers = gameState.tavernQuestOffers
+                            .filter(offer => offer.id !== questOffer.id);
+                        displayAvailableQuests();
+                    }
+                };
+                questDiv.appendChild(acceptBtn);
+                availableQuestsList.appendChild(questDiv);
+            });
+        }
+
+        function getQuestTier(playerLevel) {
+            return [...QUEST_TIER_CONFIGS]
+                .reverse()
+                .find(tier => playerLevel >= tier.minLevel) || QUEST_TIER_CONFIGS[0];
+        }
+
+        function getQuestMonsterPool(playerLevel) {
+            const nearbyMonsters = monsterTemplates.filter(monster => {
+                return monster.minLevel <= playerLevel + 1
+                    && monster.maxLevel >= Math.max(1, playerLevel - 1);
+            });
+            if (nearbyMonsters.length > 0) return nearbyMonsters;
+
+            const unlockedMonsters = monsterTemplates.filter(monster => monster.minLevel <= playerLevel);
+            return unlockedMonsters.length > 0 ? unlockedMonsters : monsterTemplates;
+        }
+
+        function getQuestElitePool(playerLevel) {
+            const pool = [...getQuestMonsterPool(playerLevel)]
+                .sort((first, second) => {
+                    return (second.minLevel - first.minLevel)
+                        || ((second.hp + second.atk * 4) - (first.hp + first.atk * 4));
+                });
+            return pool.slice(0, Math.max(1, Math.ceil(pool.length / 3)));
+        }
+
+        function generateDynamicQuests(playerLevel, offerCount = 3, random = Math.random) {
+            const safeLevel = Math.max(1, Math.floor(Number(playerLevel) || 1));
+            const quests = [];
+            const activeOrCompletedQuestIds = gameState.quests.map(q => q.id);
+            const tier = getQuestTier(safeLevel);
+            const pendingBoss = bossTemplates.find(boss => {
+                return safeLevel >= boss.requiredLevel
+                    && !gameState.defeatedBosses.includes(boss.id);
+            }) || null;
+            const availableTemplates = questTemplates.filter(template => {
+                if (safeLevel < (template.minLevel || 1)) return false;
+                return template.type !== "boss_hunt" || Boolean(pendingBoss);
+            });
+            const worldRewardMultiplier = 1 + gameState.worldResetCount * 0.15;
+
+            for (let i = 0; i < offerCount; i++) {
+                const unusedTemplates = availableTemplates.filter(template => {
+                    return !quests.some(quest => quest.objectiveType === template.type);
+                });
+                const templatePool = unusedTemplates.length > 0 ? unusedTemplates : availableTemplates;
+                const template = templatePool[Math.floor(random() * templatePool.length)];
+                if (!template) break;
+
+                let questId = `${template.type}_${safeLevel}_${Date.now()}_${i}`;
+                while (activeOrCompletedQuestIds.includes(questId)) {
+                    questId = `${template.type}_${safeLevel}_${Date.now()}_${Math.floor(random() * 1000000)}`;
+                }
+
+                const countRange = template.maxCount - template.minCount + 1;
+                const targetCount = template.minCount + Math.floor(random() * countRange);
+                let targetMonster = null;
+
+                if (template.type === "kill_specific_monster") {
+                    const monsterPool = getQuestMonsterPool(safeLevel);
+                    targetMonster = monsterPool[Math.floor(random() * monsterPool.length)]?.name || null;
+                } else if (template.type === "elite_hunt") {
+                    const elitePool = getQuestElitePool(safeLevel);
+                    targetMonster = elitePool[Math.floor(random() * elitePool.length)]?.name || null;
+                } else if (template.type === "boss_hunt") {
+                    targetMonster = pendingBoss?.name || null;
+                }
+
+                const questName = template.name.replaceAll("{monsterName}", targetMonster || "Monster");
+                const description = template.description
+                    .replaceAll("{monsterName}", targetMonster || "monster")
+                    .replaceAll("{count}", targetCount);
+                const scaledExp = Math.max(
+                    1,
+                    Math.floor(calculateExpToNextLevel(safeLevel) * template.expShare * worldRewardMultiplier)
+                );
+                const scaledGold = Math.max(
+                    1,
+                    Math.floor((80 + safeLevel * 25) * template.goldMultiplier * getShopPriceMultiplier())
+                );
+                const receivesItem = random() < tier.itemChance;
+                const rewardItemId = receivesItem
+                    ? tier.rewardItemPool[Math.floor(random() * tier.rewardItemPool.length)]
+                    : null;
+                const rewardOre = tier.ore
+                    + Math.floor(gameState.worldResetCount / 2)
+                    + (template.type === "boss_hunt" ? 2 : 0);
+
+                const newQuest = {
+                    id: questId,
+                    completed: false,
+                    objectiveType: template.type,
+                    tierLabel: tier.label,
+                    level: safeLevel,
+                    name: `[${tier.label}] ${questName}`,
+                    description,
+                    target: {
+                        type: "monster_kill",
+                        count: targetCount,
+                        current: 0
+                    },
+                    reward: {
+                        gold: scaledGold,
+                        exp: scaledExp,
+                        ore: rewardOre,
+                        item: rewardItemId ? getItemTemplate(rewardItemId) : null,
+                        itemLevel: safeLevel
+                    }
+                };
+                if (targetMonster) {
+                    newQuest.target.monster = targetMonster;
+                }
+
+                quests.push(newQuest);
+                activeOrCompletedQuestIds.push(newQuest.id);
+            }
+
+            return quests;
+        }
+
+
+        // --- Monster Spawning & Difficulty ---
+        function getAdaptiveMonster() {
+            const pLevel = gameState.player.level;
+            const possibleMonsters = monsterTemplates.filter(monster => {
+                return monster.minLevel <= pLevel && monster.maxLevel >= pLevel;
+            });
+
+            if (possibleMonsters.length === 0) {
+                const unlockedMonsters = monsterTemplates.filter(monster => monster.minLevel <= pLevel);
+                const fallbackPool = unlockedMonsters.length > 0 ? unlockedMonsters : monsterTemplates;
+                return fallbackPool[Math.floor(Math.random() * fallbackPool.length)];
+            }
+
+            return possibleMonsters[Math.floor(Math.random() * possibleMonsters.length)];
+        }
+
+        function getPendingBoss() {
+            return bossTemplates.find(boss => {
+                return gameState.player.level >= boss.requiredLevel
+                    && !gameState.defeatedBosses.includes(boss.id);
+            }) || null;
+        }
+
+        function scaleDifficulty() {
+            return 1 + (gameState.areaLevel - 1) * 0.1;
+        }
+
+        function spawnMonster() {
+            const pLevel = gameState.player.level;
+            const pendingBoss = getPendingBoss();
+            const template = pendingBoss || getAdaptiveMonster();
+            const isBoss = Boolean(pendingBoss);
+            const baseLevel = isBoss ? template.requiredLevel : template.minLevel;
+            const progressionScale = 1 + Math.min(0.3, Math.max(0, pLevel - baseLevel) * 0.05);
+            const environmentScale = isBoss
+                ? getWorldDifficultyMultiplier()
+                : scaleDifficulty() * getWorldDifficultyMultiplier();
+            const finalMultiplier = progressionScale * environmentScale;
+            const monsterLevel = isBoss
+                ? Math.max(template.requiredLevel, pLevel)
+                : Math.max(1, pLevel + Math.floor(Math.random() * 3) - 1);
+
+            gameState.currentMonster = {
+                id: template.id || template.name.toLowerCase().replace(/\s+/g, '_'),
+                name: template.name,
+                level: monsterLevel,
+                hp: Math.floor(template.hp * finalMultiplier),
+                maxHp: Math.floor(template.hp * finalMultiplier),
+                atk: Math.floor(template.atk * finalMultiplier),
+                exp: Math.floor(template.exp * finalMultiplier),
+                gold: Math.floor(template.gold * finalMultiplier),
+                isBoss,
+                rewardItemId: template.rewardItemId || null,
+                ability: template.ability || null,
+                abilityChance: template.abilityChance || 0
+            };
+
+            startBattle();
+        }
+
+        // --- Save/Load System ---
+        function saveGame() {
+            try {
+                localStorage.setItem('dragonRealmSave', JSON.stringify(gameState));
+                addLogEntry("💾 Game saved to local storage!", 'log-entry');
+            } catch (e) {
+                addLogEntry("Error saving game: " + e.message, 'log-error');
+            }
+        }
+
+        function equipmentItemsMatch(first, second) {
+            if (!first || !second) return false;
+            const comparedFields = [
+                "id", "name", "type", "rarity", "upgradeLevel",
+                "atkBonus", "defBonus", "hpBonus", "mpBonus"
+            ];
+            return comparedFields.every(field => (first[field] || 0) === (second[field] || 0));
+        }
+
+        function normalizeSavedItem(item) {
+            if (!item || typeof item !== 'object') return null;
+            const template = getItemTemplate(item.id)
+                || gameState.shopInventory.find(shopItem => shopItem.id === item.id)
+                || {};
+            const normalized = { ...template, ...item };
+            if (isEquipmentItem(normalized)) {
+                normalized.baseItemId = normalized.baseItemId || normalized.id;
+                normalized.baseStats = normalized.baseStats || getEquipmentBaseStats(template);
+                normalized.baseValue = Number.isFinite(normalized.baseValue)
+                    ? normalized.baseValue
+                    : calculateEquipmentBaseValue(Object.keys(template).length > 0 ? template : normalized);
+                if (!EQUIPMENT_RARITIES[normalized.rarity]) {
+                    normalized.rarity = template.rarity || "common";
+                }
+                normalized.upgradeLevel = Number.isFinite(normalized.upgradeLevel)
+                    ? Math.min(5, Math.max(0, Math.floor(normalized.upgradeLevel)))
+                    : 0;
+                if (normalized.rolledStats) {
+                    const rolledStats = calculateRarityStats(normalized.baseStats, normalized.rarity);
+                    EQUIPMENT_STAT_FIELDS.forEach(field => {
+                        normalized[field] = rolledStats[field]
+                            + getUpgradeStatBonus(normalized, field, normalized.upgradeLevel);
+                    });
+                    normalized.statRollVersion = 2;
+                    normalized.upgradeStatVersion = 2;
+                } else if (normalized.upgradeStatVersion !== 2) {
+                    const oldPrimaryField = {
+                        weapon: "atkBonus",
+                        armor: "defBonus"
+                    }[normalized.type] || null;
+                    if (oldPrimaryField) {
+                        EQUIPMENT_STAT_FIELDS.forEach(field => {
+                            if (field === oldPrimaryField || (normalized.baseStats?.[field] || 0) <= 0) return;
+                            normalized[field] = (normalized[field] || 0)
+                                + getEquipmentUpgradeIncrement(normalized, field) * normalized.upgradeLevel;
+                        });
+                    }
+                    normalized.upgradeStatVersion = 2;
+                }
+            }
+            return normalized;
+        }
+
+        function migrateEquipmentInventory(savedState, equipped) {
+            const inventory = Array.isArray(savedState.inventory)
+                ? savedState.inventory.map(normalizeSavedItem).filter(Boolean)
+                : [];
+            const isLegacyEquipmentState = !Number.isFinite(savedState.equipmentStateVersion)
+                || savedState.equipmentStateVersion < 2;
+
+            if (isLegacyEquipmentState) {
+                Object.values(equipped).forEach(equippedItem => {
+                    if (!equippedItem) return;
+                    const duplicateIndex = inventory.findIndex(inventoryItem => {
+                        return equipmentItemsMatch(inventoryItem, equippedItem);
+                    });
+                    if (duplicateIndex !== -1) {
+                        inventory.splice(duplicateIndex, 1);
+                    }
+                });
+            }
+
+            Object.values(equipped).forEach(item => {
+                if (isEquipmentItem(item) && !item.instanceId) {
+                    item.instanceId = createEquipmentInstanceId();
+                }
+            });
+            inventory.forEach(item => {
+                if (isEquipmentItem(item) && !item.instanceId) {
+                    item.instanceId = createEquipmentInstanceId();
+                }
+            });
+
+            return inventory;
+        }
+
+        function migrateSavedQuests(savedQuests, playerLevel, worldResetCount, usesCurrentProgression) {
+            if (!Array.isArray(savedQuests)) return [];
+
+            const tier = getQuestTier(playerLevel);
+            const worldRewardMultiplier = 1 + worldResetCount * 0.15;
+            const migrated = savedQuests
+                .filter(quest => quest && typeof quest === 'object' && quest.id)
+                .map(quest => {
+                    const normalized = {
+                        ...quest,
+                        target: quest.target && typeof quest.target === 'object'
+                            ? { ...quest.target }
+                            : { type: "monster_kill", count: 1, current: 0 },
+                        reward: quest.reward && typeof quest.reward === 'object'
+                            ? { ...quest.reward }
+                            : { gold: 0, exp: 0, item: null }
+                    };
+
+                    const isDynamicQuest = normalized.id !== "starting_quest_1";
+                    if (!usesCurrentProgression && isDynamicQuest && !normalized.completed) {
+                        normalized.level = playerLevel;
+                        normalized.tierLabel = tier.label;
+                        normalized.target.count = Math.min(
+                            20,
+                            Math.max(1, Math.floor(normalized.target.count || 1))
+                        );
+                        normalized.target.current = Math.max(
+                            0,
+                            Math.floor(normalized.target.current || 0)
+                        );
+                        normalized.reward.exp = Math.max(
+                            normalized.reward.exp || 0,
+                            Math.floor(calculateExpToNextLevel(playerLevel) * 0.10 * worldRewardMultiplier)
+                        );
+                        normalized.reward.gold = Math.max(
+                            normalized.reward.gold || 0,
+                            Math.floor((80 + playerLevel * 25) * getShopPriceMultiplier(worldResetCount))
+                        );
+                        normalized.reward.ore = Math.max(
+                            normalized.reward.ore || 0,
+                            tier.ore + Math.floor(worldResetCount / 2)
+                        );
+                        normalized.reward.itemLevel = playerLevel;
+                    }
+                    return normalized;
+                });
+
+            const active = migrated.filter(quest => !quest.completed);
+            const recentCompleted = migrated
+                .filter(quest => quest.completed)
+                .sort((first, second) => (second.completedAt || 0) - (first.completedAt || 0))
+                .slice(0, 5);
+            return [...active, ...recentCompleted];
+        }
+
+        function migrateSavedState(savedState) {
+            if (!savedState || typeof savedState !== 'object' || Array.isArray(savedState)) {
+                throw new Error("Save data is not a valid object.");
+            }
+            if (!savedState.player || typeof savedState.player !== 'object') {
+                throw new Error("Save data does not contain a valid player.");
+            }
+
+            const defaultPlayer = gameState.player;
+            const savedEquipped = savedState.player.equipped;
+            const hasIdentityState = typeof savedState.player.hasChosenName === 'boolean';
+            const hasChosenName = hasIdentityState ? savedState.player.hasChosenName : true;
+            const savedName = sanitizePlayerName(savedState.player.name);
+            const migratedName = savedName || (hasChosenName ? "Hero" : "");
+            const nameChangesRemaining = Number.isFinite(savedState.player.nameChangesRemaining)
+                ? Math.min(1, Math.max(0, Math.floor(savedState.player.nameChangesRemaining)))
+                : 1;
+            const equipped = {
+                weapon: savedEquipped && typeof savedEquipped === 'object' ? normalizeSavedItem(savedEquipped.weapon) : null,
+                armor: savedEquipped && typeof savedEquipped === 'object' ? normalizeSavedItem(savedEquipped.armor) : null,
+                accessory: savedEquipped && typeof savedEquipped === 'object' ? normalizeSavedItem(savedEquipped.accessory) : null,
+                accessory2: savedEquipped && typeof savedEquipped === 'object' ? normalizeSavedItem(savedEquipped.accessory2) : null
+            };
+
+            Object.values(equipped).forEach(item => {
+                if (item) {
+                    item.upgradeLevel = Number.isFinite(item.upgradeLevel)
+                        ? Math.min(5, Math.max(0, Math.floor(item.upgradeLevel)))
+                        : 0;
+                }
+            });
+            const inventory = migrateEquipmentInventory(savedState, equipped);
+
+            const validLocations = ["town", "battle", "tavern", "shop", "blacksmith"];
+            let currentLocation = validLocations.includes(savedState.currentLocation)
+                ? savedState.currentLocation
+                : "town";
+            const inBattle = Boolean(savedState.inBattle && savedState.currentMonster);
+            if (currentLocation === "battle" && !inBattle) {
+                currentLocation = "town";
+            } else if (inBattle) {
+                currentLocation = "battle";
+            }
+
+            const savedOre = savedState.blacksmithMaterials?.ore;
+            const ore = Number.isFinite(savedOre) && savedOre >= 0 ? Math.floor(savedOre) : 0;
+            const hasSavedTavernOffers = Array.isArray(savedState.tavernQuestOffers);
+            const worldResetCount = Number.isFinite(savedState.worldResetCount)
+                ? Math.max(0, Math.floor(savedState.worldResetCount))
+                : 0;
+            const worldStatBonus = Number.isFinite(savedState.worldStatBonus)
+                ? Math.max(0, Math.floor(savedState.worldStatBonus))
+                : worldResetCount * WORLD_RESET_STAT_BONUS;
+            const playerLevel = Number.isFinite(savedState.player.level)
+                ? Math.max(1, Math.floor(savedState.player.level))
+                : 1;
+            const expToNextLevel = calculateExpToNextLevel(playerLevel);
+            const savedExp = Number.isFinite(savedState.player.exp)
+                ? Math.max(0, savedState.player.exp)
+                : 0;
+            const savedExpRequirement = Number.isFinite(savedState.player.expToNextLevel)
+                && savedState.player.expToNextLevel > 0
+                ? savedState.player.expToNextLevel
+                : expToNextLevel;
+            const usesCurrentProgression = savedState.progressionStateVersion >= 2;
+            const migratedExp = usesCurrentProgression
+                ? Math.min(savedExp, expToNextLevel - 1)
+                : Math.floor(expToNextLevel * Math.min(0.999999, savedExp / savedExpRequirement));
+            const migratedQuests = migrateSavedQuests(
+                savedState.quests,
+                playerLevel,
+                worldResetCount,
+                usesCurrentProgression
+            );
+            const hasOriginState = typeof savedState.player.originAssigned === "boolean";
+            const originAssigned = hasOriginState
+                ? savedState.player.originAssigned
+                : hasChosenName;
+            const completedLevels = playerLevel - 1;
+            const derivedLegacyOrigin = {
+                hp: Math.max(1, Math.floor((savedState.player.baseHp || 100) - completedLevels * 10 - worldStatBonus)),
+                mp: Math.max(1, Math.floor((savedState.player.baseMp || 50) - completedLevels * 5 - worldStatBonus)),
+                atk: Math.max(1, Math.floor((savedState.player.baseAtk || 10) - completedLevels * 2 - worldStatBonus)),
+                def: Math.max(1, Math.floor((savedState.player.baseDef || 5) - completedLevels - worldStatBonus))
+            };
+            const originStats = originAssigned
+                ? normalizeOriginStats(savedState.player.originStats, derivedLegacyOrigin)
+                : { ...DEFAULT_ORIGIN_STATS };
+            const originName = originAssigned
+                ? savedState.player.originName || "Legacy"
+                : "Unawakened";
+            const titleProgress = Object.fromEntries(
+                Object.keys(getDefaultTitleProgress()).map(progressKey => {
+                    const savedProgress = savedState.titleProgress?.[progressKey];
+                    return [
+                        progressKey,
+                        Number.isFinite(savedProgress) ? Math.max(0, Math.floor(savedProgress)) : 0
+                    ];
+                })
+            );
+            const previouslyDefeatedBossIds = Array.isArray(savedState.defeatedBosses)
+                ? savedState.defeatedBosses
+                : [];
+            previouslyDefeatedBossIds.forEach(bossId => {
+                const progressKey = `boss_${bossId}`;
+                if (Object.hasOwn(titleProgress, progressKey)) {
+                    titleProgress[progressKey] = Math.max(1, titleProgress[progressKey]);
+                }
+            });
+            const unlockedTitles = Array.isArray(savedState.unlockedTitles)
+                ? [...new Set(savedState.unlockedTitles
+                    .filter(titleId => TITLE_QUESTS.some(title => title.id === titleId)))]
+                : [];
+            TITLE_QUESTS.forEach(titleQuest => {
+                if (titleProgress[titleQuest.progressKey] >= titleQuest.target
+                    && !unlockedTitles.includes(titleQuest.id)) {
+                    unlockedTitles.push(titleQuest.id);
+                }
+            });
+
+            return {
+                ...gameState,
+                ...savedState,
+                player: {
+                    ...defaultPlayer,
+                    ...savedState.player,
+                    name: migratedName,
+                    hasChosenName,
+                    nameChangesRemaining,
+                    originAssigned,
+                    originName,
+                    originStats,
+                    originAllocations: savedState.player.originAllocations
+                        && typeof savedState.player.originAllocations === "object"
+                        ? { ...savedState.player.originAllocations }
+                        : null,
+                    level: playerLevel,
+                    exp: migratedExp,
+                    expToNextLevel,
+                    baseHp: Number.isFinite(savedState.player.baseHp)
+                        ? savedState.player.baseHp
+                        : originStats.hp + completedLevels * 10 + worldStatBonus,
+                    hp: Number.isFinite(savedState.player.hp)
+                        ? savedState.player.hp
+                        : originStats.hp + completedLevels * 10 + worldStatBonus,
+                    baseMp: Number.isFinite(savedState.player.baseMp)
+                        ? savedState.player.baseMp
+                        : originStats.mp + completedLevels * 5 + worldStatBonus,
+                    mp: Number.isFinite(savedState.player.mp)
+                        ? savedState.player.mp
+                        : originStats.mp + completedLevels * 5 + worldStatBonus,
+                    baseAtk: Number.isFinite(savedState.player.baseAtk)
+                        ? savedState.player.baseAtk
+                        : originStats.atk + completedLevels * 2 + worldStatBonus,
+                    baseDef: Number.isFinite(savedState.player.baseDef)
+                        ? savedState.player.baseDef
+                        : originStats.def + completedLevels + worldStatBonus,
+                    equipped
+                },
+                inventory,
+                equipmentStateVersion: 6,
+                progressionStateVersion: 2,
+                quests: migratedQuests,
+                monsterCodex: savedState.monsterCodex && typeof savedState.monsterCodex === 'object'
+                    ? savedState.monsterCodex
+                    : {},
+                shopInventory: gameState.shopInventory,
+                tavernQuestOffers: usesCurrentProgression && hasSavedTavernOffers
+                    ? savedState.tavernQuestOffers.slice(0, 3)
+                    : [],
+                lastTavernVisit: usesCurrentProgression
+                    && hasSavedTavernOffers
+                    && Number.isFinite(savedState.lastTavernVisit)
+                    ? savedState.lastTavernVisit
+                    : null,
+                blacksmithMaterials: { ore },
+                totalVictories: Number.isFinite(savedState.totalVictories) && savedState.totalVictories >= 0
+                    ? Math.floor(savedState.totalVictories)
+                    : 0,
+                defeatedBosses: Array.isArray(savedState.defeatedBosses)
+                    ? savedState.defeatedBosses.filter(id => bossTemplates.some(boss => boss.id === id))
+                    : [],
+                worldResetCount,
+                worldStatBonus,
+                titleProgress,
+                unlockedTitles,
+                areaLevel: Math.max(1, Math.floor((playerLevel - 1) / 5) + 1),
+                currentMonster: inBattle ? savedState.currentMonster : null,
+                inBattle,
+                currentLocation
+            };
+        }
+
+        function loadGame() {
+            try {
+                const savedState = localStorage.getItem('dragonRealmSave');
+                if (savedState) {
+                    const parsedState = JSON.parse(savedState);
+                    const migratedState = migrateSavedState(parsedState);
+                    Object.assign(gameState, migratedState);
+
+                    updatePlayerStatsFromEquipment();
+                    updateDisplay();
+                    updateInventoryDisplay();
+                    updateEquippedGearDisplay();
+                    updateQuestDisplay();
+                    updateMonsterCodex();
+                    updateBattleButtons();
+                    updateLocationUI();
+                    if (gameState.currentLocation === "shop") {
+                        renderShopUI();
+                        renderSellUI();
+                    } else if (gameState.currentLocation === "tavern") {
+                        refreshTavernQuestOffers();
+                        displayAvailableQuests();
+                    } else if (gameState.currentLocation === "blacksmith") {
+                        renderBlacksmithUI();
+                    }
+                    updatePlayerNameControls();
+                    if (!gameState.player.hasChosenName) {
+                        openPlayerNameDialog(true);
+                    }
+                    addLogEntry("📁 Game loaded from local storage!", 'log-entry');
+                    return true;
+                } else {
+                    addLogEntry("❌ No saved game found in local storage!", 'log-error');
+                    return false;
+                }
+            } catch (e) {
+                addLogEntry("Error loading game: " + e.message, 'log-error');
+                return false;
+            }
+        }
+
+        // --- Tavern Quest Refresh ---
+        const TAVERN_QUEST_REFRESH_MS = 60 * 60 * 1000;
+
+        function formatTavernCooldown(milliseconds) {
+            const totalSeconds = Math.max(0, Math.ceil(milliseconds / 1000));
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            return [
+                hours > 0 ? `${hours}h` : null,
+                `${minutes}m`,
+                `${seconds}s`
+            ].filter(Boolean).join(' ');
+        }
+
+        function updateTavernCooldownDisplay(now = Date.now()) {
+            const statusElement = document.getElementById('tavernRefreshInfo');
+            if (!statusElement) return;
+
+            const offerCount = gameState.tavernQuestOffers.length;
+            const offerLabel = `${offerCount} quest offer${offerCount === 1 ? "" : "s"} available.`;
+            if (!gameState.lastTavernVisit) {
+                statusElement.textContent = `${offerLabel} New contracts will be prepared when you enter the tavern.`;
+                return;
+            }
+
+            const remainingTime = TAVERN_QUEST_REFRESH_MS - (now - gameState.lastTavernVisit);
+            if (remainingTime <= 0) {
+                statusElement.textContent = `${offerLabel} New contracts are ready. Leave and re-enter the tavern to refresh the board.`;
+                return;
+            }
+
+            statusElement.textContent = `${offerLabel} Quest board refreshes in ${formatTavernCooldown(remainingTime)}.`;
+        }
+
+        function refreshTavernQuestOffers(now = Date.now()) {
+            const refreshExpired = !gameState.lastTavernVisit
+                || now - gameState.lastTavernVisit >= TAVERN_QUEST_REFRESH_MS;
+            if (refreshExpired) {
+                gameState.tavernQuestOffers = generateDynamicQuests(gameState.player.level, 3);
+                gameState.lastTavernVisit = now;
+            }
+            updateTavernCooldownDisplay(now);
+            return refreshExpired;
+        }
+
+        function visitTavern() {
+            if (gameState.inBattle) return;
+            gameState.currentLocation = "tavern";
+            refreshTavernQuestOffers();
+            addLogEntry("You step into the Tavern.", "log-entry");
+            displayAvailableQuests();
+            updateLocationUI();
+        }
+
+        // --- Blacksmith ---
+        const BLACKSMITH_MAX_LEVEL = 5;
+        const BLACKSMITH_RULES = {
+            common: { baseOre: 1, successChance: 0.8 },
+            uncommon: { baseOre: 2, successChance: 0.6 },
+            rare: { baseOre: 3, successChance: 0.5 },
+            epic: { baseOre: 5, successChance: 0.4 },
+            legendary: { baseOre: 7, successChance: 0.3 }
+        };
+
+        function getBlacksmithUpgradeDetails(item) {
+            const rule = BLACKSMITH_RULES[item.rarity] || BLACKSMITH_RULES.common;
+            const upgradeLevel = Number.isFinite(item.upgradeLevel) ? item.upgradeLevel : 0;
+            return {
+                upgradeLevel,
+                oreCost: rule.baseOre + upgradeLevel,
+                successChance: rule.successChance
+            };
+        }
+
+        function getBlacksmithUpgradeBonusText(item) {
+            const statLabels = {
+                atkBonus: "ATK",
+                defBonus: "DEF",
+                hpBonus: "HP",
+                mpBonus: "MP"
+            };
+            return EQUIPMENT_STAT_FIELDS
+                .filter(field => (item[field] || 0) > 0)
+                .map(field => `+${getEquipmentUpgradeIncrement(item, field)} ${statLabels[field]}`)
+                .join(", ");
+        }
+
+        function applyBlacksmithUpgrade(item) {
+            const bonuses = [];
+            const statLabels = {
+                atkBonus: "ATK",
+                defBonus: "DEF",
+                hpBonus: "HP",
+                mpBonus: "MP"
+            };
+            EQUIPMENT_STAT_FIELDS.forEach(field => {
+                if ((item[field] || 0) <= 0) return;
+                const increment = getEquipmentUpgradeIncrement(item, field);
+                if (increment <= 0) return;
+                item[field] += increment;
+                bonuses.push(`+${increment} ${statLabels[field]}`);
+            });
+            item.upgradeStatVersion = 2;
+            return bonuses.join(", ");
+        }
+
+        function openBlacksmith() {
+            if (gameState.inBattle) return;
+            gameState.currentLocation = 'blacksmith';
+            updateLocationUI();
+            renderBlacksmithUI();
+        }
+
+        function upgradeItem(slotType) {
+            const item = gameState.player.equipped[slotType];
+            if (!item) {
+                addLogEntry("❌ Item is no longer equipped.", "log-error");
+                renderBlacksmithUI();
+                return;
+            }
+
+            const details = getBlacksmithUpgradeDetails(item);
+            if (details.upgradeLevel >= BLACKSMITH_MAX_LEVEL) {
+                addLogEntry(`❌ ${item.name} is already at +${BLACKSMITH_MAX_LEVEL}.`, "log-error");
+                return;
+            }
+            if (gameState.blacksmithMaterials.ore < details.oreCost) {
+                addLogEntry(`❌ You need ${details.oreCost} ore to upgrade ${item.name}.`, "log-error");
+                return;
+            }
+
+            gameState.blacksmithMaterials.ore -= details.oreCost;
+            if (Math.random() <= details.successChance) {
+                const bonusText = applyBlacksmithUpgrade(item);
+                item.upgradeLevel = details.upgradeLevel + 1;
+                recordTitleProgress("upgradesSucceeded", 1);
+                addLogEntry(`✅ ${item.name} upgraded to +${item.upgradeLevel}! ${bonusText}`, "log-item");
+            } else {
+                addLogEntry(`❌ Upgrade failed. ${details.oreCost} ore was consumed.`, "log-error");
+            }
+
+            updatePlayerStatsFromEquipment();
+            updateEquippedGearDisplay();
+            renderBlacksmithUI();
+        }
+
+        function renderBlacksmithUI() {
+            const materialList = document.getElementById('materialList');
+            const upgradeList = document.getElementById('upgradeList');
+            materialList.textContent = `Blacksmith Ore: ${gameState.blacksmithMaterials.ore}`;
+            upgradeList.innerHTML = '';
+
+            const equippedItems = Object.entries(gameState.player.equipped)
+                .filter(([, item]) => Boolean(item));
+            if (equippedItems.length === 0) {
+                upgradeList.textContent = 'No gear equipped.';
+                return;
+            }
+
+            equippedItems.forEach(([slotType, item]) => {
+                const details = getBlacksmithUpgradeDetails(item);
+                const entry = document.createElement('div');
+                entry.className = `inventory-item item-rarity-${item.rarity}`;
+
+                const stats = [
+                    `ATK +${item.atkBonus || 0}`,
+                    `DEF +${item.defBonus || 0}`,
+                    `HP +${item.hpBonus || 0}`,
+                    `MP +${item.mpBonus || 0}`
+                ].join(', ');
+                entry.innerHTML = `
+                    <strong>${getEquipmentSlotLabel(slotType)}: ${item.name} +${details.upgradeLevel}</strong><br>
+                    <small>${stats}</small><br>
+                    <small>Next success: ${getBlacksmithUpgradeBonusText(item)}</small><br>
+                    <small>Cost: ${details.oreCost} ore · Success: ${Math.round(details.successChance * 100)}%</small>
+                `;
+
+                const button = document.createElement('button');
+                button.textContent = details.upgradeLevel >= BLACKSMITH_MAX_LEVEL
+                    ? 'Maximum Upgrade'
+                    : 'Upgrade';
+                button.disabled = details.upgradeLevel >= BLACKSMITH_MAX_LEVEL;
+                button.onclick = () => upgradeItem(slotType);
+                entry.appendChild(button);
+                upgradeList.appendChild(entry);
+            });
+        }
+
+        function closeBlacksmith() {
+            gameState.currentLocation = "town";
+            addLogEntry("You leave the Blacksmith and return to town.", 'log-entry');
+            updateLocationUI();
+        }
+
+        function toggleKeyboardShortcutHelp(forceOpen = null) {
+            const panel = document.getElementById('shortcutHelpPanel');
+            const button = document.getElementById('shortcutHelpBtn');
+            if (!panel || !button) return false;
+
+            const shouldOpen = typeof forceOpen === "boolean"
+                ? forceOpen
+                : panel.style.display !== "grid";
+            panel.style.display = shouldOpen ? "grid" : "none";
+            button.setAttribute("aria-expanded", String(shouldOpen));
+            return shouldOpen;
+        }
+
+        function isKeyboardInputTarget(target) {
+            if (!target) return false;
+            const tagName = String(target.tagName || "").toLowerCase();
+            return target.isContentEditable
+                || tagName === "input"
+                || tagName === "textarea"
+                || tagName === "select";
+        }
+
+        function activateShortcutButton(buttonId) {
+            const button = document.getElementById(buttonId);
+            if (!button || button.disabled || button.style.display === "none") return false;
+            button.click();
+            return true;
+        }
+
+        function handleGameKeyboardShortcut(event) {
+            if (isKeyboardInputTarget(event.target)) return false;
+
+            const key = String(event.key || "").toLowerCase();
+            if ((event.ctrlKey || event.metaKey) && key === "s") {
+                event.preventDefault();
+                saveGame();
+                return true;
+            }
+            if (event.ctrlKey || event.metaKey || event.altKey || event.repeat) return false;
+
+            if (event.key === "?") {
+                event.preventDefault();
+                toggleKeyboardShortcutHelp();
+                return true;
+            }
+
+            if (event.key === "Escape") {
+                const helpPanel = document.getElementById('shortcutHelpPanel');
+                if (helpPanel?.style.display === "grid") {
+                    event.preventDefault();
+                    toggleKeyboardShortcutHelp(false);
+                    return true;
+                }
+
+                const closeActions = {
+                    shop: closeShop,
+                    tavern: leaveTavern,
+                    blacksmith: closeBlacksmith
+                };
+                const closeAction = closeActions[gameState.currentLocation];
+                if (closeAction) {
+                    event.preventDefault();
+                    closeAction();
+                    return true;
+                }
+                return false;
+            }
+
+            let handled = false;
+            if (gameState.inBattle && gameState.currentLocation === "battle") {
+                const battleShortcuts = {
+                    a: "attackBtn",
+                    "1": "attackBtn",
+                    m: "magicStrikeBtn",
+                    "2": "magicStrikeBtn",
+                    p: "usePotionBtn",
+                    "3": "usePotionBtn",
+                    f: "fleeBtn"
+                };
+                if (battleShortcuts[key]) {
+                    handled = activateShortcutButton(battleShortcuts[key]);
+                }
+            } else if (!gameState.inBattle && gameState.currentLocation === "town") {
+                const townShortcuts = {
+                    e: "exploreBtn",
+                    r: "restBtn",
+                    s: "shopBtn",
+                    t: "tavernBtn",
+                    b: "blacksmithBtn"
+                };
+                if (townShortcuts[key]) {
+                    handled = activateShortcutButton(townShortcuts[key]);
+                }
+            }
+
+            if (handled) event.preventDefault();
+            return handled;
+        }
+
+
+        // --- Event Listeners & Init ---
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('exploreBtn').onclick = exploreDungeon;
+            document.getElementById('restBtn').onclick = rest;
+            document.getElementById('shopBtn').onclick = openShop;
+            // document.getElementById('blacksmithBtn').onclick = openBlacksmith;
+            document.getElementById('tavernBtn').onclick = visitTavern;
+            document.getElementById('worldResetBtn').onclick = performWorldReset;
+            document.getElementById('leaveTavernBtn').onclick = leaveTavern;
+            // add blacksmith button
+            const bsBtn = document.createElement('button'); bsBtn.id = 'blacksmithBtn'; bsBtn.textContent = 'Blacksmith'; bsBtn.onclick = openBlacksmith;
+            document.getElementById('controls').appendChild(bsBtn);
+            document.getElementById('attackBtn').onclick = attack;
+            document.getElementById('usePotionBtn').onclick = usePotion;
+            document.getElementById('fleeBtn').onclick = flee;
+            document.getElementById('magicStrikeBtn').onclick = magicStrike;
+            document.getElementById('editPlayerNameBtn').onclick = () => openPlayerNameDialog(false);
+            document.getElementById('confirmPlayerNameBtn').onclick = submitPlayerName;
+            document.getElementById('cancelPlayerNameBtn').onclick = closePlayerNameDialog;
+            document.getElementById('shortcutHelpBtn').onclick = () => toggleKeyboardShortcutHelp();
+            document.addEventListener('keydown', handleGameKeyboardShortcut);
+            document.getElementById('playerNameInput').onkeydown = event => {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    submitPlayerName();
+                } else if (event.key === "Escape" && playerNameDialogMode === "rename") {
+                    closePlayerNameDialog();
+                }
+            };
+
+            if (!loadGame()) initGame();
+            addSaveLoadControls();
+            setInterval(saveGame, 30000);
+            setInterval(updateTavernCooldownDisplay, 1000);
+        });
+
+
+        // Add save/load buttons dynamically
+        function addSaveLoadControls() {
+            const controlsDiv = document.getElementById('controls');
+
+            const saveBtn = document.createElement('button');
+            saveBtn.textContent = '💾 Save';
+            saveBtn.onclick = saveGame;
+
+            const loadBtn = document.createElement('button');
+            loadBtn.textContent = '📁 Load';
+            loadBtn.onclick = loadGame;
+
+            // Check if buttons already exist to prevent duplicates
+            if (!document.getElementById('saveBtnId')) { // Using a temporary ID check
+                saveBtn.id = 'saveBtnId';
+                loadBtn.id = 'loadBtnId';
+                controlsDiv.appendChild(saveBtn);
+                controlsDiv.appendChild(loadBtn);
+            }
+        }
+    </script>
+</body>
+
+</html>
