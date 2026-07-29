@@ -3479,12 +3479,16 @@
         }
 
         // --- Save/Load System ---
-        function saveGame() {
+        function saveGame(options = {}) {
             try {
                 localStorage.setItem('dragonRealmSave', JSON.stringify(gameState));
-                addLogEntry("💾 Game saved to local storage!", 'log-entry');
+                if (options?.silent !== true) {
+                    addLogEntry("💾 Game saved to local storage!", 'log-entry');
+                }
+                return true;
             } catch (e) {
                 addLogEntry("Error saving game: " + e.message, 'log-error');
+                return false;
             }
         }
 
@@ -4163,6 +4167,68 @@
             return handled;
         }
 
+        let gameUiInitialized = false;
+
+        function resyncGameUiAfterResume() {
+            if (!gameUiInitialized) return false;
+
+            updateDisplay();
+            updateInventoryDisplay();
+            updateEquippedGearDisplay();
+            updateQuestDisplay();
+            updateMonsterCodex();
+            updateLocationUI();
+            updatePlayerNameControls();
+            updateTavernCooldownDisplay();
+
+            if (gameState.currentLocation === "shop") {
+                renderShopUI();
+                renderSellUI();
+            } else if (gameState.currentLocation === "tavern") {
+                displayAvailableQuests();
+            } else if (gameState.currentLocation === "blacksmith") {
+                renderBlacksmithUI();
+            }
+            return true;
+        }
+
+        function initializeMobileLifecycleRecovery() {
+            window.addEventListener("pageshow", () => {
+                resyncGameUiAfterResume();
+            });
+            window.addEventListener("pagehide", () => {
+                saveGame({ silent: true });
+            });
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "hidden") {
+                    saveGame({ silent: true });
+                } else if (document.visibilityState === "visible") {
+                    resyncGameUiAfterResume();
+                }
+            });
+            document.addEventListener("freeze", () => {
+                saveGame({ silent: true });
+            });
+            document.addEventListener("resume", () => {
+                resyncGameUiAfterResume();
+            });
+        }
+
+        async function registerOfflineSupport() {
+            if (!("serviceWorker" in navigator) || location.protocol === "file:") {
+                return false;
+            }
+
+            try {
+                await navigator.serviceWorker.register("./sw.js", { scope: "./" });
+                await navigator.serviceWorker.ready;
+                return true;
+            } catch (error) {
+                console.warn("Dragon Realm offline support could not be prepared:", error);
+                return false;
+            }
+        }
+
 
         // --- Event Listeners & Init ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -4197,6 +4263,10 @@
 
             if (!loadGame()) initGame();
             addSaveLoadControls();
+            gameUiInitialized = true;
+            initializeMobileLifecycleRecovery();
+            registerOfflineSupport();
+            resyncGameUiAfterResume();
             setInterval(saveGame, 30000);
             setInterval(updateTavernCooldownDisplay, 1000);
         });

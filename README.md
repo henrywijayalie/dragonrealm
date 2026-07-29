@@ -1,6 +1,6 @@
 # Dragon Realm Adventure
 
-Dragon Realm Adventure adalah RPG turn-based berbasis browser yang dikemas dalam satu file HTML. Jelajahi empat area, lawan monster dan boss, kumpulkan equipment dengan rarity berbeda, selesaikan quest, lalu bangun karakter lintas World Reset.
+Dragon Realm Adventure adalah RPG turn-based berbasis browser dengan seluruh gameplay di dalam satu file HTML dan Service Worker kecil untuk dukungan offline. Jelajahi empat area, lawan monster dan boss, kumpulkan equipment dengan rarity berbeda, selesaikan quest, lalu bangun karakter lintas World Reset.
 
 Tidak ada framework, dependency, proses build, atau backend. Cukup buka game di browser modern.
 
@@ -21,6 +21,7 @@ Tidak ada framework, dependency, proses build, atau backend. Cukup buka game di 
 - World Reset mulai level 100 dengan bonus stat permanen dan tingkat kesulitan yang terus meningkat.
 - Save migration untuk mempertahankan kompatibilitas dengan save versi lama.
 - Autosave setiap 30 detik, manual save/load, dan keyboard shortcut.
+- Offline cache dan pemulihan lifecycle untuk Chrome mobile.
 
 ## Mulai bermain
 
@@ -46,6 +47,19 @@ Alternatifnya, gunakan extension seperti Live Server di Visual Studio Code.
 
 > [!IMPORTANT]
 > Data permainan disimpan di `localStorage` browser dengan key `dragonRealmSave`. Save terikat pada browser, perangkat, dan alamat halaman yang digunakan. Menghapus site data atau berpindah origin dapat membuat save lama tidak terlihat.
+
+### Bermain offline
+
+Versi yang di-host dapat dibuka kembali tanpa jaringan setelah offline cache selesai disiapkan:
+
+1. Buka game dalam kondisi online.
+2. Tunggu halaman selesai dimuat.
+3. Setelah itu, game dapat dibuka kembali ketika Chrome berada dalam airplane mode.
+
+Service Worker menyimpan halaman game, sedangkan save tetap berada di `localStorage`. Ketika Chrome mobile membekukan atau membuang tab dari memori, game akan memuat halaman dari offline cache dan memulihkan UI dari save lokal.
+
+> [!NOTE]
+> Setelah deployment versi baru, buka game online setidaknya satu kali agar cache offline menerima versi terbaru. Mode offline tidak tersedia ketika `index.html` dibuka langsung melalui protokol `file://`, tetapi file lokal itu sendiri tetap dapat dijalankan tanpa jaringan.
 
 ## Alur permainan
 
@@ -124,6 +138,7 @@ Shortcut diabaikan ketika pemain sedang mengetik dan tidak akan menjalankan tomb
 ```text
 dragon-realm/
 ├── index.html      # Seluruh HTML, CSS, data, dan logika game
+├── sw.js           # Offline cache dan pemulihan navigation
 ├── README.md       # Dokumentasi proyek
 └── CHANGELOG.md    # Riwayat perubahan
 ```
@@ -163,9 +178,10 @@ https://<project-name>.vercel.app/
 
 ## Pengembangan
 
-Semua tampilan, data, dan logika berada di dalam `index.html`. Saat melakukan perubahan:
+Semua tampilan, data, dan logika gameplay berada di dalam `index.html`; `sw.js` hanya menangani offline cache. Saat melakukan perubahan:
 
-- Pertahankan format satu file jika ingin menjaga game tetap portabel.
+- Pertahankan logika gameplay di satu file jika ingin menjaga game tetap portabel.
+- Naikkan versi cache di `sw.js` jika strategi atau aset offline berubah.
 - Uji new game, equip/unequip, Shop, Tavern, Blacksmith, battle, save/load, dan World Reset.
 - Pastikan save lama tetap dapat dimigrasikan.
 - Periksa game melalui desktop dan viewport mobile.

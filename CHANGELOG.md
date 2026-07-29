@@ -8,6 +8,9 @@ Format changelog mengikuti prinsip [Keep a Changelog](https://keepachangelog.com
 
 ### Added
 
+- Offline navigation cache melalui Service Worker.
+- Pemulihan UI melalui event `pageshow`, `visibilitychange`, dan `resume` pada lifecycle Chrome mobile.
+- Silent save ketika halaman masuk ke status hidden, frozen, atau pagehide.
 - Tombol battle terpisah untuk `Use HP Potion` dan `Use MP Potion`.
 - Jumlah HP dan MP potion aktual pada panel status dan tombol battle.
 - Shortcut `P`/`3` untuk HP Potion dan `N`/`4` untuk MP Potion.
@@ -22,6 +25,7 @@ Format changelog mengikuti prinsip [Keep a Changelog](https://keepachangelog.com
 
 ### Fixed
 
+- Memperbaiki tab Chrome mobile yang terlihat tetapi seluruh tombolnya disabled setelah Chrome ditutup dari Recent Apps lalu dibuka kembali dalam airplane mode.
 - Menghapus ketergantungan pada counter `player.potions` yang terpisah dari inventory.
 - Mengabaikan counter basic potion dari save lama agar tidak menghasilkan potion inventory yang tidak pernah diperoleh.
 - Memperbaiki kondisi ketika potion yang dibeli, diperoleh dari loot, atau diterima dari quest tidak dapat digunakan melalui tombol battle.
