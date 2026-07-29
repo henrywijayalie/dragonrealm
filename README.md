@@ -6,7 +6,7 @@ Tidak ada framework, dependency, proses build, atau backend. Cukup buka game di 
 
 ## Fitur utama
 
-- Pertarungan turn-based dengan serangan biasa, magic strike, potion, dan flee.
+- Pertarungan turn-based dengan serangan biasa, magic strike, HP/MP potion dari inventory, dan flee.
 - 28 monster biasa dan 12 boss dari level rendah hingga level 100.
 - Ability monster: Heavy Strike, Venom, Mana Burn, Regeneration, dan Life Drain.
 - Empat area: Whispering Woods, Ashen Caverns, Wyrmspire Ruins, dan Dragon's Crown.
@@ -112,7 +112,8 @@ Shortcut diabaikan ketika pemain sedang mengetik dan tidak akan menjalankan tomb
 | Town | `B` | Buka Blacksmith |
 | Battle | `A` atau `1` | Attack |
 | Battle | `M` atau `2` | Magic Strike |
-| Battle | `P` atau `3` | Gunakan potion |
+| Battle | `P` atau `3` | Gunakan HP potion |
+| Battle | `N` atau `4` | Gunakan MP potion |
 | Battle | `F` | Flee |
 | Global | `Ctrl+S` / `Cmd+S` | Manual save |
 | Global | `Esc` | Tutup panel lokasi atau bantuan |
@@ -122,9 +123,14 @@ Shortcut diabaikan ketika pemain sedang mengetik dan tidak akan menjalankan tomb
 
 ```text
 dragon-realm/
-├── index.html   # Seluruh HTML, CSS, data, dan logika game
-└── README.md    # Dokumentasi proyek
+├── index.html      # Seluruh HTML, CSS, data, dan logika game
+├── README.md       # Dokumentasi proyek
+└── CHANGELOG.md    # Riwayat perubahan
 ```
+
+## Changelog
+
+Riwayat fitur, perbaikan bug, dan perubahan deployment tersedia di [`CHANGELOG.md`](./CHANGELOG.md).
 
 ## Deploy ke GitHub Pages
 

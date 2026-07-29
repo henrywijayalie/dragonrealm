@@ -655,7 +655,8 @@
                 <div class="player-stat"><span>Attack:</span> <span id="playerAtk"></span></div>
                 <div class="player-stat"><span>Defense:</span> <span id="playerDef"></span></div>
                 <div class="player-stat"><span>Gold:</span> <span id="playerGold"></span></div>
-                <div class="player-stat"><span>Potions:</span> <span id="playerPotions"></span></div>
+                <div class="player-stat"><span>HP Potions:</span> <span id="playerHpPotions"></span></div>
+                <div class="player-stat"><span>MP Potions:</span> <span id="playerMpPotions"></span></div>
             </div>
 
             <div id="gameLog" style="display: block !important;">
@@ -672,7 +673,8 @@
                 </div>
                 <div id="battleControls">
                     <button id="attackBtn">Attack!</button>
-                    <button id="usePotionBtn">Use Potion (<span id="potionCount">0</span>)</button>
+                    <button id="useHpPotionBtn">Use HP Potion (<span id="hpPotionCount">0</span>)</button>
+                    <button id="useMpPotionBtn">Use MP Potion (<span id="mpPotionCount">0</span>)</button>
                     <button id="fleeBtn">Flee!</button>
                     <button id="magicStrikeBtn">Magic Strike (<span id="magicStrikeCost"></span> MP)</button>
                 </div>
@@ -729,7 +731,8 @@
                         <strong>Battle</strong>
                         <span><kbd>A</kbd> / <kbd>1</kbd> Attack</span>
                         <span><kbd>M</kbd> / <kbd>2</kbd> Magic Strike</span>
-                        <span><kbd>P</kbd> / <kbd>3</kbd> Potion</span>
+                        <span><kbd>P</kbd> / <kbd>3</kbd> HP Potion</span>
+                        <span><kbd>N</kbd> / <kbd>4</kbd> MP Potion</span>
                         <span><kbd>F</kbd> Flee</span>
                     </div>
                     <div>
@@ -808,7 +811,6 @@
                 baseAtk: 10,
                 baseDef: 5,
                 gold: 1000,
-                potions: 3,
                 equipped: { weapon: null, armor: null, accessory: null, accessory2: null },
                 currentAtk: 0,
                 currentDef: 0,
@@ -1974,7 +1976,6 @@
                 baseAtk: preservedOriginStats.atk + permanentStatBonus,
                 baseDef: preservedOriginStats.def + permanentStatBonus,
                 gold: 0,
-                potions: 3,
                 equipped: {
                     weapon: null,
                     armor: null,
@@ -2008,10 +2009,10 @@
             addLogEntry("Welcome to Dragon Realm Adventure!");
             addLogEntry("Explore dungeons, defeat monsters, grow stronger!");
 
-            // Give starting equipment and items
+            // Give starting equipment and three real consumables; there is no hidden potion counter.
             addItemToInventory(getItemTemplate("wooden_sword"));
             addItemToInventory(getItemTemplate("leather_vest"));
-            addItemToInventory(getItemTemplate("hp_potion_small")); // Give an item version of potion
+            addItemToInventory(getItemTemplate("hp_potion_small"));
             addItemToInventory(getItemTemplate("hp_potion_small"));
             addItemToInventory(getItemTemplate("mp_potion_small"));
 
@@ -2084,8 +2085,12 @@
             document.getElementById('playerAtk').textContent = p.currentAtk; // Use currentAtk
             document.getElementById('playerDef').textContent = p.currentDef; // Use currentDef
             document.getElementById('playerGold').textContent = p.gold;
-            document.getElementById('playerPotions').textContent = p.potions; // Keep for potion button for now
-            document.getElementById('potionCount').textContent = p.potions; // For battle button
+            const hpPotionCount = getHpPotionCount();
+            const mpPotionCount = getMpPotionCount();
+            document.getElementById('playerHpPotions').textContent = hpPotionCount;
+            document.getElementById('playerMpPotions').textContent = mpPotionCount;
+            document.getElementById('hpPotionCount').textContent = hpPotionCount;
+            document.getElementById('mpPotionCount').textContent = mpPotionCount;
 
             // Update battle UI
             if (gameState.inBattle && gameState.currentMonster) {
@@ -2288,81 +2293,152 @@
             return equipItem(gameState.inventory[inventoryIndex], inventoryIndex, preferredSlot);
         }
 
-        function useItem(item, index) {
-            const p = gameState.player;
+        function isHpPotion(item) {
+            return item?.type === "consumable"
+                && (item.effect === "heal" || item.effect === "full_heal");
+        }
 
-            // Cannot use items during battle unless it's a battle-specific consumable/scroll
-            if (gameState.inBattle && item.type !== "consumable" && item.type !== "scroll") {
-                addLogEntry("You can only use potions or scrolls during battle!", 'log-error');
-                return;
+        function isMpPotion(item) {
+            return item?.type === "consumable"
+                && (item.effect === "mana" || item.effect === "full_mana");
+        }
+
+        function getPotionInventoryEntries(matchesPotion) {
+            return gameState.inventory
+                .map((item, index) => ({ item, index }))
+                .filter(entry => matchesPotion(entry.item));
+        }
+
+        function getHpPotionInventoryEntries() {
+            return getPotionInventoryEntries(isHpPotion);
+        }
+
+        function getMpPotionInventoryEntries() {
+            return getPotionInventoryEntries(isMpPotion);
+        }
+
+        function getHpPotionCount() {
+            return getHpPotionInventoryEntries().length;
+        }
+
+        function getMpPotionCount() {
+            return getMpPotionInventoryEntries().length;
+        }
+
+        function getQuickRecoveryPotionEntry(resource) {
+            const isHp = resource === "hp";
+            const currentValue = isHp ? gameState.player.hp : gameState.player.mp;
+            const maximumValue = isHp ? gameState.player.maxHp : gameState.player.maxMp;
+            const missingValue = Math.max(0, maximumValue - currentValue);
+            if (missingValue === 0) return null;
+
+            const fixedEffect = isHp ? "heal" : "mana";
+            const fullEffect = isHp ? "full_heal" : "full_mana";
+            const entries = isHp
+                ? getHpPotionInventoryEntries()
+                : getMpPotionInventoryEntries();
+            const fixedPotions = entries.filter(entry => entry.item.effect === fixedEffect);
+            const sufficientPotion = fixedPotions
+                .filter(entry => (entry.item.value || 0) >= missingValue)
+                .sort((first, second) => (first.item.value || 0) - (second.item.value || 0))[0];
+            if (sufficientPotion) return sufficientPotion;
+
+            const strongestFixedPotion = fixedPotions
+                .sort((first, second) => (second.item.value || 0) - (first.item.value || 0))[0];
+            return strongestFixedPotion
+                || entries.find(entry => entry.item.effect === fullEffect)
+                || null;
+        }
+
+        function getQuickHpPotionEntry() {
+            return getQuickRecoveryPotionEntry("hp");
+        }
+
+        function getQuickMpPotionEntry() {
+            return getQuickRecoveryPotionEntry("mp");
+        }
+
+        function useConsumable(item, index) {
+            const p = gameState.player;
+            if (!item || gameState.inventory[index] !== item) {
+                addLogEntry("Cannot use item: inventory entry is no longer available.", 'log-error');
+                return false;
             }
 
+            let restoredAmount = 0;
+            if (item.effect === "heal") {
+                if (p.hp >= p.maxHp) {
+                    addLogEntry("Your HP is already full!", 'log-error');
+                    return false;
+                }
+                restoredAmount = Math.min(p.maxHp - p.hp, Math.max(0, item.value || 0));
+                p.hp += restoredAmount;
+                addLogEntry(`🧪 You use ${item.name} and recover ${restoredAmount} HP!`, 'log-heal');
+            } else if (item.effect === "mana") {
+                if (p.mp >= p.maxMp) {
+                    addLogEntry("Your MP is already full!", 'log-error');
+                    return false;
+                }
+                restoredAmount = Math.min(p.maxMp - p.mp, Math.max(0, item.value || 0));
+                p.mp += restoredAmount;
+                addLogEntry(`✨ You use ${item.name} and recover ${restoredAmount} MP!`, 'log-heal');
+            } else if (item.effect === "full_heal") {
+                if (p.hp >= p.maxHp) {
+                    addLogEntry("Your HP is already full!", 'log-error');
+                    return false;
+                }
+                restoredAmount = p.maxHp - p.hp;
+                p.hp = p.maxHp;
+                addLogEntry(`🧪 You use ${item.name} and fully recover ${restoredAmount} HP!`, 'log-heal');
+            } else if (item.effect === "full_mana") {
+                if (p.mp >= p.maxMp) {
+                    addLogEntry("Your MP is already full!", 'log-error');
+                    return false;
+                }
+                restoredAmount = p.maxMp - p.mp;
+                p.mp = p.maxMp;
+                addLogEntry(`✨ You use ${item.name} and fully recover ${restoredAmount} MP!`, 'log-heal');
+            } else {
+                addLogEntry(`${item.name} has no usable consumable effect.`, 'log-error');
+                return false;
+            }
+
+            gameState.inventory.splice(index, 1);
+            updateDisplay();
+            updateInventoryDisplay();
+            return true;
+        }
+
+        function useItem(item, index) {
+            if (!item || gameState.inventory[index] !== item) {
+                addLogEntry("Cannot use item: inventory entry is no longer available.", 'log-error');
+                return false;
+            }
+
+            if (gameState.inBattle && item.type !== "consumable" && item.type !== "scroll") {
+                addLogEntry("You can only use potions or scrolls during battle!", 'log-error');
+                return false;
+            }
 
             switch (item.type) {
                 case "weapon":
                 case "armor":
                 case "accessory":
-                    equipItem(item, index);
-                    break;
-
+                    return equipItem(item, index);
                 case "consumable":
-                    if (item.effect === "heal") {
-                        if (p.hp === p.maxHp) {
-                            addLogEntry(`Your HP is already full!`, 'log-error');
-                            return; // Don't consume item
-                        }
-                        const healAmount = item.value;
-                        p.hp = Math.min(p.maxHp, p.hp + healAmount);
-                        addLogEntry(`🧪 You use ${item.name} and recover ${healAmount} HP!`, 'log-heal');
-                    } else if (item.effect === "mana") {
-                        if (p.mp === p.maxMp) {
-                            addLogEntry(`Your MP is already full!`, 'log-error');
-                            return; // Don't consume item
-                        }
-                        const manaAmount = item.value;
-                        p.mp = Math.min(p.maxMp, p.mp + manaAmount);
-                        addLogEntry(`✨ You use ${item.name} and recover ${manaAmount} MP!`, 'log-heal');
-                    } else if (item.effect === "full_heal") {
-                        if (p.hp === p.maxHp) {
-                            addLogEntry(`Your HP is already full!`, 'log-error');
-                            return; // Don't consume item
-                        }
-                        p.hp = p.maxHp;
-                        addLogEntry(`🧪 You use ${item.name} and fully recover your HP!`, 'log-heal');
-                    } else if (item.effect === "full_mana") {
-                        if (p.mp === p.maxMp) {
-                            addLogEntry(`Your MP is already full!`, 'log-error');
-                            return; // Don't consume item
-                        }
-                        p.mp = p.maxMp;
-                        addLogEntry(`✨ You use ${item.name} and fully recover your MP!`, 'log-heal');
-                    }
-                    // Add more consumable effects as needed (e.g., temp_atk, temp_def, cure_poison)
-
-                    // Remove consumed item from inventory
-                    gameState.inventory.splice(index, 1);
-                    break;
-
+                    return useConsumable(item, index);
                 case "scroll":
-                    // Implement scroll effects (e.g., damage, heal, escape)
-                    addLogEntry(`You read ${item.name}. (Scroll effects need implementation!)`);
-                    // Example: if (item.effect === "damage" && gameState.inBattle) { ... }
-                    gameState.inventory.splice(index, 1); // Remove scroll after use
-                    break;
-
+                    addLogEntry(`${item.name} does not have an implemented scroll effect.`, 'log-error');
+                    return false;
                 case "material":
                 case "key":
                 case "quest":
                     addLogEntry(`You can't "use" ${item.name} directly. It might be for crafting or a quest.`);
-                    break;
-
+                    return false;
                 default:
                     addLogEntry(`You attempt to use ${item.name}, but nothing happens.`);
-                    break;
+                    return false;
             }
-
-            updateDisplay(); // Refresh display after using item
-            updateInventoryDisplay(); // Refresh inventory display
         }
 
         function grantBossRewards(monster) {
@@ -2492,21 +2568,40 @@
             }
         }
 
-        // Use potion from quick slot (the old way, now it can be removed or adapted)
-        function usePotion() {
-            const p = gameState.player;
-            // Find a small HP potion in inventory if the player.potions count is gone
-            // For now, keeping the simplified count:
-            if (p.potions > 0 && p.hp < p.maxHp) {
-                p.hp = Math.min(p.maxHp, p.hp + 30);
-                p.potions--;
-                addLogEntry("🧪 You use a basic potion and recover 30 HP!", 'log-heal');
-            } else if (p.hp === p.maxHp) {
-                addLogEntry("Your HP is already full!", 'log-error');
-            } else {
-                addLogEntry("You don't have any basic potions!", 'log-error');
+        function useHpPotion() {
+            if (!gameState.inBattle) {
+                addLogEntry("You can only use the quick HP potion button during battle!", 'log-error');
+                return false;
             }
-            updateDisplay();
+            if (gameState.player.hp >= gameState.player.maxHp) {
+                addLogEntry("Your HP is already full!", 'log-error');
+                return false;
+            }
+
+            const quickPotion = getQuickHpPotionEntry();
+            if (!quickPotion) {
+                addLogEntry("You don't have any HP potions in your inventory!", 'log-error');
+                return false;
+            }
+            return useItem(quickPotion.item, quickPotion.index);
+        }
+
+        function useMpPotion() {
+            if (!gameState.inBattle) {
+                addLogEntry("You can only use the quick MP potion button during battle!", 'log-error');
+                return false;
+            }
+            if (gameState.player.mp >= gameState.player.maxMp) {
+                addLogEntry("Your MP is already full!", 'log-error');
+                return false;
+            }
+
+            const quickPotion = getQuickMpPotionEntry();
+            if (!quickPotion) {
+                addLogEntry("You don't have any MP potions in your inventory!", 'log-error');
+                return false;
+            }
+            return useItem(quickPotion.item, quickPotion.index);
         }
 
         function flee() {
@@ -2585,7 +2680,23 @@
             document.getElementById('tavernBtn').disabled = inBattle; // Disable tavern during battle
 
             document.getElementById('attackBtn').disabled = !inBattle;
-            document.getElementById('usePotionBtn').disabled = !inBattle;
+            const hpPotionButton = document.getElementById('useHpPotionBtn');
+            const quickHpPotion = getQuickHpPotionEntry();
+            hpPotionButton.disabled = !inBattle || !quickHpPotion;
+            hpPotionButton.title = quickHpPotion
+                ? `Use ${quickHpPotion.item.name} from inventory.`
+                : (gameState.player.hp >= gameState.player.maxHp
+                    ? "HP is already full."
+                    : "No HP potion is available in inventory.");
+
+            const mpPotionButton = document.getElementById('useMpPotionBtn');
+            const quickMpPotion = getQuickMpPotionEntry();
+            mpPotionButton.disabled = !inBattle || !quickMpPotion;
+            mpPotionButton.title = quickMpPotion
+                ? `Use ${quickMpPotion.item.name} from inventory.`
+                : (gameState.player.mp >= gameState.player.maxMp
+                    ? "MP is already full."
+                    : "No MP potion is available in inventory.");
             document.getElementById('fleeBtn').disabled = !inBattle;
             document.getElementById('magicStrikeBtn').disabled = !inBattle || gameState.player.mp < getMagicStrikeCost();
         }
@@ -3527,6 +3638,10 @@
             }
 
             const defaultPlayer = gameState.player;
+            const {
+                potions: _discardedLegacyPotionCounter,
+                ...savedPlayerWithoutLegacyPotions
+            } = savedState.player;
             const savedEquipped = savedState.player.equipped;
             const hasIdentityState = typeof savedState.player.hasChosenName === 'boolean';
             const hasChosenName = hasIdentityState ? savedState.player.hasChosenName : true;
@@ -3643,7 +3758,7 @@
                 ...savedState,
                 player: {
                     ...defaultPlayer,
-                    ...savedState.player,
+                    ...savedPlayerWithoutLegacyPotions,
                     name: migratedName,
                     hasChosenName,
                     nameChangesRemaining,
@@ -4022,8 +4137,10 @@
                     "1": "attackBtn",
                     m: "magicStrikeBtn",
                     "2": "magicStrikeBtn",
-                    p: "usePotionBtn",
-                    "3": "usePotionBtn",
+                    p: "useHpPotionBtn",
+                    "3": "useHpPotionBtn",
+                    n: "useMpPotionBtn",
+                    "4": "useMpPotionBtn",
                     f: "fleeBtn"
                 };
                 if (battleShortcuts[key]) {
@@ -4060,7 +4177,8 @@
             const bsBtn = document.createElement('button'); bsBtn.id = 'blacksmithBtn'; bsBtn.textContent = 'Blacksmith'; bsBtn.onclick = openBlacksmith;
             document.getElementById('controls').appendChild(bsBtn);
             document.getElementById('attackBtn').onclick = attack;
-            document.getElementById('usePotionBtn').onclick = usePotion;
+            document.getElementById('useHpPotionBtn').onclick = useHpPotion;
+            document.getElementById('useMpPotionBtn').onclick = useMpPotion;
             document.getElementById('fleeBtn').onclick = flee;
             document.getElementById('magicStrikeBtn').onclick = magicStrike;
             document.getElementById('editPlayerNameBtn').onclick = () => openPlayerNameDialog(false);
