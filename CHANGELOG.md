@@ -1,8 +1,7 @@
 # Changelog
 
 Seluruh perubahan penting pada Dragon Realm Adventure dicatat dalam file ini.
-
-Format changelog mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Proyek belum menggunakan nomor versi resmi, sehingga perubahan terbaru ditempatkan di bagian **Unreleased**.
+Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pengerjaan.
 
 ## Deployment Update - 2026-07-30
 
