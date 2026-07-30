@@ -961,12 +961,12 @@
         const WORLD_RESET_LEVEL_REQUIREMENT = 100;
         const WORLD_RESET_BASE_COST = 10000;
         const WORLD_RESET_STAT_BONUS = 10;
-        const WORLD_RESET_AEGIS_STAT_BONUS = 15;
+        const WORLD_RESET_CATALYST_STAT_BONUS = 15;
         const WORLD_RESET_MONSTER_SCALING = 0.25;
         const WORLD_RESET_SHOP_SCALING = 0.20;
         const WORLD_RESET_COST_SCALING = 1.5;
-        const WORLD_RESET_NO_AEGIS_MULTIPLIER = 1.5;
-        const WORLD_RESET_CATALYST_ID = "primordial_aegis";
+        const WORLD_RESET_NO_CATALYST_MULTIPLIER = 1.5;
+        const WORLD_RESET_CATALYST_ID = "world_seed";
 
         const DEFAULT_ORIGIN_STATS = { hp: 100, mp: 50, atk: 10, def: 5 };
         const ORIGIN_STAT_MINIMUMS = { hp: 90, mp: 40, atk: 8, def: 3 };
@@ -1290,29 +1290,17 @@
             });
         }
 
-        function hasPrimordialAegis() {
-            const matchesAegis = item => item
-                && (item.id === WORLD_RESET_CATALYST_ID || item.baseItemId === WORLD_RESET_CATALYST_ID);
-            return gameState.inventory.some(matchesAegis)
-                || Object.values(gameState.player.equipped || {}).some(matchesAegis);
+        function hasWorldSeed() {
+            return gameState.inventory.some(item => item
+                && (item.id === WORLD_RESET_CATALYST_ID
+                    || item.baseItemId === WORLD_RESET_CATALYST_ID));
         }
 
-        function consumePrimordialAegis() {
+        function consumeWorldSeed() {
             const inventoryIndex = gameState.inventory.findIndex(item => item
                 && (item.id === WORLD_RESET_CATALYST_ID || item.baseItemId === WORLD_RESET_CATALYST_ID));
             if (inventoryIndex !== -1) {
                 gameState.inventory.splice(inventoryIndex, 1);
-                return true;
-            }
-
-            const equipped = gameState.player.equipped || {};
-            const equippedSlot = Object.keys(equipped).find(slot => {
-                const item = equipped[slot];
-                return item
-                    && (item.id === WORLD_RESET_CATALYST_ID || item.baseItemId === WORLD_RESET_CATALYST_ID);
-            });
-            if (equippedSlot) {
-                equipped[equippedSlot] = null;
                 return true;
             }
             return false;
@@ -1324,12 +1312,12 @@
 
         function getWorldResetCost(
             resetCount = gameState.worldResetCount,
-            includesAegis = hasPrimordialAegis()
+            includesCatalyst = hasWorldSeed()
         ) {
             const baseCost = getWorldResetBaseCost(resetCount);
-            return includesAegis
+            return includesCatalyst
                 ? baseCost
-                : Math.round(baseCost * WORLD_RESET_NO_AEGIS_MULTIPLIER);
+                : Math.round(baseCost * WORLD_RESET_NO_CATALYST_MULTIPLIER);
         }
 
         function getWorldStatBonus() {
@@ -1393,6 +1381,11 @@
             }
 
             const item = gameState.inventory[inventoryIndex];
+            if (item.noSell) {
+                alert(`${item.name} cannot be sold.`);
+                addLogEntry(`${item.name} is a key item and cannot be sold.`, 'log-error');
+                return false;
+            }
             const sellPrice = calculateSellPrice(item);
             gameState.player.gold += sellPrice;
             const soldItem = gameState.inventory.splice(inventoryIndex, 1)[0];
@@ -1403,6 +1396,8 @@
         }
 
         function getItemDescription(item) {
+            if (item.description) return item.description;
+
             if (isEquipmentItem(item)) {
                 const stats = [
                     item.atkBonus ? `ATK +${item.atkBonus}` : null,
@@ -1467,6 +1462,8 @@
             const sellList = document.getElementById('sellList');
             sellList.innerHTML = '';
             gameState.inventory.forEach((item, i) => {
+                if (item.noSell) return;
+
                 const div = document.createElement('div');
                 div.className = 'list-item';
                 const sellPrice = calculateSellPrice(item);
@@ -1723,7 +1720,7 @@
                 atk: 130,
                 exp: 12000,
                 gold: 12000,
-                rewardItemId: "primordial_aegis",
+                rewardItemIds: ["primordial_aegis", "world_seed"],
                 ability: "heavy_strike",
                 abilityChance: 0.45
             }
@@ -1775,7 +1772,55 @@
             { id: "hp_amulet", name: "Amulet of Vitality", type: "accessory", rarity: "rare", hpBonus: 30 },
             { id: "phoenix_sigil", name: "Phoenix Sigil", type: "accessory", rarity: "rare", atkBonus: 5, hpBonus: 20, mpBonus: 20 },
             { id: "lich_crown", name: "Lich Crown", type: "accessory", rarity: "epic", atkBonus: 7, defBonus: 7, mpBonus: 40, bossOnly: true },
-            { id: "hydra_heart", name: "Hydra Heart", type: "accessory", rarity: "legendary", hpBonus: 90, mpBonus: 60, bossOnly: true }
+            { id: "hydra_heart", name: "Hydra Heart", type: "accessory", rarity: "legendary", hpBonus: 90, mpBonus: 60, bossOnly: true },
+
+            // Key items
+            {
+                id: "world_seed",
+                name: "World Seed",
+                type: "key",
+                rarity: "legendary",
+                bossOnly: true,
+                noSell: true,
+                description: "A primordial catalyst that lowers the cost of World Reset and strengthens its permanent stat bonus."
+            },
+
+            // Crafting materials
+            { id: "monster_essence", name: "Monster Essence", type: "material", rarity: "common", value: 10, description: "A basic essence used in many blacksmithing recipes." },
+            { id: "slime_gel", name: "Slime Gel", type: "material", rarity: "common", value: 8, description: "Elastic gel gathered from Slimes." },
+            { id: "beast_hide", name: "Beast Hide", type: "material", rarity: "common", value: 14, description: "Durable hide used for flexible armor." },
+            { id: "monster_fang", name: "Monster Fang", type: "material", rarity: "common", value: 16, description: "A sharp fang suited for weapons and accessories." },
+            { id: "iron_fragment", name: "Iron Fragment", type: "material", rarity: "common", value: 18, description: "A metal fragment that can be refined for equipment." },
+            { id: "ancient_wood", name: "Ancient Wood", type: "material", rarity: "uncommon", value: 24, description: "Living wood infused with old-world strength." },
+            { id: "spider_silk", name: "Spider Silk", type: "material", rarity: "uncommon", value: 22, description: "Strong lightweight fiber from giant spiders." },
+            { id: "venom_sac", name: "Venom Sac", type: "material", rarity: "uncommon", value: 26, description: "A preserved source of potent monster venom." },
+            { id: "arcane_dust", name: "Arcane Dust", type: "material", rarity: "uncommon", value: 30, description: "Magical residue used to empower crafted gear." },
+            { id: "undead_essence", name: "Undead Essence", type: "material", rarity: "uncommon", value: 34, description: "Cold essence left behind by undead creatures." },
+            { id: "fire_core", name: "Fire Core", type: "material", rarity: "rare", value: 55, description: "A concentrated core of elemental flame." },
+            { id: "dragon_scale", name: "Dragon Scale", type: "material", rarity: "rare", value: 65, description: "A resilient scale from a draconic creature." },
+            { id: "titan_shard", name: "Titan Shard", type: "material", rarity: "rare", value: 75, description: "A dense fragment from a massive construct or titan." },
+            { id: "void_crystal", name: "Void Crystal", type: "material", rarity: "epic", value: 110, description: "Crystallized energy drawn from the abyss." },
+            { id: "celestial_essence", name: "Celestial Essence", type: "material", rarity: "epic", value: 125, description: "Radiant essence from an otherworldly being." },
+            { id: "primordial_scale", name: "Primordial Scale", type: "material", rarity: "legendary", value: 250, description: "An ancient scale containing primordial power." }
+        ];
+
+        const MONSTER_MATERIAL_DROP_CHANCE = 0.6;
+        const MONSTER_MATERIAL_RULES = [
+            { materialId: "primordial_scale", matches: monster => monster.id === "primordial_dragon" },
+            { materialId: "slime_gel", matches: monster => /slime/i.test(monster.name) },
+            { materialId: "ancient_wood", matches: monster => /ironwood/i.test(monster.name) },
+            { materialId: "spider_silk", matches: monster => /spider/i.test(monster.name) },
+            { materialId: "venom_sac", matches: monster => monster.ability === "venom" || /venom|plague|basilisk/i.test(monster.name) },
+            { materialId: "beast_hide", matches: monster => /wolf|boar|hound|werewolf|griffin|roc|harpy|minotaur|behemoth/i.test(monster.name) },
+            { materialId: "monster_fang", matches: monster => /wolf|boar|hound|werewolf|griffin|toad|basilisk|dragon|wyrm|wyvern|hydra/i.test(monster.name) },
+            { materialId: "iron_fragment", matches: monster => /goblin|orc|bandit|knight|sentinel|golem|juggernaut|colossus|berserker/i.test(monster.name) },
+            { materialId: "undead_essence", matches: monster => /skeleton|wraith|necromancer|vampire|lich|soul devourer/i.test(monster.name) },
+            { materialId: "fire_core", matches: monster => /fire|inferno|hellfire|phoenix/i.test(monster.name) },
+            { materialId: "dragon_scale", matches: monster => /dragon|wyrm|wyvern|hydra/i.test(monster.name) },
+            { materialId: "titan_shard", matches: monster => /titan|golem|colossus|juggernaut|leviathan/i.test(monster.name) },
+            { materialId: "void_crystal", matches: monster => /void|abyss|shadow|rift|chaos|world eater|eclipse|archon|watcher/i.test(monster.name) },
+            { materialId: "celestial_essence", matches: monster => /celestial|seraph|astral|starforged|tempest/i.test(monster.name) },
+            { materialId: "arcane_dust", matches: monster => /mage|shaman|alchemist|djinn|archon|watcher|seraph|necromancer/i.test(monster.name) }
         ];
 
         // Dynamic quest objectives. Counts stay bounded; rewards scale separately.
@@ -1966,8 +2011,8 @@
             const bonusElement = document.getElementById('worldResetBonus');
             if (!resetButton || !tierElement || !bonusElement) return;
 
-            const hasAegis = hasPrimordialAegis();
-            const resetCost = getWorldResetCost(gameState.worldResetCount, hasAegis);
+            const hasSeed = hasWorldSeed();
+            const resetCost = getWorldResetCost(gameState.worldResetCount, hasSeed);
             const statBonus = getWorldStatBonus();
             const player = gameState.player;
             const meetsLevel = player.level >= WORLD_RESET_LEVEL_REQUIREMENT;
@@ -1975,7 +2020,7 @@
 
             tierElement.textContent = gameState.worldResetCount;
             bonusElement.textContent = `+${statBonus} All Base Stats`;
-            const catalystLabel = hasAegis ? "Aegis · +15 Stats" : "No Aegis ×1.5 · +10 Stats";
+            const catalystLabel = hasSeed ? "World Seed · +15 Stats" : "No Seed ×1.5 · +10 Stats";
             resetButton.textContent = `World Reset (${resetCost.toLocaleString('en-US')} Gold · ${catalystLabel})`;
             resetButton.style.display = meetsLevel ? "inline-block" : "none";
             resetButton.disabled = gameState.inBattle || !player.hasChosenName || !meetsLevel || !meetsGold;
@@ -1984,17 +2029,17 @@
                 resetButton.title = `Reach level ${WORLD_RESET_LEVEL_REQUIREMENT} to unlock World Reset.`;
             } else if (!meetsGold) {
                 resetButton.title = `You need ${resetCost.toLocaleString('en-US')} gold.`;
-            } else if (hasAegis) {
-                resetButton.title = "Primordial Aegis will be consumed: normal price and +15 permanent stats.";
+            } else if (hasSeed) {
+                resetButton.title = "World Seed will be consumed: normal price and +15 permanent stats.";
             } else {
-                resetButton.title = "Without Primordial Aegis: ×1.5 price and +10 permanent stats.";
+                resetButton.title = "Without World Seed: ×1.5 price and +10 permanent stats.";
             }
         }
 
         function performWorldReset() {
             const player = gameState.player;
-            const hasAegis = hasPrimordialAegis();
-            const resetCost = getWorldResetCost(gameState.worldResetCount, hasAegis);
+            const hasSeed = hasWorldSeed();
+            const resetCost = getWorldResetCost(gameState.worldResetCount, hasSeed);
             if (gameState.inBattle) {
                 addLogEntry("World Reset is unavailable during battle.", 'log-error');
                 return false;
@@ -2009,12 +2054,12 @@
             }
 
             const nextTier = gameState.worldResetCount + 1;
-            const earnedStatBonus = hasAegis
-                ? WORLD_RESET_AEGIS_STAT_BONUS
+            const earnedStatBonus = hasSeed
+                ? WORLD_RESET_CATALYST_STAT_BONUS
                 : WORLD_RESET_STAT_BONUS;
-            const catalystMessage = hasAegis
-                ? `Primordial Aegis will be consumed. The reset uses its normal price and grants +${earnedStatBonus} permanent stats.\n\n`
-                : `Without Primordial Aegis, the reset costs ×${WORLD_RESET_NO_AEGIS_MULTIPLIER} and grants +${earnedStatBonus} permanent stats.\n\n`;
+            const catalystMessage = hasSeed
+                ? `World Seed will be consumed. The reset uses its normal price and grants +${earnedStatBonus} permanent stats.\n\n`
+                : `Without World Seed, the reset costs ×${WORLD_RESET_NO_CATALYST_MULTIPLIER} and grants +${earnedStatBonus} permanent stats.\n\n`;
             const confirmed = confirm(
                 `Reset the world for ${resetCost.toLocaleString('en-US')} gold?\n\n`
                 + catalystMessage
@@ -2025,8 +2070,8 @@
             if (!confirmed) return false;
 
             player.gold -= resetCost;
-            if (hasAegis) {
-                consumePrimordialAegis();
+            if (hasSeed) {
+                consumeWorldSeed();
             }
             gameState.worldStatBonus = getWorldStatBonus() + earnedStatBonus;
             gameState.worldResetCount = nextTier;
@@ -2034,7 +2079,7 @@
             initGame({ preserveIdentity: true, preserveWorldReset: true });
             addLogEntry(
                 `🌎 World Reset complete! This reset grants +${earnedStatBonus}; total permanent bonus is +${getWorldStatBonus()} to all base stats.`
-                + (hasAegis ? " Primordial Aegis was consumed." : " The no-Aegis ×1.5 surcharge was paid."),
+                + (hasSeed ? " World Seed was consumed." : " The no-Seed ×1.5 surcharge was paid."),
                 'log-level-up'
             );
             saveGame();
@@ -2558,9 +2603,15 @@
                     addLogEntry(`${item.name} does not have an implemented scroll effect.`, 'log-error');
                     return false;
                 case "material":
-                case "key":
                 case "quest":
                     addLogEntry(`You can't "use" ${item.name} directly. It might be for crafting or a quest.`);
+                    return false;
+                case "key":
+                    if (item.id === WORLD_RESET_CATALYST_ID) {
+                        addLogEntry("World Seed is consumed automatically when you perform a World Reset.", 'log-entry');
+                    } else {
+                        addLogEntry(`You can't "use" ${item.name} directly. It might unlock something later.`);
+                    }
                     return false;
                 default:
                     addLogEntry(`You attempt to use ${item.name}, but nothing happens.`);
@@ -2583,11 +2634,20 @@
             gameState.blacksmithMaterials.ore += bonusOre;
             addLogEntry(`🏆 Boss defeated! You claim ${bonusOre} bonus ore.`, 'log-level-up');
 
-            const rewardItem = getItemTemplate(monster.rewardItemId);
-            if (rewardItem) {
+            const rewardItemIds = Array.isArray(monster.rewardItemIds)
+                ? [...monster.rewardItemIds]
+                : [monster.rewardItemId].filter(Boolean);
+            if (monster.id === "primordial_dragon"
+                && !rewardItemIds.includes(WORLD_RESET_CATALYST_ID)) {
+                rewardItemIds.push(WORLD_RESET_CATALYST_ID);
+            }
+
+            [...new Set(rewardItemIds)].forEach(rewardItemId => {
+                const rewardItem = getItemTemplate(rewardItemId);
+                if (!rewardItem) return;
                 addItemToInventory(rewardItem);
                 addLogEntry(`🎁 Boss reward: ${rewardItem.name}!`, 'log-item');
-            }
+            });
         }
 
         function resolveMonsterVictory(monster) {
@@ -3095,6 +3155,8 @@
                     itemDiv.innerHTML += `<br><small>Fully recovers HP</small>`;
                 } else if (item.type === "consumable" && item.effect === "full_mana") {
                     itemDiv.innerHTML += `<br><small>Fully recovers MP</small>`;
+                } else if (item.description) {
+                    itemDiv.innerHTML += `<br><small>${item.description}</small>`;
                 }
 
                 if (item.type === "accessory") {
@@ -3197,14 +3259,59 @@
             return oreFound;
         }
 
+        function getMonsterMaterialPool(monster) {
+            if (monster?.id === "primordial_dragon") {
+                return ["primordial_scale"];
+            }
+
+            const materialIds = MONSTER_MATERIAL_RULES
+                .filter(rule => rule.matches(monster))
+                .map(rule => rule.materialId);
+            const uniqueMaterialIds = [...new Set(materialIds)];
+            return uniqueMaterialIds.length > 0
+                ? uniqueMaterialIds
+                : ["monster_essence"];
+        }
+
+        function getMonsterMaterialDropQuantity(monster) {
+            const monsterLevel = Math.max(1, Math.floor(Number(monster.level) || 1));
+            const levelQuantity = monsterLevel >= 50 ? 2 : 1;
+            return monster.isBoss ? levelQuantity + 1 : levelQuantity;
+        }
+
+        function awardMonsterMaterial(monster, random = Math.random) {
+            if (!monster?.isBoss && random() >= MONSTER_MATERIAL_DROP_CHANCE) {
+                return null;
+            }
+
+            const materialPool = getMonsterMaterialPool(monster);
+            const materialId = materialPool[Math.floor(random() * materialPool.length)];
+            const material = getItemTemplate(materialId);
+            if (!material) return null;
+
+            const quantity = getMonsterMaterialDropQuantity(monster);
+            for (let i = 0; i < quantity; i++) {
+                gameState.inventory.push(createItemInstance(material));
+            }
+            addLogEntry(`🧱 Material drop: ${quantity}× ${material.name}!`, 'log-item');
+            updateInventoryDisplay();
+            return { item: material, quantity };
+        }
+
         // Looting items from monsters
         function lootMonster(monster) {
+            awardMonsterMaterial(monster);
             awardBlacksmithOre(monster);
 
             if (Math.random() < 0.3) {
-                const commonItems = itemTemplates.filter(item => item.rarity === "common");
-                const uncommonItems = itemTemplates.filter(item => item.rarity === "uncommon");
-                const rareItems = itemTemplates.filter(item => item.rarity === "rare" && !item.bossOnly);
+                const standardLootItems = itemTemplates.filter(item => {
+                    return item.type !== "material"
+                        && item.type !== "key"
+                        && !item.bossOnly;
+                });
+                const commonItems = standardLootItems.filter(item => item.rarity === "common");
+                const uncommonItems = standardLootItems.filter(item => item.rarity === "uncommon");
+                const rareItems = standardLootItems.filter(item => item.rarity === "rare");
 
                 let possibleDrops = [];
                 if (monster.level >= 10) {
@@ -3627,6 +3734,9 @@
                 gold: Math.floor(template.gold * finalMultiplier),
                 isBoss,
                 rewardItemId: template.rewardItemId || null,
+                rewardItemIds: Array.isArray(template.rewardItemIds)
+                    ? [...template.rewardItemIds]
+                    : null,
                 ability: template.ability || null,
                 abilityChance: template.abilityChance || 0
             };
@@ -3896,6 +4006,14 @@
             const previouslyDefeatedBossIds = Array.isArray(savedState.defeatedBosses)
                 ? savedState.defeatedBosses
                 : [];
+            const defeatedPrimordialDragon = previouslyDefeatedBossIds.includes("primordial_dragon");
+            const inventoryHasWorldSeed = inventory.some(item => item
+                && (item.id === WORLD_RESET_CATALYST_ID
+                    || item.baseItemId === WORLD_RESET_CATALYST_ID));
+            if (defeatedPrimordialDragon && !inventoryHasWorldSeed) {
+                const worldSeed = normalizeSavedItem(getItemTemplate(WORLD_RESET_CATALYST_ID));
+                if (worldSeed) inventory.push(worldSeed);
+            }
             previouslyDefeatedBossIds.forEach(bossId => {
                 const progressKey = `boss_${bossId}`;
                 if (Object.hasOwn(titleProgress, progressKey)) {

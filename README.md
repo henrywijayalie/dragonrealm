@@ -89,6 +89,12 @@ Blacksmith memiliki batas `+5`. Biaya dan peluang sukses bergantung pada rarity:
 
 Biaya aktual adalah biaya dasar ditambah level upgrade saat ini. Upgrade yang gagal hanya menghabiskan ore; equipment tidak hancur dan levelnya tidak turun.
 
+### Material monster
+
+Monster biasa memiliki peluang 60% menjatuhkan material crafting, sedangkan boss selalu menjatuhkan material. Jenis material mengikuti keluarga dan ability monster, seperti Slime Gel, Beast Hide, Venom Sac, Dragon Scale, hingga Primordial Scale.
+
+Monster level 50 ke atas menjatuhkan dua unit material. Boss memperoleh satu unit tambahan. Material tersimpan di inventory dan dapat dijual, tetapi penggunaannya sebagai resep equipment akan ditambahkan pada pengembangan Blacksmith berikutnya.
+
 ### Tavern dan quest
 
 Tavern menyediakan maksimal tiga kontrak. Tawaran tetap sama saat pemain keluar-masuk Tavern dan quest yang diterima akan dihapus dari papan.
@@ -107,9 +113,11 @@ Tombol World Reset hanya muncul setelah karakter mencapai level 100.
 
 - Biaya dasar reset pertama adalah 10.000 gold.
 - Biaya dasar reset berikutnya dikalikan `1,5` untuk setiap World Tier.
-- Menggunakan Primordial Aegis memberi `+15` ke seluruh base stat dan memakai harga normal.
-- Reset tanpa Primordial Aegis memberi `+10` ke seluruh base stat dan dikenai biaya tambahan `1,5×`.
-- Primordial Aegis akan dikonsumsi jika digunakan sebagai katalis.
+- Primordial Dragon menjatuhkan Primordial Aegis dan World Seed.
+- Primordial Aegis adalah armor yang dapat dipakai sampai World Reset menghapus equipment bersama progres lainnya.
+- Menggunakan World Seed memberi `+15` ke seluruh base stat dan memakai harga normal.
+- Reset tanpa World Seed memberi `+10` ke seluruh base stat dan dikenai biaya tambahan `1,5×`.
+- World Seed akan dikonsumsi jika digunakan sebagai katalis.
 - Setiap World Tier meningkatkan kekuatan monster sebesar 25% dan harga Shop sebesar 20%.
 - Title, progres title, Origin Stats, jumlah World Reset, serta bonus permanen tetap dipertahankan.
 
