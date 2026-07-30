@@ -146,7 +146,9 @@
             font-size: 0.85em;
         }
 
-        .name-dialog-overlay {
+        .name-dialog-overlay,
+        .origin-dialog-overlay,
+        .title-dialog-overlay {
             position: fixed;
             inset: 0;
             display: none;
@@ -164,6 +166,80 @@
             border: 2px solid #e94560;
             border-radius: 10px;
             box-shadow: 0 0 25px rgba(233, 69, 96, 0.6);
+        }
+
+        .title-dialog {
+            width: min(720px, 100%);
+            max-height: min(82vh, 760px);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            background: #10182f;
+            border: 2px solid #e94560;
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgba(233, 69, 96, 0.6);
+        }
+
+        .origin-dialog {
+            width: min(560px, 100%);
+            padding: 20px;
+            background-color: #10182f;
+            border: 2px solid #e94560;
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgba(233, 69, 96, 0.6);
+        }
+
+        .origin-recovery-options {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .origin-recovery-options button {
+            width: 100%;
+            margin: 0;
+        }
+
+        .title-dialog-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .title-dialog-header h2 {
+            margin: 0;
+        }
+
+        .title-dialog-close {
+            min-width: 42px;
+            margin: 0;
+            padding: 7px 10px;
+        }
+
+        .title-dialog-content {
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .title-summary-value {
+            max-width: 78%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 6px;
+            text-align: right;
+        }
+
+        .title-list-button {
+            min-width: auto;
+            margin: 0;
+            padding: 4px 8px;
+            font-size: 0.8em;
         }
 
         .name-dialog input {
@@ -395,6 +471,14 @@
 
         .title-quest-entry.unlocked {
             color: #79d70f;
+        }
+
+        .title-quest-entry.legacy-unlock {
+            color: #ffd700;
+        }
+
+        .title-quest-entry.legacy-unlock small:nth-of-type(2) {
+            color: #ffd700;
         }
 
         .title-quest-entry small {
@@ -720,6 +804,19 @@
             .shortcut-help-panel {
                 grid-template-columns: 1fr;
             }
+
+            .title-dialog {
+                max-height: 90vh;
+                padding: 14px;
+            }
+
+            .origin-recovery-options {
+                grid-template-columns: 1fr;
+            }
+
+            .title-summary-value {
+                max-width: 72%;
+            }
         }
     </style>
 </head>
@@ -740,7 +837,15 @@
                     </span>
                 </div>
                 <div class="player-stat"><span>Origin:</span> <span id="playerOrigin"></span></div>
-                <div class="player-stat"><span>Title:</span> <span id="playerTitle"></span></div>
+                <div class="player-stat">
+                    <span>Title:</span>
+                    <span class="title-summary-value">
+                        <span id="playerTitle"></span>
+                        <button id="openTitleDialogBtn" class="title-list-button" type="button"
+                            aria-haspopup="dialog" aria-controls="titleDialogOverlay"
+                            aria-expanded="false">View Titles</button>
+                    </span>
+                </div>
                 <div class="player-stat"><span>Level:</span> <span id="playerLevel"></span></div>
                 <div class="player-stat"><span>Area:</span> <span id="currentArea"></span></div>
                 <div class="player-stat"><span>Victories:</span> <span id="totalVictories"></span></div>
@@ -760,6 +865,7 @@
                 <div class="player-stat"><span>Gold:</span> <span id="playerGold"></span></div>
                 <div class="player-stat"><span>HP Potions:</span> <span id="playerHpPotions"></span></div>
                 <div class="player-stat"><span>MP Potions:</span> <span id="playerMpPotions"></span></div>
+                <div class="player-stat"><span>Arrows:</span> <span id="playerArrows"></span></div>
             </div>
 
             <div id="gameLog" style="display: block !important;">
@@ -870,12 +976,6 @@
                 </div>
             </section>
 
-            <section id="titleSection">
-                <h3>Titles</h3>
-                <p id="unlockedTitleSummary">No titles unlocked.</p>
-                <div id="titleQuestList"></div>
-            </section>
-
             <section>
                 <h3>Monster Codex</h3>
                 <div id="monsterCodexList">
@@ -897,6 +997,40 @@
         </div>
     </div>
 
+    <div id="titleDialogOverlay" class="title-dialog-overlay" role="dialog" aria-modal="true"
+        aria-labelledby="titleDialogTitle">
+        <div class="title-dialog">
+            <div class="title-dialog-header">
+                <h2 id="titleDialogTitle">Titles & Requirements</h2>
+                <button id="closeTitleDialogBtn" class="title-dialog-close" type="button"
+                    aria-label="Close title list">×</button>
+            </div>
+            <div class="title-dialog-content">
+                <p id="unlockedTitleSummary">No titles unlocked.</p>
+                <div id="titleQuestList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="originRecoveryOverlay" class="origin-dialog-overlay" role="dialog" aria-modal="true"
+        aria-labelledby="originRecoveryTitle">
+        <div class="origin-dialog">
+            <h2 id="originRecoveryTitle">Restore Your Origin</h2>
+            <p>
+                This save lost its origin label during migration. Choose the origin name you had
+                before. This only restores the label; your current stats and progress will not change.
+            </p>
+            <p id="originRecoveryStats"></p>
+            <div class="origin-recovery-options">
+                <button type="button" data-origin-recovery="Vitalborn">Vitalborn</button>
+                <button type="button" data-origin-recovery="Aetherborn">Aetherborn</button>
+                <button type="button" data-origin-recovery="Warborn">Warborn</button>
+                <button type="button" data-origin-recovery="Ironborn">Ironborn</button>
+                <button type="button" data-origin-recovery="Versatile">Versatile</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // --- Game State Initialization ---
         const gameState = {
@@ -907,6 +1041,7 @@
                 originAssigned: true,
                 originName: "Balanced",
                 originStats: { hp: 100, mp: 50, atk: 10, def: 5 },
+                originRecoveryPending: false,
                 level: 1,
                 exp: 0,
                 expToNextLevel: 100,
@@ -917,7 +1052,17 @@
                 baseAtk: 10,
                 baseDef: 5,
                 gold: 1000,
-                equipped: { weapon: null, armor: null, accessory: null, accessory2: null },
+                equipped: {
+                    rightHand: null,
+                    leftHand: null,
+                    twoHand: null,
+                    body: null,
+                    helmet: null,
+                    bottom: null,
+                    shoes: null,
+                    accessory: null,
+                    accessory2: null
+                },
                 currentAtk: 0,
                 currentDef: 0,
                 maxHp: 100,
@@ -943,7 +1088,7 @@
                 primordialDragonsDefeated: 0
             },
             unlockedTitles: [],
-            equipmentStateVersion: 7,
+            equipmentStateVersion: 10,
             progressionStateVersion: 2,
             currentLocation: "town",
             lastTavernVisit: null,
@@ -954,10 +1099,15 @@
                 { id: "mp_potion_small", name: "Small MP Potion", icon: "🔵", type: "consumable", rarity: "common", priceBuy: 20, priceSell: 10, effect: "mana", value: 20 },
                 { id: "hp_potion_large", name: "Large HP Potion", icon: "❤️", type: "consumable", rarity: "uncommon", priceBuy: 65, priceSell: 32, effect: "heal", value: 75 },
                 { id: "mp_potion_large", name: "Large MP Potion", icon: "✨", type: "consumable", rarity: "uncommon", priceBuy: 55, priceSell: 27, effect: "mana", value: 50 },
-                { id: "iron_sword", name: "Iron Sword", icon: "⚔️", type: "weapon", rarity: "uncommon", priceBuy: 75, priceSell: 37, atkBonus: 10 },
-                { id: "chainmail_armor", name: "Chainmail Armor", icon: "🛡️", type: "armor", rarity: "uncommon", priceBuy: 100, priceSell: 50, defBonus: 7 },
-                { id: "hunter_bow", name: "Hunter Bow", icon: "🏹", type: "weapon", rarity: "common", priceBuy: 60, priceSell: 30, atkBonus: 7 },
-                { id: "mage_robe", name: "Mage Robe", icon: "🧙", type: "armor", rarity: "uncommon", priceBuy: 125, priceSell: 62, defBonus: 5, mpBonus: 15 },
+                { id: "iron_sword", name: "Iron Sword", icon: "⚔️", type: "weapon", handedness: "one", offhandEligible: false, rarity: "uncommon", priceBuy: 75, priceSell: 37, atkBonus: 10 },
+                { id: "chainmail_armor", name: "Chainmail Armor", icon: "🛡️", type: "armor", equipmentSlot: "body", rarity: "uncommon", priceBuy: 100, priceSell: 50, defBonus: 7 },
+                { id: "hunter_bow", name: "Hunter Bow", icon: "🏹", type: "weapon", weaponClass: "bow", handedness: "two", rarity: "common", priceBuy: 80, priceSell: 40, atkBonus: 6 },
+                { id: "mage_robe", name: "Mage Robe", icon: "🧙", type: "armor", equipmentSlot: "body", rarity: "uncommon", priceBuy: 125, priceSell: 62, defBonus: 5, mpBonus: 15 },
+                { id: "leather_cap", name: "Leather Cap", icon: "🪖", type: "armor", equipmentSlot: "helmet", rarity: "common", priceBuy: 55, priceSell: 27, defBonus: 1, hpBonus: 5 },
+                { id: "cloth_trousers", name: "Cloth Trousers", icon: "👖", type: "armor", equipmentSlot: "bottom", rarity: "common", priceBuy: 50, priceSell: 25, defBonus: 1, hpBonus: 4 },
+                { id: "worn_boots", name: "Worn Boots", icon: "🥾", type: "armor", equipmentSlot: "shoes", rarity: "common", priceBuy: 45, priceSell: 22, defBonus: 1 },
+                { id: "wooden_shield", name: "Wooden Shield", icon: "🛡️", type: "shield", rarity: "common", priceBuy: 65, priceSell: 32, defBonus: 2, hpBonus: 5 },
+                { id: "arrow", name: "Arrow", icon: "🏹", type: "ammo", ammoType: "arrow", arrowEffect: "standard", rarity: "common", priceBuy: 20, priceSell: 1, quantityBuy: 10, shopOnly: true, description: "Standard ammunition for bow weapons." },
                 { id: "bone_charm", name: "Bone Charm", icon: "🦴", type: "accessory", rarity: "common", priceBuy: 65, priceSell: 32, hpBonus: 15 },
                 { id: "copper_ring", name: "Copper Ring", icon: "💍", type: "accessory", rarity: "common", priceBuy: 70, priceSell: 35, atkBonus: 2 },
                 { id: "warding_stone", name: "Warding Stone", icon: "🪨", type: "accessory", rarity: "common", priceBuy: 70, priceSell: 35, defBonus: 1, hpBonus: 5 },
@@ -974,12 +1124,21 @@
         const WORLD_RESET_COST_SCALING = 1.5;
         const WORLD_RESET_NO_CATALYST_MULTIPLIER = 1.5;
         const WORLD_RESET_CATALYST_ID = "world_seed";
+        const TWO_HANDED_ATTACK_MULTIPLIER = 1.5;
+        const ARROW_ITEM_ID = "arrow";
 
         const DEFAULT_ORIGIN_STATS = { hp: 100, mp: 50, atk: 10, def: 5 };
         const ORIGIN_STAT_MINIMUMS = { hp: 90, mp: 40, atk: 8, def: 3 };
         const ORIGIN_TOKEN_VALUES = { hp: 5, mp: 5, atk: 1, def: 1 };
         const ORIGIN_TOKEN_CAPS = { hp: 5, mp: 5, atk: 4, def: 4 };
         const ORIGIN_TOKEN_COUNT = 8;
+        const PLAYER_ORIGIN_NAMES = [
+            "Vitalborn",
+            "Aetherborn",
+            "Warborn",
+            "Ironborn",
+            "Versatile"
+        ];
 
         const TITLE_QUESTS = [
             {
@@ -1041,7 +1200,7 @@
             {
                 id: "goblin_king_conqueror",
                 title: "King's Fall",
-                description: "Defeat the Goblin King.",
+                description: "Defeat the Goblin King 10 times across all worlds.",
                 progressKey: "boss_goblin_king",
                 target: 10,
                 effect: { hpBonus: 5 }
@@ -1049,7 +1208,7 @@
             {
                 id: "spider_queen_conqueror",
                 title: "Arachnid Bane",
-                description: "Defeat the Spider Queen.",
+                description: "Defeat the Spider Queen 10 times across all worlds.",
                 progressKey: "boss_spider_queen",
                 target: 10,
                 effect: { mpBonus: 5 }
@@ -1057,7 +1216,7 @@
             {
                 id: "frost_wyrm_conqueror",
                 title: "Frostbreaker",
-                description: "Defeat the Frost Wyrm.",
+                description: "Defeat the Frost Wyrm 10 times across all worlds.",
                 progressKey: "boss_frost_wyrm",
                 target: 10,
                 effect: { defBonus: 1 }
@@ -1065,7 +1224,7 @@
             {
                 id: "minotaur_warlord_conqueror",
                 title: "Labyrinth Conqueror",
-                description: "Defeat the Minotaur Warlord.",
+                description: "Defeat the Minotaur Warlord 10 times across all worlds.",
                 progressKey: "boss_minotaur_warlord",
                 target: 10,
                 effect: { atkBonus: 1 }
@@ -1073,7 +1232,7 @@
             {
                 id: "ancient_dragon_conqueror",
                 title: "Ancient Dragonslayer",
-                description: "Defeat the Ancient Dragon.",
+                description: "Defeat the Ancient Dragon 10 times across all worlds.",
                 progressKey: "boss_ancient_dragon",
                 target: 10,
                 effect: { hpBonus: 10 }
@@ -1081,7 +1240,7 @@
             {
                 id: "lich_king_conqueror",
                 title: "Lichbane",
-                description: "Defeat the Lich King.",
+                description: "Defeat the Lich King 10 times across all worlds.",
                 progressKey: "boss_lich_king",
                 target: 10,
                 effect: { mpBonus: 10 }
@@ -1089,7 +1248,7 @@
             {
                 id: "inferno_dragon_conqueror",
                 title: "Flameforged",
-                description: "Defeat the Inferno Dragon.",
+                description: "Defeat the Inferno Dragon 10 times across all worlds.",
                 progressKey: "boss_inferno_dragon",
                 target: 10,
                 effect: { atkBonus: 1, defBonus: 1 }
@@ -1097,7 +1256,7 @@
             {
                 id: "void_sovereign_conqueror",
                 title: "Void Conqueror",
-                description: "Defeat the Void Sovereign.",
+                description: "Defeat the Void Sovereign 10 times across all worlds.",
                 progressKey: "boss_void_sovereign",
                 target: 10,
                 effect: { atkBonus: 2 }
@@ -1105,7 +1264,7 @@
             {
                 id: "storm_colossus_conqueror",
                 title: "Stormbreaker",
-                description: "Defeat the Storm Colossus.",
+                description: "Defeat the Storm Colossus 10 times across all worlds.",
                 progressKey: "boss_storm_colossus",
                 target: 10,
                 effect: { defBonus: 2 }
@@ -1113,7 +1272,7 @@
             {
                 id: "celestial_hydra_conqueror",
                 title: "Hydra Slayer",
-                description: "Defeat the Celestial Hydra.",
+                description: "Defeat the Celestial Hydra 10 times across all worlds.",
                 progressKey: "boss_celestial_hydra",
                 target: 10,
                 effect: { hpBonus: 20, mpBonus: 10 }
@@ -1121,7 +1280,7 @@
             {
                 id: "world_eater_conqueror",
                 title: "Worldbreaker",
-                description: "Defeat the World Eater.",
+                description: "Defeat the World Eater 5 times across all worlds.",
                 progressKey: "boss_world_eater",
                 target: 5,
                 effect: { atkBonus: 3 }
@@ -1151,6 +1310,27 @@
                     : fallback[field];
             });
             return normalized;
+        }
+
+        function getOriginNameFromAllocations(allocations) {
+            const fields = ["hp", "mp", "atk", "def"];
+            if (!allocations || fields.some(field => !Number.isFinite(allocations[field]))) {
+                return null;
+            }
+
+            const highestAllocation = Math.max(
+                ...fields.map(field => Math.max(0, Math.floor(allocations[field])))
+            );
+            const dominantFields = fields.filter(field => {
+                return Math.max(0, Math.floor(allocations[field])) === highestAllocation;
+            });
+            if (dominantFields.length !== 1) return "Versatile";
+            return {
+                hp: "Vitalborn",
+                mp: "Aetherborn",
+                atk: "Warborn",
+                def: "Ironborn"
+            }[dominantFields[0]];
         }
 
         function generateOrigin(random = Math.random) {
@@ -1188,6 +1368,7 @@
             player.originName = origin.name;
             player.originStats = normalizeOriginStats(origin.stats);
             player.originAllocations = { ...origin.allocations };
+            player.originRecoveryPending = false;
             player.baseHp = player.originStats.hp + completedLevels * 10 + permanentBonus;
             player.baseMp = player.originStats.mp + completedLevels * 5 + permanentBonus;
             player.baseAtk = player.originStats.atk + completedLevels * 2 + permanentBonus;
@@ -1201,6 +1382,36 @@
                 `✨ Origin awakened: ${origin.name} — ${player.originStats.hp} HP, ${player.originStats.mp} MP, ${player.originStats.atk} ATK, ${player.originStats.def} DEF.`,
                 "log-level-up"
             );
+            return true;
+        }
+
+        function openOriginRecoveryDialog() {
+            const player = gameState.player;
+            if (!player.originAssigned || !player.originRecoveryPending) return false;
+
+            const overlay = document.getElementById('originRecoveryOverlay');
+            const stats = document.getElementById('originRecoveryStats');
+            if (!overlay || !stats) return false;
+
+            stats.textContent = `Preserved origin stats: ${player.originStats.hp} HP · `
+                + `${player.originStats.mp} MP · ${player.originStats.atk} ATK · `
+                + `${player.originStats.def} DEF`;
+            overlay.style.display = "flex";
+            overlay.querySelector?.('[data-origin-recovery="Aetherborn"]')?.focus();
+            return true;
+        }
+
+        function recoverOriginName(originName) {
+            if (!PLAYER_ORIGIN_NAMES.includes(originName)) return false;
+            const player = gameState.player;
+            if (!player.originRecoveryPending) return false;
+
+            player.originName = originName;
+            player.originRecoveryPending = false;
+            document.getElementById('originRecoveryOverlay').style.display = "none";
+            addLogEntry(`✨ Origin label restored: ${originName}. Your stats were not changed.`, "log-level-up");
+            updateDisplay();
+            saveGame({ silent: true });
             return true;
         }
 
@@ -1286,15 +1497,40 @@
                     gameState.titleProgress?.[titleQuest.progressKey] || 0
                 );
                 const unlocked = gameState.unlockedTitles.includes(titleQuest.id);
+                const legacyUnlock = unlocked && progress < titleQuest.target;
                 const entry = document.createElement('div');
-                entry.className = `title-quest-entry ${unlocked ? "unlocked" : ""}`;
+                entry.className = `title-quest-entry ${unlocked ? "unlocked" : ""} ${legacyUnlock ? "legacy-unlock" : ""}`;
                 entry.innerHTML = `
                     <strong>${unlocked ? "✓" : "○"} ${titleQuest.title}</strong>
                     <small>${titleQuest.description} (${progress}/${titleQuest.target})</small>
+                    ${legacyUnlock
+                        ? "<small>Legacy unlock: earned under an earlier requirement and remains permanently active.</small>"
+                        : ""}
                     <small>Effect: ${formatStatEffect(titleQuest.effect)}</small>
                 `;
                 questList.appendChild(entry);
             });
+        }
+
+        function openTitleDialog() {
+            const overlay = document.getElementById('titleDialogOverlay');
+            const openButton = document.getElementById('openTitleDialogBtn');
+            if (!overlay) return false;
+            updateTitleUI();
+            overlay.style.display = "flex";
+            openButton?.setAttribute("aria-expanded", "true");
+            document.getElementById('closeTitleDialogBtn')?.focus();
+            return true;
+        }
+
+        function closeTitleDialog() {
+            const overlay = document.getElementById('titleDialogOverlay');
+            const openButton = document.getElementById('openTitleDialogBtn');
+            if (!overlay || overlay.style.display === "none") return false;
+            overlay.style.display = "none";
+            openButton?.setAttribute("aria-expanded", "false");
+            openButton?.focus();
+            return true;
         }
 
         function hasWorldSeed() {
@@ -1364,16 +1600,19 @@
             }
 
             gameState.player.gold -= buyPrice;
-            const purchasedItem = createItemInstance(item);
-            gameState.inventory.push(purchasedItem);
-            alert(`Membeli ${item.name} seharga ${buyPrice} gold.`);
-            addLogEntry(`🛒 You bought ${item.name} for ${buyPrice} gold.`, 'log-gold');
+            const quantity = Math.max(1, Math.floor(Number(item.quantityBuy) || 1));
+            for (let index = 0; index < quantity; index++) {
+                gameState.inventory.push(createItemInstance(item));
+            }
+            const quantityLabel = quantity > 1 ? `${quantity}× ` : "";
+            alert(`Membeli ${quantityLabel}${item.name} seharga ${buyPrice} gold.`);
+            addLogEntry(`🛒 You bought ${quantityLabel}${item.name} for ${buyPrice} gold.`, 'log-gold');
             refreshShopTransactionUI();
             return true;
         }
 
         function refreshShopTransactionUI() {
-            updateDisplay();
+            updatePlayerStatsFromEquipment();
             updateInventoryDisplay();
             updateQuestDisplay();
             renderShopUI();
@@ -1446,7 +1685,13 @@
                 const upgradeText = item.upgradeLevel
                     ? ` Current upgrade: +${item.upgradeLevel}.`
                     : " Can be upgraded at the Blacksmith.";
-                return `${stats.join(", ") || "No stat bonus"}.${upgradeText}`;
+                const twoHandText = item.type === "weapon" && item.handedness === "two"
+                    ? ` Two-handed attacks apply ×${TWO_HANDED_ATTACK_MULTIPLIER} to this weapon's ATK.`
+                    : "";
+                const ammoText = isBowWeapon(item)
+                    ? " Requires one Arrow per attack; without Arrow its ATK bonus is disabled."
+                    : "";
+                return `${stats.join(", ") || "No stat bonus"}.${twoHandText}${ammoText}${upgradeText}`;
             }
 
             const effectDescriptions = {
@@ -1460,7 +1705,9 @@
 
         function getItemMetaLabel(item) {
             const rarity = item.rarity || "common";
-            const type = item.type || "item";
+            const type = isEquipmentItem(item)
+                ? getEquipmentItemCategoryLabel(item)
+                : item.type || "item";
             return `${rarity} ${type}`;
         }
 
@@ -1476,7 +1723,7 @@
                     <div class="list-item-content">
                         <div class="list-item-title">
                             ${item.icon ? `<span class="list-item-icon">${item.icon}</span>` : ''}
-                            <strong class="item-rarity-${item.rarity || 'common'}">${item.name}</strong>
+                            <strong class="item-rarity-${item.rarity || 'common'}">${item.name}${item.quantityBuy > 1 ? ` ×${item.quantityBuy}` : ""}</strong>
                             <span class="list-item-price">${buyPrice}g</span>
                         </div>
                         <small class="list-item-meta">${getItemMetaLabel(item)}</small>
@@ -1777,30 +2024,89 @@
             { id: "elixir_full_mp", name: "Elixir of Mana", type: "consumable", rarity: "rare", value: 0, effect: "full_mana" },
 
             // Weapons
-            { id: "wooden_sword", name: "Wooden Sword", type: "weapon", rarity: "common", atkBonus: 5 },
-            { id: "rusty_dagger", name: "Rusty Dagger", type: "weapon", rarity: "common", atkBonus: 4 },
-            { id: "hunter_bow", name: "Hunter Bow", type: "weapon", rarity: "common", atkBonus: 7 },
-            { id: "iron_sword", name: "Iron Sword", type: "weapon", rarity: "uncommon", atkBonus: 10 },
-            { id: "steel_axe", name: "Steel Axe", type: "weapon", rarity: "uncommon", atkBonus: 12 },
-            { id: "obsidian_blade", name: "Obsidian Blade", type: "weapon", rarity: "uncommon", atkBonus: 16 },
-            { id: "broadsword", name: "Broadsword", type: "weapon", rarity: "rare", atkBonus: 20 },
-            { id: "enchanted_staff", name: "Enchanted Staff", type: "weapon", rarity: "rare", atkBonus: 15, mpBonus: 10 },
-            { id: "royal_goblin_blade", name: "Royal Goblin Blade", type: "weapon", rarity: "rare", atkBonus: 22, hpBonus: 10, bossOnly: true },
-            { id: "venom_fang", name: "Venom Fang", type: "weapon", rarity: "rare", atkBonus: 19, hpBonus: 15, bossOnly: true },
-            { id: "labyrinth_axe", name: "Labyrinth Axe", type: "weapon", rarity: "epic", atkBonus: 28, hpBonus: 25, bossOnly: true },
-            { id: "dragonbone_greatsword", name: "Dragonbone Greatsword", type: "weapon", rarity: "rare", atkBonus: 30, bossOnly: true },
-            { id: "void_reaper_scythe", name: "Void Reaper Scythe", type: "weapon", rarity: "epic", atkBonus: 42, mpBonus: 25, bossOnly: true },
-            { id: "worldbreaker_blade", name: "Worldbreaker Blade", type: "weapon", rarity: "legendary", atkBonus: 70, hpBonus: 50, bossOnly: true },
+            { id: "wooden_sword", name: "Wooden Sword", type: "weapon", handedness: "one", offhandEligible: true, rarity: "common", atkBonus: 5 },
+            { id: "rusty_dagger", name: "Rusty Dagger", type: "weapon", handedness: "one", offhandEligible: true, rarity: "common", atkBonus: 4 },
+            { id: "hunter_bow", name: "Hunter Bow", type: "weapon", weaponClass: "bow", handedness: "two", rarity: "common", atkBonus: 6 },
+            { id: "recurve_bow", name: "Recurve Bow", type: "weapon", weaponClass: "bow", handedness: "two", rarity: "uncommon", atkBonus: 11 },
+            { id: "ironwood_warbow", name: "Ironwood Warbow", type: "weapon", weaponClass: "bow", handedness: "two", rarity: "uncommon", atkBonus: 15, hpBonus: 10 },
+            { id: "iron_sword", name: "Iron Sword", type: "weapon", handedness: "one", offhandEligible: false, rarity: "uncommon", atkBonus: 10 },
+            { id: "steel_axe", name: "Steel Axe", type: "weapon", handedness: "two", rarity: "uncommon", atkBonus: 16 },
+            { id: "obsidian_blade", name: "Obsidian Blade", type: "weapon", handedness: "one", offhandEligible: false, rarity: "uncommon", atkBonus: 16 },
+            { id: "broadsword", name: "Broadsword", type: "weapon", handedness: "two", rarity: "rare", atkBonus: 20 },
+            { id: "enchanted_staff", name: "Enchanted Staff", type: "weapon", handedness: "two", rarity: "rare", atkBonus: 15, mpBonus: 15 },
+            { id: "arcane_longbow", name: "Arcane Longbow", type: "weapon", weaponClass: "bow", handedness: "two", rarity: "rare", atkBonus: 19, mpBonus: 15 },
+            { id: "stormcaller_bow", name: "Stormcaller Bow", type: "weapon", weaponClass: "bow", handedness: "two", rarity: "rare", atkBonus: 23, mpBonus: 10 },
+            { id: "dragonwing_bow", name: "Dragonwing Bow", type: "weapon", weaponClass: "bow", handedness: "two", rarity: "epic", atkBonus: 32, hpBonus: 25, questOnly: true },
+            { id: "celestial_starbow", name: "Celestial Starbow", type: "weapon", weaponClass: "bow", handedness: "two", rarity: "legendary", atkBonus: 48, mpBonus: 40, questOnly: true },
+            { id: "royal_goblin_blade", name: "Royal Goblin Blade", type: "weapon", handedness: "one", offhandEligible: false, rarity: "rare", atkBonus: 22, hpBonus: 10, bossOnly: true },
+            { id: "venom_fang", name: "Venom Fang", type: "weapon", handedness: "one", offhandEligible: true, rarity: "rare", atkBonus: 19, hpBonus: 15, bossOnly: true },
+            { id: "labyrinth_axe", name: "Labyrinth Axe", type: "weapon", handedness: "two", rarity: "epic", atkBonus: 25, hpBonus: 25, bossOnly: true },
+            { id: "dragonbone_greatsword", name: "Dragonbone Greatsword", type: "weapon", handedness: "two", rarity: "rare", atkBonus: 28, bossOnly: true },
+            { id: "void_reaper_scythe", name: "Void Reaper Scythe", type: "weapon", handedness: "two", rarity: "epic", atkBonus: 39, mpBonus: 25, bossOnly: true },
+            { id: "worldbreaker_blade", name: "Worldbreaker Blade", type: "weapon", handedness: "two", rarity: "legendary", atkBonus: 63, hpBonus: 50, bossOnly: true },
 
-            // Armors
-            { id: "leather_vest", name: "Leather Vest", type: "armor", rarity: "common", defBonus: 3 },
-            { id: "chainmail_armor", name: "Chainmail Armor", type: "armor", rarity: "uncommon", defBonus: 7 },
-            { id: "mage_robe", name: "Mage Robe", type: "armor", rarity: "uncommon", defBonus: 5, mpBonus: 15 },
-            { id: "plate_armor", name: "Plate Armor", type: "armor", rarity: "rare", defBonus: 15 },
-            { id: "wyrmscale_armor", name: "Wyrmscale Armor", type: "armor", rarity: "rare", defBonus: 20, hpBonus: 25, bossOnly: true },
-            { id: "inferno_plate", name: "Inferno Plate", type: "armor", rarity: "legendary", defBonus: 32, hpBonus: 55, bossOnly: true },
-            { id: "stormforged_plate", name: "Stormforged Plate", type: "armor", rarity: "epic", defBonus: 38, hpBonus: 60, bossOnly: true },
-            { id: "primordial_aegis", name: "Primordial Aegis", type: "armor", rarity: "legendary", defBonus: 55, hpBonus: 120, mpBonus: 40, bossOnly: true },
+            // Shields (Left Hand only)
+            { id: "buckler", name: "Buckler", type: "shield", rarity: "common", atkBonus: 1, defBonus: 1 },
+            { id: "wooden_shield", name: "Wooden Shield", type: "shield", rarity: "common", defBonus: 2, hpBonus: 5 },
+            { id: "bone_shield", name: "Bone Shield", type: "shield", rarity: "uncommon", defBonus: 4, hpBonus: 15 },
+            { id: "iron_shield", name: "Iron Shield", type: "shield", rarity: "uncommon", defBonus: 5, hpBonus: 10 },
+            { id: "spellguard_shield", name: "Spellguard Shield", type: "shield", rarity: "rare", defBonus: 6, mpBonus: 25 },
+            { id: "runic_shield", name: "Runic Shield", type: "shield", rarity: "rare", defBonus: 7, mpBonus: 18 },
+            { id: "tower_shield", name: "Tower Shield", type: "shield", rarity: "rare", defBonus: 9, hpBonus: 25 },
+            { id: "obsidian_bulwark", name: "Obsidian Bulwark", type: "shield", rarity: "epic", defBonus: 12, hpBonus: 45, questOnly: true },
+            { id: "dragon_shield", name: "Dragon Shield", type: "shield", rarity: "epic", defBonus: 13, hpBonus: 35 },
+            { id: "celestial_ward", name: "Celestial Ward", type: "shield", rarity: "legendary", defBonus: 17, hpBonus: 45, mpBonus: 30, questOnly: true },
+
+            // Body armor
+            { id: "padded_coat", name: "Padded Coat", type: "armor", equipmentSlot: "body", rarity: "common", defBonus: 2, hpBonus: 10 },
+            { id: "leather_vest", name: "Leather Vest", type: "armor", equipmentSlot: "body", rarity: "common", defBonus: 3 },
+            { id: "ranger_garb", name: "Ranger Garb", type: "armor", equipmentSlot: "body", rarity: "uncommon", atkBonus: 2, defBonus: 5, hpBonus: 10 },
+            { id: "chainmail_armor", name: "Chainmail Armor", type: "armor", equipmentSlot: "body", rarity: "uncommon", defBonus: 7 },
+            { id: "mage_robe", name: "Mage Robe", type: "armor", equipmentSlot: "body", rarity: "uncommon", defBonus: 5, mpBonus: 15 },
+            { id: "battlemage_mantle", name: "Battlemage Mantle", type: "armor", equipmentSlot: "body", rarity: "rare", atkBonus: 2, defBonus: 10, mpBonus: 25 },
+            { id: "plate_armor", name: "Plate Armor", type: "armor", equipmentSlot: "body", rarity: "rare", defBonus: 15 },
+            { id: "wyrmscale_armor", name: "Wyrmscale Armor", type: "armor", equipmentSlot: "body", rarity: "rare", defBonus: 17, hpBonus: 25, bossOnly: true },
+            { id: "titan_cuirass", name: "Titan Cuirass", type: "armor", equipmentSlot: "body", rarity: "epic", defBonus: 22, hpBonus: 55, questOnly: true },
+            { id: "inferno_plate", name: "Inferno Plate", type: "armor", equipmentSlot: "body", rarity: "legendary", atkBonus: 2, defBonus: 24, hpBonus: 50, bossOnly: true },
+            { id: "stormforged_plate", name: "Stormforged Plate", type: "armor", equipmentSlot: "body", rarity: "epic", defBonus: 30, hpBonus: 70, mpBonus: 20, bossOnly: true },
+            { id: "celestial_raiment", name: "Celestial Raiment", type: "armor", equipmentSlot: "body", rarity: "legendary", defBonus: 34, hpBonus: 35, mpBonus: 60, questOnly: true },
+            { id: "primordial_aegis", name: "Primordial Aegis", type: "armor", equipmentSlot: "body", rarity: "legendary", defBonus: 55, hpBonus: 120, mpBonus: 40, bossOnly: true },
+
+            // Helmets
+            { id: "leather_cap", name: "Leather Cap", type: "armor", equipmentSlot: "helmet", rarity: "common", defBonus: 1, hpBonus: 5 },
+            { id: "scout_hood", name: "Scout Hood", type: "armor", equipmentSlot: "helmet", rarity: "common", atkBonus: 1, defBonus: 1 },
+            { id: "iron_helm", name: "Iron Helm", type: "armor", equipmentSlot: "helmet", rarity: "uncommon", defBonus: 3, hpBonus: 8 },
+            { id: "mage_hood", name: "Mage Hood", type: "armor", equipmentSlot: "helmet", rarity: "uncommon", defBonus: 2, mpBonus: 12 },
+            { id: "knight_visor", name: "Knight Visor", type: "armor", equipmentSlot: "helmet", rarity: "uncommon", defBonus: 4, hpBonus: 12 },
+            { id: "dragon_helm", name: "Dragon Helm", type: "armor", equipmentSlot: "helmet", rarity: "rare", defBonus: 6, hpBonus: 18 },
+            { id: "warlock_circlet", name: "Warlock Circlet", type: "armor", equipmentSlot: "helmet", rarity: "rare", atkBonus: 2, defBonus: 4, mpBonus: 20 },
+            { id: "void_crown", name: "Void Crown", type: "armor", equipmentSlot: "helmet", rarity: "epic", defBonus: 8, mpBonus: 25 },
+            { id: "titan_greathelm", name: "Titan Greathelm", type: "armor", equipmentSlot: "helmet", rarity: "epic", defBonus: 9, hpBonus: 35, questOnly: true },
+            { id: "celestial_halo", name: "Celestial Halo", type: "armor", equipmentSlot: "helmet", rarity: "legendary", defBonus: 12, hpBonus: 25, mpBonus: 35, questOnly: true },
+
+            // Bottom armor
+            { id: "cloth_trousers", name: "Cloth Trousers", type: "armor", equipmentSlot: "bottom", rarity: "common", defBonus: 1, hpBonus: 4 },
+            { id: "leather_greaves", name: "Leather Greaves", type: "armor", equipmentSlot: "bottom", rarity: "common", defBonus: 2 },
+            { id: "scout_breeches", name: "Scout Breeches", type: "armor", equipmentSlot: "bottom", rarity: "common", atkBonus: 1, defBonus: 1 },
+            { id: "chain_leggings", name: "Chain Leggings", type: "armor", equipmentSlot: "bottom", rarity: "uncommon", defBonus: 4, hpBonus: 8 },
+            { id: "mage_leggings", name: "Mage Leggings", type: "armor", equipmentSlot: "bottom", rarity: "uncommon", defBonus: 3, mpBonus: 10 },
+            { id: "reinforced_cuisses", name: "Reinforced Cuisses", type: "armor", equipmentSlot: "bottom", rarity: "uncommon", defBonus: 5, hpBonus: 10 },
+            { id: "dragon_legguards", name: "Dragon Legguards", type: "armor", equipmentSlot: "bottom", rarity: "rare", defBonus: 8, hpBonus: 20 },
+            { id: "spellweave_skirt", name: "Spellweave Skirt", type: "armor", equipmentSlot: "bottom", rarity: "rare", defBonus: 5, mpBonus: 20 },
+            { id: "titan_legplates", name: "Titan Legplates", type: "armor", equipmentSlot: "bottom", rarity: "epic", defBonus: 10, hpBonus: 35, questOnly: true },
+            { id: "celestial_legwraps", name: "Celestial Legwraps", type: "armor", equipmentSlot: "bottom", rarity: "legendary", defBonus: 13, hpBonus: 25, mpBonus: 35, questOnly: true },
+
+            // Shoes
+            { id: "worn_boots", name: "Worn Boots", type: "armor", equipmentSlot: "shoes", rarity: "common", defBonus: 1 },
+            { id: "leather_boots", name: "Leather Boots", type: "armor", equipmentSlot: "shoes", rarity: "common", defBonus: 1, hpBonus: 5 },
+            { id: "trail_shoes", name: "Trail Shoes", type: "armor", equipmentSlot: "shoes", rarity: "common", defBonus: 1, mpBonus: 5 },
+            { id: "swift_boots", name: "Swift Boots", type: "armor", equipmentSlot: "shoes", rarity: "uncommon", atkBonus: 1, defBonus: 2 },
+            { id: "arcane_boots", name: "Arcane Boots", type: "armor", equipmentSlot: "shoes", rarity: "uncommon", defBonus: 2, mpBonus: 12 },
+            { id: "iron_sabatons", name: "Iron Sabatons", type: "armor", equipmentSlot: "shoes", rarity: "uncommon", defBonus: 4, hpBonus: 10 },
+            { id: "windrunner_boots", name: "Windrunner Boots", type: "armor", equipmentSlot: "shoes", rarity: "rare", atkBonus: 2, defBonus: 4, hpBonus: 10 },
+            { id: "titan_sabatons", name: "Titan Sabatons", type: "armor", equipmentSlot: "shoes", rarity: "rare", defBonus: 6, hpBonus: 20 },
+            { id: "voidwalker_boots", name: "Voidwalker Boots", type: "armor", equipmentSlot: "shoes", rarity: "epic", atkBonus: 2, defBonus: 7, mpBonus: 25, questOnly: true },
+            { id: "celestial_greaves", name: "Celestial Greaves", type: "armor", equipmentSlot: "shoes", rarity: "legendary", defBonus: 10, hpBonus: 25, mpBonus: 30, questOnly: true },
 
             // Accessories
             { id: "bone_charm", name: "Bone Charm", type: "accessory", rarity: "common", hpBonus: 15 },
@@ -1824,6 +2130,9 @@
             { id: "titan_emblem", name: "Titan Emblem", type: "accessory", rarity: "epic", defBonus: 5, hpBonus: 35 },
             { id: "lich_crown", name: "Lich Crown", type: "accessory", rarity: "epic", atkBonus: 7, defBonus: 6, mpBonus: 35, bossOnly: true },
             { id: "hydra_heart", name: "Hydra Heart", type: "accessory", rarity: "legendary", defBonus: 5, hpBonus: 80, mpBonus: 50, bossOnly: true },
+
+            // Ammunition
+            { id: "arrow", name: "Arrow", type: "ammo", ammoType: "arrow", arrowEffect: "standard", rarity: "common", value: 2, shopOnly: true, description: "Standard ammunition for bow weapons." },
 
             // Key items
             {
@@ -1966,6 +2275,9 @@
                 ore: 0,
                 rewardItemPool: [
                     "hp_potion_large", "mp_potion_large", "iron_sword", "chainmail_armor",
+                    "hunter_bow",
+                    "padded_coat", "leather_cap", "scout_hood", "cloth_trousers",
+                    "scout_breeches", "worn_boots", "trail_shoes", "wooden_shield", "buckler",
                     "bone_charm", "copper_ring", "warding_stone", "mana_bead", "swift_charm"
                 ]
             },
@@ -1975,7 +2287,12 @@
                 itemChance: 0.55,
                 ore: 1,
                 rewardItemPool: [
-                    "hp_potion_greater", "mp_potion_greater", "steel_axe", "mage_robe",
+                    "hp_potion_greater", "mp_potion_greater", "steel_axe", "recurve_bow",
+                    "ironwood_warbow", "mage_robe", "ranger_garb",
+                    "iron_helm", "mage_hood", "knight_visor",
+                    "chain_leggings", "mage_leggings", "reinforced_cuisses",
+                    "swift_boots", "arcane_boots", "iron_sabatons",
+                    "iron_shield", "bone_shield",
                     "ring_of_might", "amulet_of_defense", "emerald_pendant",
                     "wolf_tooth_necklace", "scholar_brooch", "duelist_medal"
                 ]
@@ -1987,7 +2304,13 @@
                 ore: 2,
                 rewardItemPool: [
                     "hp_potion_greater", "mp_potion_greater", "obsidian_blade", "broadsword",
-                    "plate_armor", "mana_crystal", "hp_amulet", "guardian_seal",
+                    "arcane_longbow", "stormcaller_bow",
+                    "plate_armor", "battlemage_mantle",
+                    "dragon_helm", "warlock_circlet",
+                    "dragon_legguards", "spellweave_skirt",
+                    "titan_sabatons", "windrunner_boots",
+                    "runic_shield", "tower_shield", "spellguard_shield",
+                    "mana_crystal", "hp_amulet", "guardian_seal",
                     "berserker_crest", "sage_prism", "phoenix_sigil"
                 ]
             },
@@ -1998,7 +2321,13 @@
                 ore: 3,
                 rewardItemPool: [
                     "elixir_full_hp", "elixir_full_mp", "broadsword", "enchanted_staff",
-                    "plate_armor", "guardian_seal", "berserker_crest", "sage_prism",
+                    "stormcaller_bow", "dragonwing_bow",
+                    "plate_armor", "titan_cuirass",
+                    "void_crown", "titan_greathelm",
+                    "dragon_legguards", "titan_legplates",
+                    "titan_sabatons", "voidwalker_boots",
+                    "dragon_shield", "obsidian_bulwark",
+                    "guardian_seal", "berserker_crest", "sage_prism",
                     "phoenix_sigil", "void_locket", "titan_emblem"
                 ]
             },
@@ -2009,7 +2338,10 @@
                 ore: 4,
                 rewardItemPool: [
                     "elixir_full_hp", "elixir_full_mp", "broadsword", "enchanted_staff",
-                    "plate_armor", "phoenix_sigil", "void_locket", "titan_emblem"
+                    "dragonwing_bow", "celestial_starbow",
+                    "celestial_raiment", "celestial_halo", "celestial_legwraps",
+                    "celestial_greaves", "celestial_ward",
+                    "phoenix_sigil", "void_locket", "titan_emblem"
                 ]
             }
         ];
@@ -2214,9 +2546,14 @@
                 ? normalizeOriginStats(previousPlayer.originStats)
                 : { ...DEFAULT_ORIGIN_STATS };
             const preservedOriginName = preserveIdentity && previousPlayer.originAssigned
-                ? previousPlayer.originName || "Legacy"
+                ? previousPlayer.originName || "Recovery Required"
                 : "Unawakened";
             const preservedOriginAssigned = Boolean(preserveIdentity && previousPlayer.originAssigned);
+            const preservedOriginRecoveryPending = Boolean(
+                preserveIdentity
+                && previousPlayer.originAssigned
+                && previousPlayer.originRecoveryPending
+            );
             const preservedTitleProgress = preserveIdentity
                 ? { ...getDefaultTitleProgress(), ...(gameState.titleProgress || {}) }
                 : getDefaultTitleProgress();
@@ -2233,6 +2570,7 @@
                     originAssigned: preservedOriginAssigned,
                     originName: preservedOriginName,
                     originStats: preservedOriginStats,
+                    originRecoveryPending: preservedOriginRecoveryPending,
                     originAllocations: previousPlayer.originAllocations
                         ? { ...previousPlayer.originAllocations }
                         : null
@@ -2244,6 +2582,7 @@
                     originAssigned: false,
                     originName: "Unawakened",
                     originStats: { ...DEFAULT_ORIGIN_STATS },
+                    originRecoveryPending: false,
                     originAllocations: null
                 };
 
@@ -2260,8 +2599,13 @@
                 baseDef: preservedOriginStats.def + permanentStatBonus,
                 gold: 0,
                 equipped: {
-                    weapon: null,
-                    armor: null,
+                    rightHand: null,
+                    leftHand: null,
+                    twoHand: null,
+                    body: null,
+                    helmet: null,
+                    bottom: null,
+                    shoes: null,
                     accessory: null,
                     accessory2: null
                 },
@@ -2282,7 +2626,7 @@
             gameState.worldStatBonus = preservedWorldStatBonus;
             gameState.titleProgress = preservedTitleProgress;
             gameState.unlockedTitles = preservedUnlockedTitles;
-            gameState.equipmentStateVersion = ACCESSORY_BALANCE_EQUIPMENT_VERSION;
+            gameState.equipmentStateVersion = EQUIPMENT_SLOT_STATE_VERSION;
             gameState.progressionStateVersion = 2;
             gameState.currentLocation = "town";
             gameState.lastTavernVisit = null;
@@ -2339,9 +2683,11 @@
                 .map(getTitleDefinition)
                 .filter(Boolean);
             document.getElementById('playerTitle').textContent = unlockedTitleDefinitions.length > 0
-                ? unlockedTitleDefinitions
-                    .map(title => `${title.title}, [${formatStatEffect(title.effect)}]`)
-                    .join(" · ")
+                ? `${unlockedTitleDefinitions[0].title}`
+                    + (unlockedTitleDefinitions.length > 1
+                        ? ` +${unlockedTitleDefinitions.length - 1} more`
+                        : "")
+                    + ` [${formatStatEffect(getActiveTitleEffect())}]`
                 : "None";
             updatePlayerNameControls();
             updateWorldResetUI();
@@ -2372,6 +2718,7 @@
             const mpPotionCount = getMpPotionCount();
             document.getElementById('playerHpPotions').textContent = hpPotionCount;
             document.getElementById('playerMpPotions').textContent = mpPotionCount;
+            document.getElementById('playerArrows').textContent = getArrowCount();
             document.getElementById('hpPotionCount').textContent = hpPotionCount;
             document.getElementById('mpPotionCount').textContent = mpPotionCount;
 
@@ -2453,6 +2800,26 @@
 
         // --- Player Actions ---
 
+        function isBowWeapon(item) {
+            return item?.type === "weapon" && item.weaponClass === "bow";
+        }
+
+        function isArrowAmmo(item) {
+            return item?.type === "ammo"
+                && (item.ammoType === "arrow" || item.id === ARROW_ITEM_ID);
+        }
+
+        function getArrowCount() {
+            return gameState.inventory.filter(isArrowAmmo).length;
+        }
+
+        function getEquippedAttackBonus(item, slotType) {
+            const attackBonus = Math.max(0, Number(item?.atkBonus) || 0);
+            if (slotType !== "twoHand") return attackBonus;
+            if (isBowWeapon(item) && getArrowCount() <= 0) return 0;
+            return Math.round(attackBonus * TWO_HANDED_ATTACK_MULTIPLIER);
+        }
+
         // NEW: Calculate player's effective stats based on base stats and equipped items
         function updatePlayerStatsFromEquipment() {
             const p = gameState.player;
@@ -2469,15 +2836,12 @@
             let totalHpBonus = 0;
             let totalMpBonus = 0;
 
-            for (const slot in p.equipped) {
-                const item = p.equipped[slot];
-                if (item) {
-                    totalAtkBonus += item.atkBonus || 0;
-                    totalDefBonus += item.defBonus || 0;
-                    totalHpBonus += item.hpBonus || 0;
-                    totalMpBonus += item.mpBonus || 0;
-                }
-            }
+            getUniqueEquippedItems(p.equipped).forEach(([slotType, item]) => {
+                totalAtkBonus += getEquippedAttackBonus(item, slotType);
+                totalDefBonus += item.defBonus || 0;
+                totalHpBonus += item.hpBonus || 0;
+                totalMpBonus += item.mpBonus || 0;
+            });
             const titleEffect = getActiveTitleEffect();
             totalAtkBonus += titleEffect.atkBonus || 0;
             totalDefBonus += titleEffect.defBonus || 0;
@@ -2506,27 +2870,143 @@
             }
         }
 
+        const EQUIPMENT_SLOT_ORDER = [
+            "rightHand",
+            "leftHand",
+            "twoHand",
+            "body",
+            "helmet",
+            "bottom",
+            "shoes",
+            "accessory",
+            "accessory2"
+        ];
+
         const EQUIPMENT_SLOT_LABELS = {
-            weapon: "Weapon",
-            armor: "Armor",
+            rightHand: "Right Hand Weapon",
+            leftHand: "Left Hand Weapon",
+            twoHand: "Two-Handed Weapon",
+            body: "Body Armor",
+            helmet: "Helmet",
+            bottom: "Bottom",
+            shoes: "Shoes",
             accessory: "Accessory 1",
             accessory2: "Accessory 2"
         };
+
+        function getUniqueEquippedItems(equipped = gameState.player.equipped) {
+            const seenItems = new Set();
+            return EQUIPMENT_SLOT_ORDER
+                .map(slotType => [slotType, equipped?.[slotType]])
+                .filter(([, item]) => {
+                    if (!item) return false;
+                    const identity = item.instanceId || item;
+                    if (seenItems.has(identity)) return false;
+                    seenItems.add(identity);
+                    return true;
+                });
+        }
 
         function getEquipmentSlotLabel(slotType) {
             return EQUIPMENT_SLOT_LABELS[slotType] || slotType;
         }
 
+        function getEquipmentItemCategoryLabel(item) {
+            if (item?.type === "weapon") {
+                if (item.handedness === "two") return "Two-Handed Weapon";
+                return item.offhandEligible ? "Versatile One-Handed Weapon" : "Main-Hand Weapon";
+            }
+            if (item?.type === "shield") return "Shield";
+            if (item?.type === "armor") {
+                return getEquipmentSlotLabel(item.equipmentSlot || "body");
+            }
+            if (item?.type === "accessory") return "Accessory";
+            return item?.type || "Item";
+        }
+
         function resolveEquipmentSlot(item, preferredSlot = null) {
             if (!item) return null;
-            if (item.type !== "accessory") return item.type;
+            if (item.type === "weapon") {
+                if (item.handedness === "two") return "twoHand";
+                if (preferredSlot === "leftHand") {
+                    return item.offhandEligible ? "leftHand" : null;
+                }
+                if (preferredSlot === "rightHand") return "rightHand";
+                if (!gameState.player.equipped.rightHand) return "rightHand";
+                if (item.offhandEligible && !gameState.player.equipped.leftHand) {
+                    return "leftHand";
+                }
+                return "rightHand";
+            }
 
+            if (item.type === "shield") return "leftHand";
+
+            if (item.type === "armor") {
+                const armorSlot = item.equipmentSlot || "body";
+                return ["body", "helmet", "bottom", "shoes"].includes(armorSlot)
+                    ? armorSlot
+                    : "body";
+            }
+
+            if (item.type !== "accessory") return null;
             const accessorySlots = ["accessory", "accessory2"];
             if (preferredSlot && accessorySlots.includes(preferredSlot)) {
                 return preferredSlot;
             }
             return accessorySlots.find(slot => !gameState.player.equipped[slot])
                 || accessorySlots[0];
+        }
+
+        function getEquipmentEquipOptions(item) {
+            if (item?.type === "accessory") return ["accessory", "accessory2"];
+            if (item?.type === "weapon" && item.handedness !== "two") {
+                return item.offhandEligible
+                    ? ["rightHand", "leftHand"]
+                    : ["rightHand"];
+            }
+            const slotType = resolveEquipmentSlot(item);
+            return slotType ? [slotType] : [];
+        }
+
+        function isItemValidForEquipmentSlot(item, slotType) {
+            if (!item) return false;
+            if (slotType === "rightHand") {
+                return item.type === "weapon" && item.handedness !== "two";
+            }
+            if (slotType === "leftHand") {
+                return item.type === "shield"
+                    || (item.type === "weapon"
+                        && item.handedness !== "two"
+                        && item.offhandEligible === true);
+            }
+            if (slotType === "twoHand") {
+                return item.type === "weapon" && item.handedness === "two";
+            }
+            if (["body", "helmet", "bottom", "shoes"].includes(slotType)) {
+                return item.type === "armor"
+                    && (item.equipmentSlot || "body") === slotType;
+            }
+            if (["accessory", "accessory2"].includes(slotType)) {
+                return item.type === "accessory";
+            }
+            return false;
+        }
+
+        function moveEquippedItemToInventory(slotType) {
+            const equipped = gameState.player.equipped;
+            const item = equipped[slotType];
+            if (!item) return null;
+
+            equipped[slotType] = null;
+            const alreadyInInventory = item.instanceId
+                ? gameState.inventory.some(entry => entry.instanceId === item.instanceId)
+                : gameState.inventory.includes(item);
+            if (!alreadyInInventory) gameState.inventory.push(item);
+            addLogEntry(
+                `You unequipped ${item.name} from ${getEquipmentSlotLabel(slotType)}.`,
+                'log-item'
+            );
+            return item;
         }
 
         function equipItem(item, inventoryIndex, preferredSlot = null) {
@@ -2544,7 +3024,9 @@
 
             const slotType = resolveEquipmentSlot(item, preferredSlot);
 
-            if (!slotType || !p.equipped.hasOwnProperty(slotType)) {
+            if (!slotType
+                || !p.equipped.hasOwnProperty(slotType)
+                || !isItemValidForEquipmentSlot(item, slotType)) {
                 addLogEntry(`Cannot equip ${item.name}: Unknown equipment type.`, 'log-error');
                 return false;
             }
@@ -2553,14 +3035,18 @@
                 item.upgradeLevel = 0;
             }
 
-            const currentlyEquipped = p.equipped[slotType];
             const [itemToEquip] = gameState.inventory.splice(inventoryIndex, 1);
-            p.equipped[slotType] = itemToEquip;
-
-            if (currentlyEquipped) {
-                gameState.inventory.push(currentlyEquipped);
-                addLogEntry(`You unequipped ${currentlyEquipped.name} from ${getEquipmentSlotLabel(slotType)}.`, 'log-item');
+            if (slotType === "twoHand") {
+                moveEquippedItemToInventory("rightHand");
+                moveEquippedItemToInventory("leftHand");
+                moveEquippedItemToInventory("twoHand");
+            } else if (slotType === "rightHand" || slotType === "leftHand") {
+                moveEquippedItemToInventory("twoHand");
+                moveEquippedItemToInventory(slotType);
+            } else {
+                moveEquippedItemToInventory(slotType);
             }
+            p.equipped[slotType] = itemToEquip;
 
             addLogEntry(`⚔️ You equipped ${itemToEquip.name} in ${getEquipmentSlotLabel(slotType)}!`, 'log-item');
             refreshEquipmentUI();
@@ -2706,6 +3192,7 @@
             switch (item.type) {
                 case "weapon":
                 case "armor":
+                case "shield":
                 case "accessory":
                     return equipItem(item, index);
                 case "consumable":
@@ -2716,6 +3203,9 @@
                 case "material":
                 case "quest":
                     addLogEntry(`You can't "use" ${item.name} directly. It might be for crafting or a quest.`);
+                    return false;
+                case "ammo":
+                    addLogEntry(`${item.name} is consumed automatically when attacking with a compatible weapon.`);
                     return false;
                 case "key":
                     if (item.id === WORLD_RESET_CATALYST_ID) {
@@ -2846,14 +3336,56 @@
             return { damage: actualDamage, abilityTriggered, mpDrained, monsterHealed, defeated };
         }
 
+        function preparePlayerWeaponAttack() {
+            const bow = gameState.player.equipped.twoHand;
+            if (!isBowWeapon(bow)) {
+                return {
+                    attackPower: gameState.player.currentAtk,
+                    usedArrow: false,
+                    usedBow: false
+                };
+            }
+
+            const attackPower = gameState.player.currentAtk;
+            const arrowIndex = gameState.inventory.findIndex(isArrowAmmo);
+            if (arrowIndex === -1) {
+                addLogEntry(
+                    "🏹 You have no Arrows. The bow provides no ATK, so you attack unarmed.",
+                    'log-error'
+                );
+                return { attackPower, usedArrow: false, usedBow: true };
+            }
+
+            gameState.inventory.splice(arrowIndex, 1);
+            const arrowsRemaining = getArrowCount();
+            if (arrowsRemaining === 0) {
+                addLogEntry(
+                    "🏹 You fire your final Arrow. This attack still uses bow damage, but your next attack will use damage without a weapon.",
+                    'log-error'
+                );
+            } else {
+                addLogEntry(
+                    `🏹 You fire an Arrow. ${arrowsRemaining} remaining.`,
+                    'log-item'
+                );
+            }
+            updateInventoryDisplay();
+            updatePlayerStatsFromEquipment();
+            return { attackPower, usedArrow: true, usedBow: true };
+        }
+
         function attack() {
             if (!gameState.inBattle) return;
 
             const p = gameState.player;
             const m = gameState.currentMonster;
+            const preparedAttack = preparePlayerWeaponAttack();
 
             // Player attacks monster
-            const playerDamage = Math.max(1, p.currentAtk - Math.floor(m.atk / 2)); // Monster's def is implied from its atk
+            const playerDamage = Math.max(
+                1,
+                preparedAttack.attackPower - Math.floor(m.atk / 2)
+            ); // Monster's def is implied from its atk
             m.hp = Math.max(0, m.hp - playerDamage);
             addLogEntry(`💥 You attack the ${m.name} for ${playerDamage} damage!`, 'log-damage');
 
@@ -2934,7 +3466,8 @@
             }
 
             p.mp -= getMagicStrikeCost();
-            const magicDamage = p.currentAtk * 1.5; // Deals 150% of current attack as magic damage
+            const preparedAttack = preparePlayerWeaponAttack();
+            const magicDamage = preparedAttack.attackPower * 1.5; // Deals 150% of current attack as magic damage
             m.hp = Math.max(0, m.hp - magicDamage);
             addLogEntry(`✨ You unleash a Magic Strike on the ${m.name} for ${magicDamage.toFixed(0)} damage!`, 'log-damage');
 
@@ -2977,7 +3510,16 @@
             document.getElementById('shopBtn').disabled = inBattle;
             document.getElementById('tavernBtn').disabled = inBattle; // Disable tavern during battle
 
-            document.getElementById('attackBtn').disabled = !inBattle;
+            const attackButton = document.getElementById('attackBtn');
+            const equippedBow = gameState.player.equipped.twoHand;
+            const usesBow = isBowWeapon(equippedBow);
+            const arrowCount = getArrowCount();
+            attackButton.disabled = !inBattle;
+            attackButton.title = usesBow
+                ? (arrowCount > 0
+                    ? `${arrowCount} Arrow${arrowCount === 1 ? "" : "s"} available. One will be consumed.`
+                    : "No Arrows available. Attack uses unarmed damage.")
+                : "Perform a normal attack.";
             const hpPotionButton = document.getElementById('useHpPotionBtn');
             const quickHpPotion = getQuickHpPotionEntry();
             hpPotionButton.disabled = !inBattle || !quickHpPotion;
@@ -2996,7 +3538,13 @@
                     ? "MP is already full."
                     : "No MP potion is available in inventory.");
             document.getElementById('fleeBtn').disabled = !inBattle;
-            document.getElementById('magicStrikeBtn').disabled = !inBattle || gameState.player.mp < getMagicStrikeCost();
+            const magicStrikeButton = document.getElementById('magicStrikeBtn');
+            magicStrikeButton.disabled = !inBattle || gameState.player.mp < getMagicStrikeCost();
+            magicStrikeButton.title = usesBow
+                ? (arrowCount > 0
+                    ? "Magic Strike consumes one Arrow while a bow is equipped."
+                    : "No Arrows available; the bow contributes no ATK.")
+                : `Costs ${getMagicStrikeCost()} MP.`;
         }
 
         // --- Player Progression ---
@@ -3050,6 +3598,9 @@
         let equipmentInstanceCounter = 0;
         const EQUIPMENT_STAT_FIELDS = ["atkBonus", "defBonus", "hpBonus", "mpBonus"];
         const ACCESSORY_BALANCE_EQUIPMENT_VERSION = 7;
+        const TWO_HAND_BALANCE_EQUIPMENT_VERSION = 9;
+        const DEFENSIVE_BALANCE_EQUIPMENT_VERSION = 10;
+        const EQUIPMENT_SLOT_STATE_VERSION = 10;
         const EQUIPMENT_RARITIES = {
             common: { rank: 0, statMultiplier: 1, sellMultiplier: 1 },
             uncommon: { rank: 1, statMultiplier: 1.25, sellMultiplier: 1.35 },
@@ -3059,7 +3610,7 @@
         };
 
         function isEquipmentItem(item) {
-            return item && ["weapon", "armor", "accessory"].includes(item.type);
+            return item && ["weapon", "armor", "shield", "accessory"].includes(item.type);
         }
 
         function createEquipmentInstanceId() {
@@ -3122,6 +3673,7 @@
             const incrementsByType = {
                 weapon: { atkBonus: 5, defBonus: 2, hpBonus: 5, mpBonus: 5 },
                 armor: { atkBonus: 2, defBonus: 3, hpBonus: 5, mpBonus: 5 },
+                shield: { atkBonus: 2, defBonus: 3, hpBonus: 5, mpBonus: 5 },
                 accessory: { atkBonus: 2, defBonus: 2, hpBonus: 5, mpBonus: 5 }
             };
             return incrementsByType[item.type]?.[field] || 0;
@@ -3143,6 +3695,16 @@
         function createItemInstance(item, options = {}) {
             const instance = { ...item };
             if (isEquipmentItem(instance)) {
+                if (instance.type === "weapon") {
+                    instance.handedness = instance.handedness === "two" ? "two" : "one";
+                    instance.offhandEligible = instance.handedness === "one"
+                        && instance.offhandEligible === true;
+                } else if (instance.type === "armor") {
+                    instance.equipmentSlot = ["body", "helmet", "bottom", "shoes"]
+                        .includes(instance.equipmentSlot)
+                        ? instance.equipmentSlot
+                        : "body";
+                }
                 instance.baseItemId = instance.baseItemId || instance.id;
                 instance.baseStats = instance.baseStats || getEquipmentBaseStats(instance);
                 instance.baseValue = Number.isFinite(instance.baseValue)
@@ -3240,12 +3802,15 @@
                 const item = stack.item;
                 const itemDiv = document.createElement('div');
                 itemDiv.className = `inventory-item item-rarity-${item.rarity}`;
+                const itemTypeLabel = isEquipmentItem(item)
+                    ? getEquipmentItemCategoryLabel(item)
+                    : item.type.charAt(0).toUpperCase() + item.type.slice(1);
                 itemDiv.innerHTML = `
                     <strong>${item.name}</strong>
                     ${stack.count > 1 ? ` (×${stack.count})` : ''} <br>
-                    <small>${item.type.charAt(0).toUpperCase() + item.type.slice(1)} - ${item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)}</small>
+                    <small>${itemTypeLabel} - ${item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)}</small>
                 `;
-                if (item.type === "weapon" || item.type === "armor" || item.type === "accessory") {
+                if (isEquipmentItem(item)) {
                     itemDiv.innerHTML += `<br><small>ATK +${item.atkBonus || 0}, DEF +${item.defBonus || 0}, HP +${item.hpBonus || 0}, MP +${item.mpBonus || 0}</small>`;
                     itemDiv.innerHTML += `<br><small>Sell Value: ${calculateSellPrice(item)} Gold</small>`;
                 } else if (item.type === "consumable" && item.effect === "heal") {
@@ -3260,10 +3825,11 @@
                     itemDiv.innerHTML += `<br><small>${item.description}</small>`;
                 }
 
-                if (item.type === "accessory") {
+                const equipOptions = getEquipmentEquipOptions(item);
+                if (equipOptions.length > 1) {
                     const equipActions = document.createElement('div');
                     equipActions.className = "inventory-equip-actions";
-                    ["accessory", "accessory2"].forEach(slotType => {
+                    equipOptions.forEach(slotType => {
                         const equipButton = document.createElement('button');
                         equipButton.textContent = `Equip ${getEquipmentSlotLabel(slotType)}`;
                         equipButton.disabled = gameState.inBattle;
@@ -3297,16 +3863,21 @@
             equippedGearList.innerHTML = ''; // Clear previous display
 
             const p = gameState.player;
-            const slots = ['weapon', 'armor', 'accessory', 'accessory2'];
-
-            slots.forEach(slotType => {
+            EQUIPMENT_SLOT_ORDER.forEach(slotType => {
                 const item = p.equipped[slotType];
                 const itemDiv = document.createElement('div');
                 itemDiv.innerHTML = `<span class="equipped-slot">${getEquipmentSlotLabel(slotType)}:</span> `;
                 if (item) {
                     const upgradeLevel = Number.isFinite(item.upgradeLevel) ? item.upgradeLevel : 0;
+                    const effectiveAttack = getEquippedAttackBonus(item, slotType);
+                    const attackText = slotType === "twoHand" && (item.atkBonus || 0) > 0
+                        ? `ATK +${item.atkBonus || 0} (effective +${effectiveAttack})`
+                        : `ATK +${item.atkBonus || 0}`;
+                    const ammoText = isBowWeapon(item)
+                        ? `<br><small>Arrows: ${getArrowCount()}${getArrowCount() > 0 ? "" : " — bow ATK disabled"}</small>`
+                        : "";
                     itemDiv.innerHTML += `<span class="item-rarity-${item.rarity}">${item.name} +${upgradeLevel}</span>`;
-                    itemDiv.innerHTML += `<br><small>ATK +${item.atkBonus || 0}, DEF +${item.defBonus || 0}, HP +${item.hpBonus || 0}, MP +${item.mpBonus || 0}</small>`;
+                    itemDiv.innerHTML += `<br><small>${attackText}, DEF +${item.defBonus || 0}, HP +${item.hpBonus || 0}, MP +${item.mpBonus || 0}</small>${ammoText}`;
 
                     const unequipButton = document.createElement('button');
                     unequipButton.textContent = 'Unequip';
@@ -3410,7 +3981,9 @@
                 const standardLootItems = itemTemplates.filter(item => {
                     return item.type !== "material"
                         && item.type !== "key"
-                        && !item.bossOnly;
+                        && !item.bossOnly
+                        && !item.questOnly
+                        && !item.shopOnly;
                 });
                 const commonItems = standardLootItems.filter(item => item.rarity === "common");
                 const uncommonItems = standardLootItems.filter(item => item.rarity === "uncommon");
@@ -3992,8 +4565,43 @@
             }) || null;
         }
 
+        const NORMAL_AREA_SCALING_PER_AREA = 0.04;
+        const NORMAL_AREA_SCALING_CAP = 0.6;
+        const NORMAL_MONSTER_EQUIPMENT_SCALING = [
+            { minLevel: 1, hp: 1, atk: 1 },
+            { minLevel: 5, hp: 1.05, atk: 1.02 },
+            { minLevel: 10, hp: 1.08, atk: 1.03 },
+            { minLevel: 20, hp: 1.12, atk: 1.04 },
+            { minLevel: 40, hp: 1.16, atk: 1.06 },
+            { minLevel: 60, hp: 1.20, atk: 1.08 },
+            { minLevel: 80, hp: 1.25, atk: 1.10 },
+            { minLevel: 100, hp: 1.30, atk: 1.12 }
+        ];
+        const BOSS_EQUIPMENT_SCALING = [
+            { minLevel: 1, hp: 1, atk: 1 },
+            { minLevel: 6, hp: 1.05, atk: 1.02 },
+            { minLevel: 10, hp: 1.08, atk: 1.03 },
+            { minLevel: 20, hp: 1.12, atk: 1.05 },
+            { minLevel: 40, hp: 1.18, atk: 1.07 },
+            { minLevel: 60, hp: 1.24, atk: 1.09 },
+            { minLevel: 80, hp: 1.30, atk: 1.11 },
+            { minLevel: 100, hp: 1.35, atk: 1.13 }
+        ];
+
+        function getMonsterEquipmentScaling(playerLevel, isBoss = false) {
+            const safeLevel = Math.max(1, Math.floor(Number(playerLevel) || 1));
+            const tiers = isBoss
+                ? BOSS_EQUIPMENT_SCALING
+                : NORMAL_MONSTER_EQUIPMENT_SCALING;
+            return [...tiers]
+                .reverse()
+                .find(tier => safeLevel >= tier.minLevel) || tiers[0];
+        }
+
         function scaleDifficulty() {
-            return 1 + (gameState.areaLevel - 1) * 0.1;
+            const areaBonus = Math.max(0, gameState.areaLevel - 1)
+                * NORMAL_AREA_SCALING_PER_AREA;
+            return 1 + Math.min(NORMAL_AREA_SCALING_CAP, areaBonus);
         }
 
         function spawnMonster() {
@@ -4007,6 +4615,7 @@
                 ? getWorldDifficultyMultiplier()
                 : scaleDifficulty() * getWorldDifficultyMultiplier();
             const finalMultiplier = progressionScale * environmentScale;
+            const equipmentScaling = getMonsterEquipmentScaling(pLevel, isBoss);
             const monsterLevel = isBoss
                 ? Math.max(template.requiredLevel, pLevel)
                 : Math.max(1, pLevel + Math.floor(Math.random() * 3) - 1);
@@ -4015,9 +4624,9 @@
                 id: template.id || template.name.toLowerCase().replace(/\s+/g, '_'),
                 name: template.name,
                 level: monsterLevel,
-                hp: Math.floor(template.hp * finalMultiplier),
-                maxHp: Math.floor(template.hp * finalMultiplier),
-                atk: Math.floor(template.atk * finalMultiplier),
+                hp: Math.floor(template.hp * finalMultiplier * equipmentScaling.hp),
+                maxHp: Math.floor(template.hp * finalMultiplier * equipmentScaling.hp),
+                atk: Math.floor(template.atk * finalMultiplier * equipmentScaling.atk),
                 exp: Math.floor(template.exp * finalMultiplier),
                 gold: Math.floor(template.gold * finalMultiplier),
                 isBoss,
@@ -4049,7 +4658,8 @@
         function equipmentItemsMatch(first, second) {
             if (!first || !second) return false;
             const comparedFields = [
-                "id", "name", "type", "rarity", "upgradeLevel",
+                "id", "name", "type", "handedness", "offhandEligible",
+                "equipmentSlot", "rarity", "upgradeLevel",
                 "atkBonus", "defBonus", "hpBonus", "mpBonus"
             ];
             return comparedFields.every(field => (first[field] || 0) === (second[field] || 0));
@@ -4062,6 +4672,20 @@
                 || {};
             const normalized = { ...template, ...item };
             if (isEquipmentItem(normalized)) {
+                if (normalized.type === "weapon") {
+                    normalized.handedness = template.handedness === "two"
+                        || normalized.handedness === "two"
+                        ? "two"
+                        : "one";
+                    normalized.offhandEligible = normalized.handedness === "one"
+                        && (template.offhandEligible === true
+                            || (!template.id && normalized.offhandEligible === true));
+                } else if (normalized.type === "armor") {
+                    normalized.equipmentSlot = ["body", "helmet", "bottom", "shoes"]
+                        .includes(template.equipmentSlot || normalized.equipmentSlot)
+                        ? template.equipmentSlot || normalized.equipmentSlot
+                        : "body";
+                }
                 normalized.baseItemId = normalized.baseItemId || normalized.id;
                 normalized.baseStats = normalized.baseStats || getEquipmentBaseStats(template);
                 normalized.baseValue = Number.isFinite(normalized.baseValue)
@@ -4084,7 +4708,8 @@
                 } else if (normalized.upgradeStatVersion !== 2) {
                     const oldPrimaryField = {
                         weapon: "atkBonus",
-                        armor: "defBonus"
+                        armor: "defBonus",
+                        shield: "defBonus"
                     }[normalized.type] || null;
                     if (oldPrimaryField) {
                         EQUIPMENT_STAT_FIELDS.forEach(field => {
@@ -4131,6 +4756,73 @@
             return item;
         }
 
+        function migrateEquipmentSlotBalance(item, savedEquipmentStateVersion = 0) {
+            if (!item
+                || item.type !== "weapon"
+                || item.handedness !== "two"
+                || savedEquipmentStateVersion >= TWO_HAND_BALANCE_EQUIPMENT_VERSION) {
+                return item;
+            }
+
+            const template = getItemTemplate(item.id);
+            if (!template || template.type !== "weapon" || template.handedness !== "two") {
+                return item;
+            }
+
+            const baseStats = getEquipmentBaseStats(template);
+            const upgradeLevel = Math.min(
+                BLACKSMITH_MAX_LEVEL,
+                Math.max(0, Math.floor(Number(item.upgradeLevel) || 0))
+            );
+            const balancedStats = item.rolledStats
+                ? calculateRarityStats(baseStats, item.rarity)
+                : { ...baseStats };
+
+            item.baseStats = baseStats;
+            item.baseValue = calculateEquipmentBaseValue(template);
+            item.upgradeLevel = upgradeLevel;
+            EQUIPMENT_STAT_FIELDS.forEach(field => {
+                item[field] = (balancedStats[field] || 0)
+                    + getUpgradeStatBonus(item, field, upgradeLevel);
+            });
+            item.statRollVersion = item.rolledStats ? 2 : item.statRollVersion;
+            item.upgradeStatVersion = 2;
+            item.equipmentSlotVersion = 1;
+            return item;
+        }
+
+        function migrateDefensiveEquipmentBalance(item, savedEquipmentStateVersion = 0) {
+            if (!item
+                || !["armor", "shield"].includes(item.type)
+                || savedEquipmentStateVersion >= DEFENSIVE_BALANCE_EQUIPMENT_VERSION) {
+                return item;
+            }
+
+            const template = getItemTemplate(item.id);
+            if (!template || template.type !== item.type) return item;
+
+            const baseStats = getEquipmentBaseStats(template);
+            const upgradeLevel = Math.min(
+                BLACKSMITH_MAX_LEVEL,
+                Math.max(0, Math.floor(Number(item.upgradeLevel) || 0))
+            );
+            const balancedStats = item.rolledStats
+                ? calculateRarityStats(baseStats, item.rarity)
+                : { ...baseStats };
+
+            item.baseStats = baseStats;
+            item.baseValue = calculateEquipmentBaseValue(template);
+            item.upgradeLevel = upgradeLevel;
+            EQUIPMENT_STAT_FIELDS.forEach(field => {
+                item[field] = (balancedStats[field] || 0)
+                    + getUpgradeStatBonus(item, field, upgradeLevel);
+            });
+            item.statRollVersion = item.rolledStats ? 2 : item.statRollVersion;
+            item.upgradeStatVersion = 2;
+            item.defensiveBalanceVersion = 1;
+            return item;
+        }
+
         function migrateEquipmentInventory(savedState, equipped) {
             const savedEquipmentStateVersion = Number.isFinite(savedState.equipmentStateVersion)
                 ? savedState.equipmentStateVersion
@@ -4139,6 +4831,8 @@
                 ? savedState.inventory
                     .map(normalizeSavedItem)
                     .map(item => migrateAccessoryBalance(item, savedEquipmentStateVersion))
+                    .map(item => migrateEquipmentSlotBalance(item, savedEquipmentStateVersion))
+                    .map(item => migrateDefensiveEquipmentBalance(item, savedEquipmentStateVersion))
                     .filter(Boolean)
                 : [];
             const isLegacyEquipmentState = !Number.isFinite(savedState.equipmentStateVersion)
@@ -4265,22 +4959,69 @@
             const savedEquipmentStateVersion = Number.isFinite(savedState.equipmentStateVersion)
                 ? savedState.equipmentStateVersion
                 : 0;
-            const equipped = {
-                weapon: savedEquipped && typeof savedEquipped === 'object' ? normalizeSavedItem(savedEquipped.weapon) : null,
-                armor: savedEquipped && typeof savedEquipped === 'object' ? normalizeSavedItem(savedEquipped.armor) : null,
-                accessory: savedEquipped && typeof savedEquipped === 'object'
-                    ? migrateAccessoryBalance(
-                        normalizeSavedItem(savedEquipped.accessory),
+            const normalizeEquippedItem = item => migrateDefensiveEquipmentBalance(
+                migrateEquipmentSlotBalance(
+                    migrateAccessoryBalance(
+                        normalizeSavedItem(item),
                         savedEquipmentStateVersion
-                    )
+                    ),
+                    savedEquipmentStateVersion
+                ),
+                savedEquipmentStateVersion
+            );
+            const legacyWeapon = savedEquipped && typeof savedEquipped === 'object'
+                ? normalizeEquippedItem(savedEquipped.weapon)
+                : null;
+            const equipped = {
+                rightHand: savedEquipped && typeof savedEquipped === 'object'
+                    ? normalizeEquippedItem(savedEquipped.rightHand)
+                    : null,
+                leftHand: savedEquipped && typeof savedEquipped === 'object'
+                    ? normalizeEquippedItem(savedEquipped.leftHand)
+                    : null,
+                twoHand: savedEquipped && typeof savedEquipped === 'object'
+                    ? normalizeEquippedItem(savedEquipped.twoHand)
+                    : null,
+                body: savedEquipped && typeof savedEquipped === 'object'
+                    ? normalizeEquippedItem(savedEquipped.body || savedEquipped.armor)
+                    : null,
+                helmet: savedEquipped && typeof savedEquipped === 'object'
+                    ? normalizeEquippedItem(savedEquipped.helmet)
+                    : null,
+                bottom: savedEquipped && typeof savedEquipped === 'object'
+                    ? normalizeEquippedItem(savedEquipped.bottom)
+                    : null,
+                shoes: savedEquipped && typeof savedEquipped === 'object'
+                    ? normalizeEquippedItem(savedEquipped.shoes)
+                    : null,
+                accessory: savedEquipped && typeof savedEquipped === 'object'
+                    ? normalizeEquippedItem(savedEquipped.accessory)
                     : null,
                 accessory2: savedEquipped && typeof savedEquipped === 'object'
-                    ? migrateAccessoryBalance(
-                        normalizeSavedItem(savedEquipped.accessory2),
-                        savedEquipmentStateVersion
-                    )
+                    ? normalizeEquippedItem(savedEquipped.accessory2)
                     : null
             };
+            if (legacyWeapon && !equipped.rightHand && !equipped.leftHand && !equipped.twoHand) {
+                if (legacyWeapon.handedness === "two") {
+                    equipped.twoHand = legacyWeapon;
+                } else {
+                    equipped.rightHand = legacyWeapon;
+                }
+            }
+            const displacedEquippedItems = [];
+            EQUIPMENT_SLOT_ORDER.forEach(slotType => {
+                const item = equipped[slotType];
+                if (!item || isItemValidForEquipmentSlot(item, slotType)) return;
+                displacedEquippedItems.push(item);
+                equipped[slotType] = null;
+            });
+            if (equipped.twoHand) {
+                ["rightHand", "leftHand"].forEach(slotType => {
+                    if (!equipped[slotType]) return;
+                    displacedEquippedItems.push(equipped[slotType]);
+                    equipped[slotType] = null;
+                });
+            }
 
             Object.values(equipped).forEach(item => {
                 if (item) {
@@ -4290,6 +5031,12 @@
                 }
             });
             const inventory = migrateEquipmentInventory(savedState, equipped);
+            displacedEquippedItems.forEach(item => {
+                const duplicate = item.instanceId
+                    ? inventory.some(entry => entry.instanceId === item.instanceId)
+                    : inventory.includes(item);
+                if (!duplicate) inventory.push(item);
+            });
 
             const validLocations = ["town", "battle", "tavern", "shop", "blacksmith"];
             let currentLocation = validLocations.includes(savedState.currentLocation)
@@ -4346,9 +5093,23 @@
             const originStats = originAssigned
                 ? normalizeOriginStats(savedState.player.originStats, derivedLegacyOrigin)
                 : { ...DEFAULT_ORIGIN_STATS };
-            const originName = originAssigned
-                ? savedState.player.originName || "Legacy"
-                : "Unawakened";
+            const savedOriginName = typeof savedState.player.originName === "string"
+                ? savedState.player.originName.trim()
+                : "";
+            const inferredOriginName = getOriginNameFromAllocations(
+                savedState.player.originAllocations
+            );
+            const hasValidOriginName = PLAYER_ORIGIN_NAMES.includes(savedOriginName);
+            const originName = !originAssigned
+                ? "Unawakened"
+                : hasValidOriginName
+                    ? savedOriginName
+                    : inferredOriginName || "Recovery Required";
+            const originRecoveryPending = Boolean(
+                originAssigned
+                && !hasValidOriginName
+                && !inferredOriginName
+            );
             const titleProgress = Object.fromEntries(
                 Object.keys(getDefaultTitleProgress()).map(progressKey => {
                     const savedProgress = savedState.titleProgress?.[progressKey];
@@ -4398,6 +5159,7 @@
                     originAssigned,
                     originName,
                     originStats,
+                    originRecoveryPending,
                     originAllocations: savedState.player.originAllocations
                         && typeof savedState.player.originAllocations === "object"
                         ? { ...savedState.player.originAllocations }
@@ -4426,7 +5188,7 @@
                     equipped
                 },
                 inventory,
-                equipmentStateVersion: ACCESSORY_BALANCE_EQUIPMENT_VERSION,
+                equipmentStateVersion: EQUIPMENT_SLOT_STATE_VERSION,
                 progressionStateVersion: 2,
                 quests: migratedQuests,
                 monsterCodex: savedState.monsterCodex && typeof savedState.monsterCodex === 'object'
@@ -4487,6 +5249,8 @@
                     updatePlayerNameControls();
                     if (!gameState.player.hasChosenName) {
                         openPlayerNameDialog(true);
+                    } else if (gameState.player.originRecoveryPending) {
+                        openOriginRecoveryDialog();
                     }
                     addLogEntry("📁 Game loaded from local storage!", 'log-entry');
                     return true;
@@ -4584,7 +5348,15 @@
             };
             return EQUIPMENT_STAT_FIELDS
                 .filter(field => (item[field] || 0) > 0)
-                .map(field => `+${getEquipmentUpgradeIncrement(item, field)} ${statLabels[field]}`)
+                .map(field => {
+                    const increment = getEquipmentUpgradeIncrement(item, field);
+                    if (field === "atkBonus"
+                        && item.type === "weapon"
+                        && item.handedness === "two") {
+                        return `+${increment} ATK (effective +${Math.round(increment * TWO_HANDED_ATTACK_MULTIPLIER)})`;
+                    }
+                    return `+${increment} ${statLabels[field]}`;
+                })
                 .join(", ");
         }
 
@@ -4601,7 +5373,15 @@
                 const increment = getEquipmentUpgradeIncrement(item, field);
                 if (increment <= 0) return;
                 item[field] += increment;
-                bonuses.push(`+${increment} ${statLabels[field]}`);
+                if (field === "atkBonus"
+                    && item.type === "weapon"
+                    && item.handedness === "two") {
+                    bonuses.push(
+                        `+${increment} ATK (effective +${Math.round(increment * TWO_HANDED_ATTACK_MULTIPLIER)})`
+                    );
+                } else {
+                    bonuses.push(`+${increment} ${statLabels[field]}`);
+                }
             });
             item.upgradeStatVersion = 2;
             return bonuses.join(", ");
@@ -4653,8 +5433,7 @@
             materialList.textContent = `Blacksmith Ore: ${gameState.blacksmithMaterials.ore}`;
             upgradeList.innerHTML = '';
 
-            const equippedItems = Object.entries(gameState.player.equipped)
-                .filter(([, item]) => Boolean(item));
+            const equippedItems = getUniqueEquippedItems(gameState.player.equipped);
             if (equippedItems.length === 0) {
                 upgradeList.textContent = 'No gear equipped.';
                 return;
@@ -4665,8 +5444,11 @@
                 const entry = document.createElement('div');
                 entry.className = `inventory-item item-rarity-${item.rarity}`;
 
+                const blacksmithAttackText = slotType === "twoHand" && (item.atkBonus || 0) > 0
+                    ? `ATK +${item.atkBonus || 0} (×${TWO_HANDED_ATTACK_MULTIPLIER} = ${Math.round((item.atkBonus || 0) * TWO_HANDED_ATTACK_MULTIPLIER)})`
+                    : `ATK +${item.atkBonus || 0}`;
                 const stats = [
-                    `ATK +${item.atkBonus || 0}`,
+                    blacksmithAttackText,
                     `DEF +${item.defBonus || 0}`,
                     `HP +${item.hpBonus || 0}`,
                     `MP +${item.mpBonus || 0}`
@@ -4726,6 +5508,9 @@
 
         function handleGameKeyboardShortcut(event) {
             if (isKeyboardInputTarget(event.target)) return false;
+            if (document.getElementById('originRecoveryOverlay')?.style.display === "flex") {
+                return false;
+            }
 
             const key = String(event.key || "").toLowerCase();
             if ((event.ctrlKey || event.metaKey) && key === "s") {
@@ -4742,6 +5527,13 @@
             }
 
             if (event.key === "Escape") {
+                const titleDialog = document.getElementById('titleDialogOverlay');
+                if (titleDialog?.style.display === "flex") {
+                    event.preventDefault();
+                    closeTitleDialog();
+                    return true;
+                }
+
                 const helpPanel = document.getElementById('shortcutHelpPanel');
                 if (helpPanel?.style.display === "grid") {
                     event.preventDefault();
@@ -4879,6 +5671,14 @@
             document.getElementById('editPlayerNameBtn').onclick = () => openPlayerNameDialog(false);
             document.getElementById('confirmPlayerNameBtn').onclick = submitPlayerName;
             document.getElementById('cancelPlayerNameBtn').onclick = closePlayerNameDialog;
+            document.getElementById('openTitleDialogBtn').onclick = openTitleDialog;
+            document.getElementById('closeTitleDialogBtn').onclick = closeTitleDialog;
+            document.getElementById('titleDialogOverlay').onclick = event => {
+                if (event.target === event.currentTarget) closeTitleDialog();
+            };
+            document.querySelectorAll('[data-origin-recovery]').forEach(button => {
+                button.onclick = () => recoverOriginName(button.dataset.originRecovery);
+            });
             document.getElementById('shortcutHelpBtn').onclick = () => toggleKeyboardShortcutHelp();
             document.addEventListener('keydown', handleGameKeyboardShortcut);
             document.getElementById('playerNameInput').onkeydown = event => {

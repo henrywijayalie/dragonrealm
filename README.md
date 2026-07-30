@@ -10,7 +10,7 @@ Tidak ada framework, dependency, proses build, atau backend. Cukup buka game di 
 - 28 monster biasa dan 12 boss dari level rendah hingga level 100.
 - Ability monster: Heavy Strike, Venom, Mana Burn, Regeneration, dan Life Drain.
 - Empat area: Whispering Woods, Ashen Caverns, Wyrmspire Ruins, dan Dragon's Crown.
-- Equipment berupa weapon, armor, serta dua slot accessory.
+- Slot equipment mencakup Right Hand, Left Hand untuk off-hand/shield, Two-Handed Weapon, Body Armor, Helmet, Bottom, Shoes, serta dua accessory.
 - Rarity dinamis dari Common hingga Legendary; item dengan nama dasar yang sama dapat memiliki rarity dan bonus stat berbeda.
 - Shop untuk membeli dan menjual item, lengkap dengan deskripsi dan harga yang menyesuaikan World Tier.
 - Blacksmith untuk meningkatkan seluruh stat yang dimiliki equipment hingga `+5`.
@@ -73,9 +73,25 @@ Service Worker menyimpan halaman game, sedangkan save tetap berada di `localStor
 
 ## Sistem penting
 
+### Origin Stats
+
+Karakter baru memperoleh delapan token stat acak di atas fondasi `90 HP`, `40 MP`, `8 ATK`, dan `3 DEF`. Token HP/MP bernilai `+5`, sedangkan token ATK/DEF bernilai `+1`. Origin ditentukan oleh alokasi yang paling dominan: Vitalborn untuk HP, Aetherborn untuk MP, Warborn untuk ATK, Ironborn untuk DEF, dan Versatile ketika alokasi tertinggi berimbang.
+
+`Legacy` bukan jenis origin pemain. Label tersebut sebelumnya hanya menjadi fallback save lama. Save yang kehilangan label origin kini meminta pemulihan satu kali; pemain memilih kembali nama origin sebelumnya tanpa mengubah statistik atau progres. Jika data alokasi masih tersedia, nama origin dipulihkan secara otomatis.
+
 ### Equipment dan Blacksmith
 
 Equipment dapat meningkatkan ATK, DEF, HP, dan MP. Weapon atau gear lain yang memiliki lebih dari satu bonus stat akan meningkatkan seluruh bonus tersebut ketika upgrade berhasil.
+
+Right Hand menerima seluruh weapon satu tangan. Left Hand menerima shield atau weapon ringan yang memiliki kompatibilitas off-hand; weapon main-hand-only tidak dapat dipasang di sana. Weapon dua tangan memakai kedua tangan sekaligus: memasangnya otomatis melepas weapon kanan dan kiri, sedangkan memasang shield atau weapon satu tangan akan melepas weapon dua tangan. Kontribusi ATK weapon dua tangan dikalikan `×1,5`, tetapi statistiknya hanya dihitung satu kali.
+
+Bow membutuhkan satu Arrow untuk setiap Normal Attack atau Magic Strike. Shop menjual paket berisi 10 Arrow dan inventory menampilkannya sebagai stack. Ketika Arrow habis, bow tidak memberikan bonus ATK sehingga serangan memakai kekuatan karakter tanpa weapon. Format ammo sudah menyimpan jenis serta efek Arrow standar sebagai fondasi crafting Arrow berefek pada pengembangan Blacksmith berikutnya.
+
+Tersedia tujuh basis bow: Hunter Bow, Recurve Bow, Ironwood Warbow, Arcane Longbow, Stormcaller Bow, Dragonwing Bow, dan Celestial Starbow. Hanya Hunter Bow yang dijual di Shop; enam bow lainnya diperoleh melalui loot atau reward quest sesuai tier. Setiap basis bow tetap dapat memiliki rarity dan hasil upgrade yang berbeda.
+
+Armor kini khusus slot tubuh. Katalog defensif menyediakan 10 shield, 13 body armor, 10 helmet, 10 bottom, dan 10 shoes dari common hingga legendary. Setiap slot memiliki pilihan spesialis DEF/HP/MP serta hybrid ATK agar build tidak bergantung pada satu jalur gear. Equipment endgame tertentu hanya tersedia dari quest tier Mythic atau Primordial. Save lama otomatis memigrasikan base stat defensif sambil mempertahankan rarity dan level upgrade.
+
+Statistik monster mempertimbangkan perluasan equipment secara bertahap. Early dan mid game memperoleh tambahan HP/ATK ringan, boss mendapat scaling tersendiri, sedangkan multiplier Area untuk monster normal dibuat lebih landai dan dibatasi agar level tinggi tetap menantang tanpa lonjakan statistik berlebihan.
 
 Tersedia 21 variasi accessory untuk dua slot aktif. Pilihannya mencakup spesialis ATK, DEF, HP, MP, serta hybrid, mulai dari Copper Ring dan Mana Bead sampai Void Locket, Titan Emblem, Lich Crown, dan Hydra Heart. Empat accessory common tersedia langsung di Shop; variasi lain diperoleh dari loot, quest, atau boss. Rarity meningkatkan seluruh stat dasar yang dimiliki accessory.
 
@@ -112,6 +128,8 @@ Selain quest perburuan, Tavern dapat memberikan Supply Request untuk mengumpulka
 Title tidak perlu dipilih. Semua title yang sudah dibuka selalu aktif, bonusnya dijumlahkan, dan progresnya tidak hilang saat World Reset.
 
 Title diperoleh melalui tantangan jangka panjang dan dari mengalahkan setiap jenis boss sesuai persyaratan yang ditampilkan di dalam game.
+
+Daftar title, progres, persyaratan, dan efek dibuka melalui tombol `View Titles` di panel Player Info. Daftar ditampilkan dalam modal agar side panel tetap ringkas.
 
 ### World Reset
 

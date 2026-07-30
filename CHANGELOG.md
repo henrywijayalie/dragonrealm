@@ -26,6 +26,34 @@ Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pe
 - Memperluas reward quest dengan accessory sesuai tier, termasuk Guardian Seal, Sage Prism, Void Locket, dan Titan Emblem.
 - Save lama otomatis memigrasikan statistik accessory ke balancing baru tanpa menghilangkan rarity atau level upgrade.
 - Rest sekarang menampilkan recovery aktual dan memberi tahu pemain ketika HP serta MP sudah penuh sehingga tidak ada recovery yang diperoleh.
+- Memperluas equipment menjadi Right Hand Weapon, Left Hand Weapon, Two-Handed Weapon, Body Armor, Helmet, Bottom, Shoes, dan dua slot accessory.
+- Weapon off-hand-compatible mendukung dual wield, sedangkan weapon main-hand-only tidak dapat dipasang di Left Hand.
+- Left Hand dapat menggunakan shield; menambahkan lima shield dari Wooden Shield hingga Dragon Shield.
+- Weapon dua tangan mengunci kedua tangan dan tidak menggandakan perhitungan statistik.
+- Menambahkan 15 equipment Helmet, Bottom, dan Shoes dari common hingga epic serta mendistribusikannya ke Shop, loot, dan reward quest.
+- Menyeimbangkan statistik weapon dua tangan agar sebanding dengan penggunaan dua weapon satu tangan.
+- Save lama otomatis memindahkan weapon ke slot tangan yang sesuai dan armor ke Body Armor.
+- Menambahkan scaling HP/ATK monster bertahap untuk mengimbangi slot equipment baru.
+- Membuat scaling Area monster normal lebih landai dan membatasinya agar statistik level tinggi tidak melonjak berlebihan.
+- Memberikan kurva scaling terpisah kepada boss agar pertarungan tetap menantang dari level rendah sampai level 100.
+- Memberikan multiplier kontribusi ATK `×1,5` kepada seluruh weapon dua tangan dan menormalisasi statistik dasarnya agar bonus tidak dihitung ganda.
+- Menambahkan Arrow sebagai ammo bow; Shop menjual paket 10 Arrow dan inventory menampilkannya sebagai stack.
+- Normal Attack serta Magic Strike dengan bow mengonsumsi satu Arrow; saat Arrow habis, bonus ATK bow dinonaktifkan dan serangan menggunakan damage tanpa weapon.
+- Memberikan peringatan ketika Arrow terakhir ditembakkan bahwa serangan tersebut masih memakai damage bow dan serangan berikutnya akan menggunakan damage tanpa weapon.
+- Memperluas pilihan menjadi tujuh basis bow dari Hunter Bow hingga Celestial Starbow dengan jalur statistik early, mid, dan endgame.
+- Mempertahankan Hunter Bow sebagai satu-satunya bow di Shop; variasi bow lainnya diperoleh melalui loot dan reward quest sesuai tier.
+- Menyimpan tipe dan efek Arrow standar sebagai fondasi jenis Arrow hasil crafting pada pengembangan Blacksmith berikutnya.
+- Memindahkan daftar title, persyaratan, progres, dan efek ke modal responsif melalui tombol `View Titles` di Player Info.
+- Menandai title yang diperoleh ketika persyaratan lama masih berlaku sebagai `Legacy unlock`, sehingga title permanen tetap aktif tanpa membuat progres persyaratan terbaru terlihat seperti bug.
+- Menyesuaikan deskripsi title boss agar jumlah kemenangan yang tertulis konsisten dengan target progresnya.
+- Memperbaiki migrasi origin agar Aetherborn dan origin valid lainnya tidak diganti dengan label `Legacy`.
+- Menambahkan pemulihan origin satu kali untuk save yang sudah kehilangan label; pilihan hanya mengembalikan nama origin tanpa mengubah statistik atau progres.
+- Memulihkan nama origin secara otomatis ketika data alokasi origin lama masih tersedia.
+- Memperluas katalog defensif menjadi 10 shield, 13 body armor, 10 helmet, 10 bottom, dan 10 shoes.
+- Menambahkan jalur gear spesialis DEF, HP, MP, serta hybrid ATK dari common hingga legendary.
+- Membatasi defensive equipment endgame tertentu sebagai reward quest Mythic atau Primordial agar tidak jatuh terlalu awal.
+- Menyeimbangkan kembali Wyrmscale Armor, Inferno Plate, dan Stormforged Plate terhadap gear quest serta urutan boss.
+- Menaikkan equipment state ke versi 10 dan memigrasikan armor/shield lama tanpa menghilangkan rarity atau level upgrade.
 
 ## 29 Juli 2026
 
