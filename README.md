@@ -77,6 +77,8 @@ Service Worker menyimpan halaman game, sedangkan save tetap berada di `localStor
 
 Equipment dapat meningkatkan ATK, DEF, HP, dan MP. Weapon atau gear lain yang memiliki lebih dari satu bonus stat akan meningkatkan seluruh bonus tersebut ketika upgrade berhasil.
 
+Tersedia 21 variasi accessory untuk dua slot aktif. Pilihannya mencakup spesialis ATK, DEF, HP, MP, serta hybrid, mulai dari Copper Ring dan Mana Bead sampai Void Locket, Titan Emblem, Lich Crown, dan Hydra Heart. Empat accessory common tersedia langsung di Shop; variasi lain diperoleh dari loot, quest, atau boss. Rarity meningkatkan seluruh stat dasar yang dimiliki accessory.
+
 Blacksmith memiliki batas `+5`. Biaya dan peluang sukses bergantung pada rarity:
 
 | Rarity | Biaya dasar | Peluang sukses |
@@ -91,15 +93,19 @@ Biaya aktual adalah biaya dasar ditambah level upgrade saat ini. Upgrade yang ga
 
 ### Material monster
 
-Monster biasa memiliki peluang 60% menjatuhkan material crafting, sedangkan boss selalu menjatuhkan material. Jenis material mengikuti keluarga dan ability monster, seperti Slime Gel, Beast Hide, Venom Sac, Dragon Scale, hingga Primordial Scale.
+Monster biasa memiliki peluang 60% menjatuhkan material crafting, sedangkan boss memiliki peluang 40%. Tersedia 32 jenis material yang mengikuti keluarga dan ability monster, seperti Slime Gel, Goblin Scrap, Troll Blood, Runestone, Phoenix Ash, Dragon Scale, hingga Primordial Scale.
 
 Monster level 50 ke atas menjatuhkan dua unit material. Boss memperoleh satu unit tambahan. Material tersimpan di inventory dan dapat dijual, tetapi penggunaannya sebagai resep equipment akan ditambahkan pada pengembangan Blacksmith berikutnya.
+
+Item non-equipment dengan ID yang sama ditampilkan sebagai satu stack, misalnya `Small HP Potion ×5`. Shop juga menampilkan satu baris per stack; tombol `Sell` menjual satu unit setiap kali ditekan. Equipment tetap terpisah karena setiap instance dapat memiliki rarity, statistik, dan upgrade berbeda.
 
 ### Tavern dan quest
 
 Tavern menyediakan maksimal tiga kontrak. Tawaran tetap sama saat pemain keluar-masuk Tavern dan quest yang diterima akan dihapus dari papan.
 
 Papan dapat menghasilkan tawaran baru setelah cooldown satu jam. Pemain tidak perlu menyelesaikan seluruh quest aktif untuk memperoleh tawaran baru ketika refresh sudah tersedia.
+
+Selain quest perburuan, Tavern dapat memberikan Supply Request untuk mengumpulkan material. Material hanya dikurangi ketika jumlahnya cukup dan pemain menekan tombol penyerahan di Tavern. Menjual material sebelum diserahkan akan mengurangi progres yang tersedia.
 
 ### Title
 

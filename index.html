@@ -789,6 +789,9 @@
                 <p id="tavernRefreshInfo">Quest board status is loading...</p>
                 <div id="availableQuestsList">
                 </div>
+                <h3>Quest Deliveries</h3>
+                <div id="tavernQuestTurnInList">
+                </div>
                 <button id="leaveTavernBtn">Leave Tavern</button>
             </div>
 
@@ -940,7 +943,7 @@
                 primordialDragonsDefeated: 0
             },
             unlockedTitles: [],
-            equipmentStateVersion: 6,
+            equipmentStateVersion: 7,
             progressionStateVersion: 2,
             currentLocation: "town",
             lastTavernVisit: null,
@@ -954,7 +957,11 @@
                 { id: "iron_sword", name: "Iron Sword", icon: "⚔️", type: "weapon", rarity: "uncommon", priceBuy: 75, priceSell: 37, atkBonus: 10 },
                 { id: "chainmail_armor", name: "Chainmail Armor", icon: "🛡️", type: "armor", rarity: "uncommon", priceBuy: 100, priceSell: 50, defBonus: 7 },
                 { id: "hunter_bow", name: "Hunter Bow", icon: "🏹", type: "weapon", rarity: "common", priceBuy: 60, priceSell: 30, atkBonus: 7 },
-                { id: "mage_robe", name: "Mage Robe", icon: "🧙", type: "armor", rarity: "uncommon", priceBuy: 125, priceSell: 62, defBonus: 5, mpBonus: 15 }
+                { id: "mage_robe", name: "Mage Robe", icon: "🧙", type: "armor", rarity: "uncommon", priceBuy: 125, priceSell: 62, defBonus: 5, mpBonus: 15 },
+                { id: "bone_charm", name: "Bone Charm", icon: "🦴", type: "accessory", rarity: "common", priceBuy: 65, priceSell: 32, hpBonus: 15 },
+                { id: "copper_ring", name: "Copper Ring", icon: "💍", type: "accessory", rarity: "common", priceBuy: 70, priceSell: 35, atkBonus: 2 },
+                { id: "warding_stone", name: "Warding Stone", icon: "🪨", type: "accessory", rarity: "common", priceBuy: 70, priceSell: 35, defBonus: 1, hpBonus: 5 },
+                { id: "mana_bead", name: "Mana Bead", icon: "🔹", type: "accessory", rarity: "common", priceBuy: 60, priceSell: 30, mpBonus: 12 }
             ]
         };
 
@@ -1368,8 +1375,39 @@
         function refreshShopTransactionUI() {
             updateDisplay();
             updateInventoryDisplay();
+            updateQuestDisplay();
             renderShopUI();
             renderSellUI();
+        }
+
+        function getInventoryStackKey(item, inventoryIndex = 0) {
+            if (isEquipmentItem(item)) {
+                return `equipment:${item.instanceId || inventoryIndex}`;
+            }
+            return `stack:${item.id || item.name}:${item.type || "item"}`;
+        }
+
+        function getInventoryStacks(inventory = gameState.inventory) {
+            const stacks = new Map();
+            inventory.forEach((item, inventoryIndex) => {
+                const key = getInventoryStackKey(item, inventoryIndex);
+                if (!stacks.has(key)) {
+                    stacks.set(key, {
+                        key,
+                        item,
+                        count: 0,
+                        inventoryIndices: []
+                    });
+                }
+                const stack = stacks.get(key);
+                stack.count++;
+                stack.inventoryIndices.push(inventoryIndex);
+            });
+            return [...stacks.values()];
+        }
+
+        function getInventoryItemCount(itemId) {
+            return gameState.inventory.filter(item => item?.id === itemId).length;
         }
 
         function sellItem(inventoryIndex) {
@@ -1461,7 +1499,8 @@
         function renderSellUI() {
             const sellList = document.getElementById('sellList');
             sellList.innerHTML = '';
-            gameState.inventory.forEach((item, i) => {
+            getInventoryStacks().forEach(stack => {
+                const { item, count } = stack;
                 if (item.noSell) return;
 
                 const div = document.createElement('div');
@@ -1471,8 +1510,8 @@
                     <div class="list-item-content">
                         <div class="list-item-title">
                             ${item.icon ? `<span class="list-item-icon">${item.icon}</span>` : ''}
-                            <strong class="item-rarity-${item.rarity || 'common'}">${item.name}</strong>
-                            <span class="list-item-price">Sell: ${sellPrice}g</span>
+                            <strong class="item-rarity-${item.rarity || 'common'}">${item.name}${count > 1 ? ` ×${count}` : ""}</strong>
+                            <span class="list-item-price">Price: ${sellPrice}g each</span>
                         </div>
                         <small class="list-item-meta">${getItemMetaLabel(item)}</small>
                         <small class="list-item-description">${getItemDescription(item)}</small>
@@ -1481,8 +1520,8 @@
                 const btn = document.createElement('button');
                 btn.textContent = 'Sell';
                 btn.className = 'shop-action-button';
-                btn.title = `Sell ${item.name} for ${sellPrice} gold.`;
-                btn.onclick = () => sellItem(i);
+                btn.title = `Sell one ${item.name} for ${sellPrice} gold.`;
+                btn.onclick = () => sellItem(stack.inventoryIndices[0]);
                 div.appendChild(btn);
                 sellList.appendChild(div);
             });
@@ -1764,15 +1803,27 @@
             { id: "primordial_aegis", name: "Primordial Aegis", type: "armor", rarity: "legendary", defBonus: 55, hpBonus: 120, mpBonus: 40, bossOnly: true },
 
             // Accessories
-            { id: "bone_charm", name: "Bone Charm", type: "accessory", rarity: "common", hpBonus: 10 },
+            { id: "bone_charm", name: "Bone Charm", type: "accessory", rarity: "common", hpBonus: 15 },
+            { id: "copper_ring", name: "Copper Ring", type: "accessory", rarity: "common", atkBonus: 2 },
+            { id: "warding_stone", name: "Warding Stone", type: "accessory", rarity: "common", defBonus: 1, hpBonus: 5 },
+            { id: "mana_bead", name: "Mana Bead", type: "accessory", rarity: "common", mpBonus: 12 },
+            { id: "swift_charm", name: "Swift Charm", type: "accessory", rarity: "common", atkBonus: 1, defBonus: 1 },
             { id: "ring_of_might", name: "Ring of Might", type: "accessory", rarity: "uncommon", atkBonus: 3 },
             { id: "amulet_of_defense", name: "Amulet of Defense", type: "accessory", rarity: "uncommon", defBonus: 3 },
-            { id: "emerald_pendant", name: "Emerald Pendant", type: "accessory", rarity: "uncommon", hpBonus: 15, mpBonus: 10 },
-            { id: "mana_crystal", name: "Mana Crystal", type: "accessory", rarity: "rare", mpBonus: 20 },
-            { id: "hp_amulet", name: "Amulet of Vitality", type: "accessory", rarity: "rare", hpBonus: 30 },
-            { id: "phoenix_sigil", name: "Phoenix Sigil", type: "accessory", rarity: "rare", atkBonus: 5, hpBonus: 20, mpBonus: 20 },
-            { id: "lich_crown", name: "Lich Crown", type: "accessory", rarity: "epic", atkBonus: 7, defBonus: 7, mpBonus: 40, bossOnly: true },
-            { id: "hydra_heart", name: "Hydra Heart", type: "accessory", rarity: "legendary", hpBonus: 90, mpBonus: 60, bossOnly: true },
+            { id: "emerald_pendant", name: "Emerald Pendant", type: "accessory", rarity: "uncommon", hpBonus: 18, mpBonus: 12 },
+            { id: "wolf_tooth_necklace", name: "Wolf-Tooth Necklace", type: "accessory", rarity: "uncommon", atkBonus: 2, hpBonus: 12 },
+            { id: "scholar_brooch", name: "Scholar Brooch", type: "accessory", rarity: "uncommon", defBonus: 1, mpBonus: 18 },
+            { id: "duelist_medal", name: "Duelist Medal", type: "accessory", rarity: "uncommon", atkBonus: 2, defBonus: 2 },
+            { id: "mana_crystal", name: "Mana Crystal", type: "accessory", rarity: "rare", mpBonus: 28 },
+            { id: "hp_amulet", name: "Amulet of Vitality", type: "accessory", rarity: "rare", hpBonus: 38 },
+            { id: "guardian_seal", name: "Guardian Seal", type: "accessory", rarity: "rare", defBonus: 4, hpBonus: 20 },
+            { id: "berserker_crest", name: "Berserker Crest", type: "accessory", rarity: "rare", atkBonus: 4, hpBonus: 18 },
+            { id: "sage_prism", name: "Sage Prism", type: "accessory", rarity: "rare", atkBonus: 2, defBonus: 2, mpBonus: 18 },
+            { id: "phoenix_sigil", name: "Phoenix Sigil", type: "accessory", rarity: "rare", atkBonus: 4, hpBonus: 18, mpBonus: 15 },
+            { id: "void_locket", name: "Void Locket", type: "accessory", rarity: "epic", atkBonus: 5, mpBonus: 30 },
+            { id: "titan_emblem", name: "Titan Emblem", type: "accessory", rarity: "epic", defBonus: 5, hpBonus: 35 },
+            { id: "lich_crown", name: "Lich Crown", type: "accessory", rarity: "epic", atkBonus: 7, defBonus: 6, mpBonus: 35, bossOnly: true },
+            { id: "hydra_heart", name: "Hydra Heart", type: "accessory", rarity: "legendary", defBonus: 5, hpBonus: 80, mpBonus: 50, bossOnly: true },
 
             // Key items
             {
@@ -1801,13 +1852,46 @@
             { id: "titan_shard", name: "Titan Shard", type: "material", rarity: "rare", value: 75, description: "A dense fragment from a massive construct or titan." },
             { id: "void_crystal", name: "Void Crystal", type: "material", rarity: "epic", value: 110, description: "Crystallized energy drawn from the abyss." },
             { id: "celestial_essence", name: "Celestial Essence", type: "material", rarity: "epic", value: 125, description: "Radiant essence from an otherworldly being." },
+            { id: "goblin_scrap", name: "Goblin Scrap", type: "material", rarity: "common", value: 12, description: "A battered but reusable part taken from Goblin equipment." },
+            { id: "toad_mucus", name: "Toad Mucus", type: "material", rarity: "common", value: 11, description: "Sticky alchemical mucus gathered from monstrous Toads." },
+            { id: "boar_tusk", name: "Boar Tusk", type: "material", rarity: "common", value: 15, description: "A sturdy tusk suitable for reinforcing weapons." },
+            { id: "troll_blood", name: "Troll Blood", type: "material", rarity: "uncommon", value: 28, description: "Regenerative blood that remains warm long after battle." },
+            { id: "reptile_scale", name: "Reptile Scale", type: "material", rarity: "uncommon", value: 29, description: "A hard scale from a dangerous reptilian monster." },
+            { id: "harpy_feather", name: "Harpy Feather", type: "material", rarity: "uncommon", value: 32, description: "A light, magically responsive feather from a winged beast." },
+            { id: "chimera_horn", name: "Chimera Horn", type: "material", rarity: "rare", value: 58, description: "A twisted horn carrying several intertwined monster essences." },
+            { id: "demon_horn", name: "Demon Horn", type: "material", rarity: "rare", value: 62, description: "A dark horn that radiates infernal strength." },
+            { id: "blood_crystal", name: "Blood Crystal", type: "material", rarity: "rare", value: 68, description: "Crystallized life energy formed by blood-bound monsters." },
+            { id: "runestone", name: "Runestone", type: "material", rarity: "rare", value: 72, description: "An engraved stone fragment that still holds an ancient command." },
+            { id: "storm_essence", name: "Storm Essence", type: "material", rarity: "rare", value: 78, description: "Unstable elemental energy captured from a storm creature." },
+            { id: "obsidian_fragment", name: "Obsidian Fragment", type: "material", rarity: "rare", value: 82, description: "A razor-edged volcanic fragment hardened by extreme pressure." },
+            { id: "soul_fragment", name: "Soul Fragment", type: "material", rarity: "rare", value: 86, description: "A remnant of spiritual energy left by a powerful undead." },
+            { id: "crystal_fragment", name: "Crystal Fragment", type: "material", rarity: "rare", value: 90, description: "A luminous shard grown inside a magical creature." },
+            { id: "phoenix_ash", name: "Phoenix Ash", type: "material", rarity: "epic", value: 135, description: "Ever-warm ash carrying the promise of rebirth." },
+            { id: "chaos_fragment", name: "Chaos Fragment", type: "material", rarity: "epic", value: 145, description: "A volatile fragment whose shape changes when unobserved." },
             { id: "primordial_scale", name: "Primordial Scale", type: "material", rarity: "legendary", value: 250, description: "An ancient scale containing primordial power." }
         ];
 
         const MONSTER_MATERIAL_DROP_CHANCE = 0.6;
+        const BOSS_MATERIAL_DROP_CHANCE = 0.4;
         const MONSTER_MATERIAL_RULES = [
             { materialId: "primordial_scale", matches: monster => monster.id === "primordial_dragon" },
             { materialId: "slime_gel", matches: monster => /slime/i.test(monster.name) },
+            { materialId: "goblin_scrap", matches: monster => /goblin/i.test(monster.name) },
+            { materialId: "toad_mucus", matches: monster => /toad/i.test(monster.name) },
+            { materialId: "boar_tusk", matches: monster => /boar/i.test(monster.name) },
+            { materialId: "troll_blood", matches: monster => /troll/i.test(monster.name) },
+            { materialId: "reptile_scale", matches: monster => /lizardman|basilisk/i.test(monster.name) },
+            { materialId: "harpy_feather", matches: monster => /harpy|griffin|roc/i.test(monster.name) },
+            { materialId: "chimera_horn", matches: monster => /chimera/i.test(monster.name) },
+            { materialId: "demon_horn", matches: monster => /demon|abyssal hound|hellfire behemoth|inferno/i.test(monster.name) },
+            { materialId: "blood_crystal", matches: monster => /vampire|bloodmoon/i.test(monster.name) },
+            { materialId: "runestone", matches: monster => /runebound|stone golem|starforged golem|astral juggernaut/i.test(monster.name) },
+            { materialId: "storm_essence", matches: monster => /thunder|tempest|storm/i.test(monster.name) },
+            { materialId: "obsidian_fragment", matches: monster => /obsidian/i.test(monster.name) },
+            { materialId: "soul_fragment", matches: monster => /soul|wraith|lich|necromancer/i.test(monster.name) },
+            { materialId: "crystal_fragment", matches: monster => /crystal|eclipse|astral|starforged/i.test(monster.name) },
+            { materialId: "phoenix_ash", matches: monster => /phoenix/i.test(monster.name) },
+            { materialId: "chaos_fragment", matches: monster => /chaos|world eater/i.test(monster.name) },
             { materialId: "ancient_wood", matches: monster => /ironwood/i.test(monster.name) },
             { materialId: "spider_silk", matches: monster => /spider/i.test(monster.name) },
             { materialId: "venom_sac", matches: monster => monster.ability === "venom" || /venom|plague|basilisk/i.test(monster.name) },
@@ -1844,6 +1928,15 @@
                 goldMultiplier: 1.15
             },
             {
+                type: "collect_material",
+                name: "Supply Request: {itemName}",
+                description: "Collect and deliver {count} {itemName} to the Tavern.",
+                minCount: 3,
+                maxCount: 7,
+                expShare: 0.11,
+                goldMultiplier: 1.2
+            },
+            {
                 type: "elite_hunt",
                 name: "Elite Hunt: {monsterName}",
                 description: "Defeat {count} powerful {monsterName}s.",
@@ -1871,35 +1964,53 @@
                 label: "Bronze",
                 itemChance: 0.45,
                 ore: 0,
-                rewardItemPool: ["hp_potion_large", "mp_potion_large", "iron_sword", "chainmail_armor", "ring_of_might", "bone_charm"]
+                rewardItemPool: [
+                    "hp_potion_large", "mp_potion_large", "iron_sword", "chainmail_armor",
+                    "bone_charm", "copper_ring", "warding_stone", "mana_bead", "swift_charm"
+                ]
             },
             {
                 minLevel: 20,
                 label: "Silver",
                 itemChance: 0.55,
                 ore: 1,
-                rewardItemPool: ["hp_potion_greater", "mp_potion_greater", "steel_axe", "mage_robe", "emerald_pendant", "mana_crystal"]
+                rewardItemPool: [
+                    "hp_potion_greater", "mp_potion_greater", "steel_axe", "mage_robe",
+                    "ring_of_might", "amulet_of_defense", "emerald_pendant",
+                    "wolf_tooth_necklace", "scholar_brooch", "duelist_medal"
+                ]
             },
             {
                 minLevel: 40,
                 label: "Gold",
                 itemChance: 0.65,
                 ore: 2,
-                rewardItemPool: ["hp_potion_greater", "mp_potion_greater", "obsidian_blade", "broadsword", "plate_armor", "phoenix_sigil"]
+                rewardItemPool: [
+                    "hp_potion_greater", "mp_potion_greater", "obsidian_blade", "broadsword",
+                    "plate_armor", "mana_crystal", "hp_amulet", "guardian_seal",
+                    "berserker_crest", "sage_prism", "phoenix_sigil"
+                ]
             },
             {
                 minLevel: 60,
                 label: "Mythic",
                 itemChance: 0.75,
                 ore: 3,
-                rewardItemPool: ["elixir_full_hp", "elixir_full_mp", "broadsword", "enchanted_staff", "plate_armor", "phoenix_sigil"]
+                rewardItemPool: [
+                    "elixir_full_hp", "elixir_full_mp", "broadsword", "enchanted_staff",
+                    "plate_armor", "guardian_seal", "berserker_crest", "sage_prism",
+                    "phoenix_sigil", "void_locket", "titan_emblem"
+                ]
             },
             {
                 minLevel: 80,
                 label: "Primordial",
                 itemChance: 1,
                 ore: 4,
-                rewardItemPool: ["elixir_full_hp", "elixir_full_mp", "broadsword", "enchanted_staff", "plate_armor", "phoenix_sigil"]
+                rewardItemPool: [
+                    "elixir_full_hp", "elixir_full_mp", "broadsword", "enchanted_staff",
+                    "plate_armor", "phoenix_sigil", "void_locket", "titan_emblem"
+                ]
             }
         ];
 
@@ -2171,7 +2282,7 @@
             gameState.worldStatBonus = preservedWorldStatBonus;
             gameState.titleProgress = preservedTitleProgress;
             gameState.unlockedTitles = preservedUnlockedTitles;
-            gameState.equipmentStateVersion = 6;
+            gameState.equipmentStateVersion = ACCESSORY_BALANCE_EQUIPMENT_VERSION;
             gameState.progressionStateVersion = 2;
             gameState.currentLocation = "town";
             gameState.lastTavernVisit = null;
@@ -2938,6 +3049,7 @@
 
         let equipmentInstanceCounter = 0;
         const EQUIPMENT_STAT_FIELDS = ["atkBonus", "defBonus", "hpBonus", "mpBonus"];
+        const ACCESSORY_BALANCE_EQUIPMENT_VERSION = 7;
         const EQUIPMENT_RARITIES = {
             common: { rank: 0, statMultiplier: 1, sellMultiplier: 1 },
             uncommon: { rank: 1, statMultiplier: 1.25, sellMultiplier: 1.35 },
@@ -3124,24 +3236,13 @@
                 return;
             }
 
-            // Group items by name and count
-            const groupedInventory = {};
-            gameState.inventory.forEach((item, inventoryIndex) => {
-                const key = isEquipmentItem(item)
-                    ? item.instanceId || `legacy-equipment-${inventoryIndex}`
-                    : `${item.id || item.name}-${item.type}`;
-                if (!groupedInventory[key]) {
-                    groupedInventory[key] = { ...item, count: 0 };
-                }
-                groupedInventory[key].count++;
-            });
-
-            Object.values(groupedInventory).forEach(item => {
+            getInventoryStacks().forEach(stack => {
+                const item = stack.item;
                 const itemDiv = document.createElement('div');
                 itemDiv.className = `inventory-item item-rarity-${item.rarity}`;
                 itemDiv.innerHTML = `
                     <strong>${item.name}</strong>
-                    ${item.count > 1 ? ` (x${item.count})` : ''} <br>
+                    ${stack.count > 1 ? ` (×${stack.count})` : ''} <br>
                     <small>${item.type.charAt(0).toUpperCase() + item.type.slice(1)} - ${item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)}</small>
                 `;
                 if (item.type === "weapon" || item.type === "armor" || item.type === "accessory") {
@@ -3181,9 +3282,7 @@
                 }
 
                 itemDiv.onclick = () => {
-                    const actualItemIndexToUse = isEquipmentItem(item)
-                        ? gameState.inventory.findIndex(invItem => invItem.instanceId === item.instanceId)
-                        : gameState.inventory.findIndex(invItem => invItem.id === item.id && invItem.name === item.name);
+                    const actualItemIndexToUse = stack.inventoryIndices[0];
                     if (actualItemIndexToUse !== -1) {
                         useItem(gameState.inventory[actualItemIndexToUse], actualItemIndexToUse);
                     }
@@ -3280,7 +3379,10 @@
         }
 
         function awardMonsterMaterial(monster, random = Math.random) {
-            if (!monster?.isBoss && random() >= MONSTER_MATERIAL_DROP_CHANCE) {
+            const dropChance = monster?.isBoss
+                ? BOSS_MATERIAL_DROP_CHANCE
+                : MONSTER_MATERIAL_DROP_CHANCE;
+            if (random() >= dropChance) {
                 return null;
             }
 
@@ -3295,6 +3397,7 @@
             }
             addLogEntry(`🧱 Material drop: ${quantity}× ${material.name}!`, 'log-item');
             updateInventoryDisplay();
+            updateQuestDisplay();
             return { item: material, quantity };
         }
 
@@ -3379,7 +3482,65 @@
                     .slice(0, 5);
                 gameState.quests = [...activeQuests, ...recentCompletedQuests];
                 updateQuestDisplay();
+                return true;
             }
+            return false;
+        }
+
+        function removeInventoryItems(itemId, quantity) {
+            const safeQuantity = Math.max(0, Math.floor(Number(quantity) || 0));
+            if (!itemId || safeQuantity <= 0 || getInventoryItemCount(itemId) < safeQuantity) {
+                return false;
+            }
+
+            let remaining = safeQuantity;
+            for (let index = gameState.inventory.length - 1; index >= 0 && remaining > 0; index--) {
+                if (gameState.inventory[index]?.id !== itemId) continue;
+                gameState.inventory.splice(index, 1);
+                remaining--;
+            }
+            return remaining === 0;
+        }
+
+        function turnInCollectionQuest(questId) {
+            if (gameState.inBattle || gameState.currentLocation !== "tavern") {
+                addLogEntry("Collection quests can only be delivered at the Tavern.", 'log-error');
+                return false;
+            }
+
+            const quest = gameState.quests.find(entry => entry.id === questId);
+            const target = quest?.target;
+            if (!quest || quest.completed || target?.type !== "item_collection") {
+                addLogEntry("That collection quest is no longer available.", 'log-error');
+                return false;
+            }
+
+            const requiredCount = Math.max(1, Math.floor(Number(target.count) || 1));
+            const availableCount = getInventoryItemCount(target.itemId);
+            if (availableCount < requiredCount) {
+                addLogEntry(
+                    `You need ${requiredCount - availableCount} more ${target.itemName || "quest item"}.`,
+                    'log-error'
+                );
+                displayTavernQuestTurnIns();
+                return false;
+            }
+
+            if (!removeInventoryItems(target.itemId, requiredCount)) {
+                addLogEntry("The required materials could not be removed from inventory.", 'log-error');
+                return false;
+            }
+
+            target.current = requiredCount;
+            addLogEntry(
+                `📦 Delivered ${requiredCount}× ${target.itemName} to the Tavern.`,
+                'log-quest'
+            );
+            const completed = completeQuest(quest.id);
+            updateInventoryDisplay();
+            displayTavernQuestTurnIns();
+            saveGame({ silent: true });
+            return completed;
         }
 
         function trackMonsterKill(monsterName) {
@@ -3423,6 +3584,12 @@
                 let progress = '';
                 if (quest.target && quest.target.type === "monster_kill") {
                     progress = ` (${quest.target.current || 0}/${quest.target.count})`;
+                } else if (quest.target?.type === "item_collection") {
+                    const inventoryCount = Math.min(
+                        quest.target.count,
+                        getInventoryItemCount(quest.target.itemId)
+                    );
+                    progress = ` (${inventoryCount}/${quest.target.count} in inventory)`;
                 }
                 const rewardParts = [
                     `${quest.reward?.gold || 0} Gold`,
@@ -3480,11 +3647,36 @@
         function rest() {
             if (gameState.inBattle) return;
             const p = gameState.player;
-            const hpRecovered = Math.floor(p.maxHp * 0.2); // Recover 20% HP
-            const mpRecovered = Math.floor(p.maxMp * 0.3); // Recover 30% MP
-            p.hp = Math.min(p.maxHp, p.hp + hpRecovered);
-            p.mp = Math.min(p.maxMp, p.mp + mpRecovered);
-            addLogEntry(`You rest and recover ${hpRecovered} HP and ${mpRecovered} MP.`, 'log-heal');
+            const previousHp = p.hp;
+            const previousMp = p.mp;
+            const hpRecoveryAmount = Math.floor(p.maxHp * 0.2);
+            const mpRecoveryAmount = Math.floor(p.maxMp * 0.3);
+            p.hp = Math.min(p.maxHp, p.hp + hpRecoveryAmount);
+            p.mp = Math.min(p.maxMp, p.mp + mpRecoveryAmount);
+
+            const hpRecovered = p.hp - previousHp;
+            const mpRecovered = p.mp - previousMp;
+            if (hpRecovered <= 0 && mpRecovered <= 0) {
+                addLogEntry(
+                    "You finish resting, but your HP and MP are already full. No recovery is gained.",
+                    'log-entry'
+                );
+            } else if (hpRecovered <= 0) {
+                addLogEntry(
+                    `You rest and recover ${mpRecovered} MP. Your HP is already full.`,
+                    'log-heal'
+                );
+            } else if (mpRecovered <= 0) {
+                addLogEntry(
+                    `You rest and recover ${hpRecovered} HP. Your MP is already full.`,
+                    'log-heal'
+                );
+            } else {
+                addLogEntry(
+                    `You rest and recover ${hpRecovered} HP and ${mpRecovered} MP.`,
+                    'log-heal'
+                );
+            }
             updateDisplay();
         }
 
@@ -3494,10 +3686,47 @@
             updateLocationUI();
         }
 
+        function displayTavernQuestTurnIns() {
+            const turnInList = document.getElementById('tavernQuestTurnInList');
+            if (!turnInList) return;
+
+            turnInList.innerHTML = '';
+            const collectionQuests = gameState.quests.filter(quest => {
+                return !quest.completed && quest.target?.type === "item_collection";
+            });
+            if (collectionQuests.length === 0) {
+                turnInList.innerHTML = '<p style="color:#aaa;">No material deliveries are currently active.</p>';
+                return;
+            }
+
+            collectionQuests.forEach(quest => {
+                const target = quest.target;
+                const inventoryCount = getInventoryItemCount(target.itemId);
+                const canDeliver = inventoryCount >= target.count;
+                const questDiv = document.createElement('div');
+                questDiv.className = 'tavern-quest-entry';
+                questDiv.innerHTML = `
+                    <strong>${quest.name}</strong><br>
+                    <small>${target.itemName}: ${Math.min(inventoryCount, target.count)}/${target.count} ready</small>
+                `;
+
+                const turnInButton = document.createElement('button');
+                turnInButton.textContent = `Deliver ${target.count}`;
+                turnInButton.disabled = !canDeliver;
+                turnInButton.title = canDeliver
+                    ? `Deliver ${target.count} ${target.itemName}.`
+                    : `Need ${target.count - inventoryCount} more ${target.itemName}.`;
+                turnInButton.onclick = () => turnInCollectionQuest(quest.id);
+                questDiv.appendChild(turnInButton);
+                turnInList.appendChild(questDiv);
+            });
+        }
+
         function displayAvailableQuests() {
             const availableQuestsList = document.getElementById('availableQuestsList');
             availableQuestsList.innerHTML = '';
             updateTavernCooldownDisplay();
+            displayTavernQuestTurnIns();
 
             const availableQuestOffers = gameState.tavernQuestOffers;
 
@@ -3548,6 +3777,17 @@
             return unlockedMonsters.length > 0 ? unlockedMonsters : monsterTemplates;
         }
 
+        function getQuestMaterialPool(playerLevel) {
+            const materialIds = getQuestMonsterPool(playerLevel)
+                .flatMap(monster => getMonsterMaterialPool(monster));
+            const materials = [...new Set(materialIds)]
+                .map(materialId => getItemTemplate(materialId))
+                .filter(item => item?.type === "material");
+            return materials.length > 0
+                ? materials
+                : [getItemTemplate("monster_essence")].filter(Boolean);
+        }
+
         function getQuestElitePool(playerLevel) {
             const pool = [...getQuestMonsterPool(playerLevel)]
                 .sort((first, second) => {
@@ -3588,10 +3828,14 @@
                 const countRange = template.maxCount - template.minCount + 1;
                 const targetCount = template.minCount + Math.floor(random() * countRange);
                 let targetMonster = null;
+                let targetItem = null;
 
                 if (template.type === "kill_specific_monster") {
                     const monsterPool = getQuestMonsterPool(safeLevel);
                     targetMonster = monsterPool[Math.floor(random() * monsterPool.length)]?.name || null;
+                } else if (template.type === "collect_material") {
+                    const materialPool = getQuestMaterialPool(safeLevel);
+                    targetItem = materialPool[Math.floor(random() * materialPool.length)] || null;
                 } else if (template.type === "elite_hunt") {
                     const elitePool = getQuestElitePool(safeLevel);
                     targetMonster = elitePool[Math.floor(random() * elitePool.length)]?.name || null;
@@ -3599,9 +3843,12 @@
                     targetMonster = pendingBoss?.name || null;
                 }
 
-                const questName = template.name.replaceAll("{monsterName}", targetMonster || "Monster");
+                const questName = template.name
+                    .replaceAll("{monsterName}", targetMonster || "Monster")
+                    .replaceAll("{itemName}", targetItem?.name || "Material");
                 const description = template.description
                     .replaceAll("{monsterName}", targetMonster || "monster")
+                    .replaceAll("{itemName}", targetItem?.name || "material")
                     .replaceAll("{count}", targetCount);
                 const scaledExp = Math.max(
                     1,
@@ -3627,11 +3874,19 @@
                     level: safeLevel,
                     name: `[${tier.label}] ${questName}`,
                     description,
-                    target: {
-                        type: "monster_kill",
-                        count: targetCount,
-                        current: 0
-                    },
+                    target: template.type === "collect_material"
+                        ? {
+                            type: "item_collection",
+                            itemId: targetItem?.id || "monster_essence",
+                            itemName: targetItem?.name || "Monster Essence",
+                            count: targetCount,
+                            current: 0
+                        }
+                        : {
+                            type: "monster_kill",
+                            count: targetCount,
+                            current: 0
+                        },
                     reward: {
                         gold: scaledGold,
                         exp: scaledExp,
@@ -3656,6 +3911,7 @@
         const ACTIVE_QUEST_TARGET_ENCOUNTER_CHANCE = 0.5;
 
         function getActiveQuestMonsterPool() {
+            const playerLevel = gameState.player.level;
             const activeTargetNames = new Set(
                 gameState.quests
                     .filter(quest => {
@@ -3667,6 +3923,38 @@
                     })
                     .map(quest => quest.target.monster)
             );
+
+            const activeCollectionMaterialIds = new Set(
+                gameState.quests
+                    .filter(quest => {
+                        const target = quest?.target;
+                        return !quest.completed
+                            && target?.type === "item_collection"
+                            && typeof target.itemId === "string"
+                            && getInventoryItemCount(target.itemId) < target.count;
+                    })
+                    .map(quest => quest.target.itemId)
+            );
+
+            activeCollectionMaterialIds.forEach(materialId => {
+                const materialSources = monsterTemplates.filter(monster => {
+                    return getMonsterMaterialPool(monster).includes(materialId);
+                });
+                const hasInRangeSource = materialSources.some(monster => {
+                    return monster.minLevel <= playerLevel && monster.maxLevel >= playerLevel;
+                });
+                if (hasInRangeSource || materialSources.length === 0) return;
+
+                const getLevelDistance = monster => {
+                    if (playerLevel < monster.minLevel) return monster.minLevel - playerLevel;
+                    if (playerLevel > monster.maxLevel) return playerLevel - monster.maxLevel;
+                    return 0;
+                };
+                const nearestDistance = Math.min(...materialSources.map(getLevelDistance));
+                materialSources
+                    .filter(monster => getLevelDistance(monster) === nearestDistance)
+                    .forEach(monster => activeTargetNames.add(monster.name));
+            });
 
             return monsterTemplates.filter(monster => activeTargetNames.has(monster.name));
         }
@@ -3811,9 +4099,47 @@
             return normalized;
         }
 
+        function migrateAccessoryBalance(item, savedEquipmentStateVersion = 0) {
+            if (!item
+                || item.type !== "accessory"
+                || savedEquipmentStateVersion >= ACCESSORY_BALANCE_EQUIPMENT_VERSION) {
+                return item;
+            }
+
+            const template = getItemTemplate(item.id);
+            if (!template || template.type !== "accessory") return item;
+
+            const baseStats = getEquipmentBaseStats(template);
+            const upgradeLevel = Math.min(
+                BLACKSMITH_MAX_LEVEL,
+                Math.max(0, Math.floor(Number(item.upgradeLevel) || 0))
+            );
+            const balancedStats = item.rolledStats
+                ? calculateRarityStats(baseStats, item.rarity)
+                : { ...baseStats };
+
+            item.baseStats = baseStats;
+            item.baseValue = calculateEquipmentBaseValue(template);
+            item.upgradeLevel = upgradeLevel;
+            EQUIPMENT_STAT_FIELDS.forEach(field => {
+                item[field] = (balancedStats[field] || 0)
+                    + getUpgradeStatBonus(item, field, upgradeLevel);
+            });
+            item.statRollVersion = item.rolledStats ? 2 : item.statRollVersion;
+            item.upgradeStatVersion = 2;
+            item.accessoryBalanceVersion = 1;
+            return item;
+        }
+
         function migrateEquipmentInventory(savedState, equipped) {
+            const savedEquipmentStateVersion = Number.isFinite(savedState.equipmentStateVersion)
+                ? savedState.equipmentStateVersion
+                : 0;
             const inventory = Array.isArray(savedState.inventory)
-                ? savedState.inventory.map(normalizeSavedItem).filter(Boolean)
+                ? savedState.inventory
+                    .map(normalizeSavedItem)
+                    .map(item => migrateAccessoryBalance(item, savedEquipmentStateVersion))
+                    .filter(Boolean)
                 : [];
             const isLegacyEquipmentState = !Number.isFinite(savedState.equipmentStateVersion)
                 || savedState.equipmentStateVersion < 2;
@@ -3861,6 +4187,22 @@
                             ? { ...quest.reward }
                             : { gold: 0, exp: 0, item: null }
                     };
+                    if (normalized.target.type === "item_collection") {
+                        const savedMaterial = getItemTemplate(normalized.target.itemId);
+                        const material = savedMaterial?.type === "material"
+                            ? savedMaterial
+                            : getItemTemplate("monster_essence");
+                        normalized.target.itemId = material.id;
+                        normalized.target.itemName = material.name;
+                        normalized.target.count = Math.min(
+                            50,
+                            Math.max(1, Math.floor(Number(normalized.target.count) || 1))
+                        );
+                        normalized.target.current = Math.min(
+                            normalized.target.count,
+                            Math.max(0, Math.floor(Number(normalized.target.current) || 0))
+                        );
+                    }
 
                     const isDynamicQuest = normalized.id !== "starting_quest_1";
                     if (!usesCurrentProgression && isDynamicQuest && !normalized.completed) {
@@ -3920,11 +4262,24 @@
             const nameChangesRemaining = Number.isFinite(savedState.player.nameChangesRemaining)
                 ? Math.min(1, Math.max(0, Math.floor(savedState.player.nameChangesRemaining)))
                 : 1;
+            const savedEquipmentStateVersion = Number.isFinite(savedState.equipmentStateVersion)
+                ? savedState.equipmentStateVersion
+                : 0;
             const equipped = {
                 weapon: savedEquipped && typeof savedEquipped === 'object' ? normalizeSavedItem(savedEquipped.weapon) : null,
                 armor: savedEquipped && typeof savedEquipped === 'object' ? normalizeSavedItem(savedEquipped.armor) : null,
-                accessory: savedEquipped && typeof savedEquipped === 'object' ? normalizeSavedItem(savedEquipped.accessory) : null,
-                accessory2: savedEquipped && typeof savedEquipped === 'object' ? normalizeSavedItem(savedEquipped.accessory2) : null
+                accessory: savedEquipped && typeof savedEquipped === 'object'
+                    ? migrateAccessoryBalance(
+                        normalizeSavedItem(savedEquipped.accessory),
+                        savedEquipmentStateVersion
+                    )
+                    : null,
+                accessory2: savedEquipped && typeof savedEquipped === 'object'
+                    ? migrateAccessoryBalance(
+                        normalizeSavedItem(savedEquipped.accessory2),
+                        savedEquipmentStateVersion
+                    )
+                    : null
             };
 
             Object.values(equipped).forEach(item => {
@@ -4071,7 +4426,7 @@
                     equipped
                 },
                 inventory,
-                equipmentStateVersion: 6,
+                equipmentStateVersion: ACCESSORY_BALANCE_EQUIPMENT_VERSION,
                 progressionStateVersion: 2,
                 quests: migratedQuests,
                 monsterCodex: savedState.monsterCodex && typeof savedState.monsterCodex === 'object'

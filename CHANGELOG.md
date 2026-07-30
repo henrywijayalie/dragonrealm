@@ -11,9 +11,21 @@ Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pe
 - Primordial Dragon sekarang menjatuhkan Primordial Aegis sebagai armor dan World Seed sebagai key item.
 - World Seed tidak dapat dijual atau digunakan secara manual dan dikonsumsi ketika melengkapi World Reset.
 - Save lama yang sudah mengalahkan Primordial Dragon otomatis menerima World Seed jika belum memilikinya.
-- Menambahkan 16 jenis material crafting yang dapat dijatuhkan monster.
-- Monster biasa memiliki peluang 60% memperoleh material, sedangkan boss selalu menjatuhkannya.
+- Menambahkan 32 jenis material crafting yang dapat dijatuhkan monster.
+- Memperluas drop khusus keluarga monster dengan Goblin Scrap, Troll Blood, Reptile Scale, Runestone, Storm Essence, Phoenix Ash, Chaos Fragment, dan material baru lainnya.
+- Monster biasa memiliki peluang 60% memperoleh material, sedangkan boss memiliki peluang 40% agar material boss lebih menantang diperoleh.
 - Jenis material mengikuti keluarga atau ability monster; monster level 50 ke atas dan boss menghasilkan jumlah lebih banyak.
+- Menggabungkan item non-equipment sejenis menjadi satu stack pada Inventory dan daftar Sell.
+- Tombol `Sell` menjual satu unit dari stack setiap kali ditekan, sedangkan equipment tetap ditampilkan per instance.
+- Menambahkan Supply Request di Tavern untuk mengumpulkan dan menyerahkan material sebagai quest.
+- Material quest dikurangi sesuai kebutuhan saat diserahkan; menjual material akan menurunkan jumlah yang siap dikumpulkan.
+- Monster sumber material quest tetap dapat ditemui jika pemain sudah melewati rentang encounter normalnya.
+- Menyeimbangkan kembali statistik accessory agar pilihan satu-stat dan hybrid memiliki fungsi yang lebih jelas.
+- Menambah jumlah variasi accessory menjadi 21, mencakup build ATK, DEF, HP, MP, dan hybrid dari common hingga epic.
+- Menambahkan Bone Charm, Copper Ring, Warding Stone, dan Mana Bead ke Shop sebagai pilihan accessory awal.
+- Memperluas reward quest dengan accessory sesuai tier, termasuk Guardian Seal, Sage Prism, Void Locket, dan Titan Emblem.
+- Save lama otomatis memigrasikan statistik accessory ke balancing baru tanpa menghilangkan rarity atau level upgrade.
+- Rest sekarang menampilkan recovery aktual dan memberi tahu pemain ketika HP serta MP sudah penuh sehingga tidak ada recovery yang diperoleh.
 
 ## 29 Juli 2026
 
