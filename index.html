@@ -90,6 +90,7 @@
             transition: background-color 0.2s, transform 0.1s;
             margin-right: 10px;
             margin-bottom: 10px;
+            touch-action: manipulation;
         }
 
         button:hover {
@@ -282,19 +283,53 @@
         }
 
         /* --- Controls --- */
+        #battleControls {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        #battleControls button {
+            display: block;
+            width: 100%;
+            min-width: 0;
+            min-height: 48px;
+            margin: 0;
+            padding: 10px 12px;
+            line-height: 1.25;
+            text-align: center;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        #magicStrikeBtn {
+            grid-column: span 2;
+        }
+
         #controls {
             display: flex;
             flex-wrap: wrap;
+            gap: 10px;
             margin-top: 15px;
             border-top: 1px dashed rgba(233, 69, 96, 0.3);
             padding-top: 15px;
         }
 
+        #controls button {
+            flex: 1 1 150px;
+            min-height: 44px;
+            margin: 0;
+        }
+
         .shortcut-help {
-            margin-top: 8px;
+            margin-top: 12px;
         }
 
         .shortcut-help-toggle {
+            max-width: 100%;
+            min-height: 42px;
+            margin: 0;
             padding: 6px 10px;
             font-size: 0.85em;
             background: rgba(0, 191, 255, 0.25);
@@ -609,13 +644,81 @@
 
         /* --- Responsive Design --- */
         @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
             .game-container {
                 grid-template-columns: 1fr;
+                gap: 14px;
             }
 
             .main-panel,
             .side-panel {
                 grid-column: 1 / 2;
+                padding: 16px;
+            }
+
+            #battleControls {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            #magicStrikeBtn {
+                grid-column: 1 / -1;
+            }
+
+            #controls button {
+                flex-basis: calc(50% - 5px);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+
+            .game-container {
+                gap: 10px;
+            }
+
+            .main-panel,
+            .side-panel {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: clamp(1.35rem, 7vw, 1.8rem);
+                line-height: 1.2;
+            }
+
+            #battleControls {
+                gap: 8px;
+            }
+
+            #battleControls button {
+                min-height: 52px;
+                padding: 9px 7px;
+                font-size: clamp(0.82rem, 4vw, 1rem);
+            }
+
+            #controls {
+                gap: 8px;
+            }
+
+            #controls button {
+                flex-basis: calc(50% - 4px);
+                min-height: 48px;
+                padding: 9px 7px;
+                font-size: 0.9rem;
+            }
+
+            .shortcut-help-toggle {
+                width: 100%;
+                min-height: 46px;
+            }
+
+            .shortcut-help-panel {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -752,12 +855,6 @@
                 </div>
             </section>
 
-            <section id="titleSection">
-                <h3>Titles</h3>
-                <p id="unlockedTitleSummary">No titles unlocked.</p>
-                <div id="titleQuestList"></div>
-            </section>
-
             <section>
                 <h3>Inventory</h3>
                 <div id="inventoryList">
@@ -768,6 +865,12 @@
                 <h3>Quest Log</h3>
                 <div id="questLogList">
                 </div>
+            </section>
+
+            <section id="titleSection">
+                <h3>Titles</h3>
+                <p id="unlockedTitleSummary">No titles unlocked.</p>
+                <div id="titleQuestList"></div>
             </section>
 
             <section>
@@ -1452,7 +1555,31 @@
             { name: "Fire Elemental", hp: 215, atk: 45, exp: 175, gold: 68, minLevel: 12, maxLevel: 19, ability: "mana_burn", abilityChance: 0.25 },
             { name: "Elder Dragon", hp: 340, atk: 48, exp: 210, gold: 85, minLevel: 15, maxLevel: 99, ability: "heavy_strike", abilityChance: 0.3 },
             { name: "Shadow Dragon", hp: 320, atk: 51, exp: 225, gold: 92, minLevel: 15, maxLevel: 99, ability: "life_drain", abilityChance: 0.3 },
-            { name: "Ancient Titan", hp: 430, atk: 49, exp: 245, gold: 105, minLevel: 17, maxLevel: 99, ability: "regenerate", abilityChance: 0.3 }
+            { name: "Ancient Titan", hp: 430, atk: 49, exp: 245, gold: 105, minLevel: 17, maxLevel: 99, ability: "regenerate", abilityChance: 0.3 },
+
+            // Level 20-50 encounters
+            { name: "Ashen Berserker", hp: 480, atk: 53, exp: 280, gold: 120, minLevel: 20, maxLevel: 24, ability: "heavy_strike", abilityChance: 0.3 },
+            { name: "Plague Alchemist", hp: 520, atk: 55, exp: 320, gold: 132, minLevel: 20, maxLevel: 27, ability: "venom", abilityChance: 0.3 },
+            { name: "Crystal Basilisk", hp: 590, atk: 57, exp: 365, gold: 148, minLevel: 23, maxLevel: 31, ability: "venom", abilityChance: 0.35 },
+            { name: "Dread Griffin", hp: 660, atk: 60, exp: 420, gold: 170, minLevel: 26, maxLevel: 35, ability: "heavy_strike", abilityChance: 0.3 },
+            { name: "Runebound Sentinel", hp: 745, atk: 63, exp: 490, gold: 198, minLevel: 29, maxLevel: 39, ability: "regenerate", abilityChance: 0.3 },
+            { name: "Bloodmoon Werewolf", hp: 835, atk: 67, exp: 570, gold: 232, minLevel: 32, maxLevel: 42, ability: "life_drain", abilityChance: 0.3 },
+            { name: "Abyss Watcher", hp: 925, atk: 70, exp: 660, gold: 270, minLevel: 35, maxLevel: 45, ability: "mana_burn", abilityChance: 0.35 },
+            { name: "Thunder Roc", hp: 1020, atk: 73, exp: 760, gold: 312, minLevel: 38, maxLevel: 48, ability: "heavy_strike", abilityChance: 0.35 },
+            { name: "Hellfire Behemoth", hp: 1140, atk: 77, exp: 880, gold: 362, minLevel: 42, maxLevel: 50, ability: "regenerate", abilityChance: 0.35 },
+            { name: "Void Archon", hp: 1280, atk: 80, exp: 1020, gold: 420, minLevel: 45, maxLevel: 50, ability: "life_drain", abilityChance: 0.35 },
+
+            // Level 50-80 encounters
+            { name: "Ironwood Colossus", hp: 1400, atk: 83, exp: 1200, gold: 500, minLevel: 50, maxLevel: 56, ability: "regenerate", abilityChance: 0.35 },
+            { name: "Soul Devourer", hp: 1450, atk: 86, exp: 1280, gold: 530, minLevel: 50, maxLevel: 59, ability: "life_drain", abilityChance: 0.35 },
+            { name: "Tempest Djinn", hp: 1530, atk: 88, exp: 1380, gold: 570, minLevel: 54, maxLevel: 63, ability: "mana_burn", abilityChance: 0.35 },
+            { name: "Obsidian Leviathan", hp: 1660, atk: 91, exp: 1510, gold: 620, minLevel: 57, maxLevel: 66, ability: "heavy_strike", abilityChance: 0.35 },
+            { name: "Eclipse Seraph", hp: 1800, atk: 94, exp: 1650, gold: 680, minLevel: 60, maxLevel: 69, ability: "life_drain", abilityChance: 0.4 },
+            { name: "Astral Juggernaut", hp: 1950, atk: 97, exp: 1810, gold: 750, minLevel: 63, maxLevel: 72, ability: "heavy_strike", abilityChance: 0.4 },
+            { name: "Rift Stalker", hp: 2100, atk: 100, exp: 1990, gold: 830, minLevel: 66, maxLevel: 75, ability: "venom", abilityChance: 0.4 },
+            { name: "Starforged Golem", hp: 2260, atk: 103, exp: 2190, gold: 920, minLevel: 69, maxLevel: 78, ability: "regenerate", abilityChance: 0.4 },
+            { name: "Nether Phoenix", hp: 2440, atk: 107, exp: 2420, gold: 1020, minLevel: 72, maxLevel: 80, ability: "regenerate", abilityChance: 0.4 },
+            { name: "Chaos Dragon", hp: 2660, atk: 111, exp: 2680, gold: 1140, minLevel: 76, maxLevel: 80, ability: "mana_burn", abilityChance: 0.4 }
         ];
 
         const bossTemplates = [
@@ -3419,8 +3546,37 @@
 
 
         // --- Monster Spawning & Difficulty ---
-        function getAdaptiveMonster() {
+        const ACTIVE_QUEST_TARGET_ENCOUNTER_CHANCE = 0.5;
+
+        function getActiveQuestMonsterPool() {
+            const activeTargetNames = new Set(
+                gameState.quests
+                    .filter(quest => {
+                        const target = quest?.target;
+                        return !quest.completed
+                            && target?.type === "monster_kill"
+                            && typeof target.monster === "string"
+                            && (target.current || 0) < target.count;
+                    })
+                    .map(quest => quest.target.monster)
+            );
+
+            return monsterTemplates.filter(monster => activeTargetNames.has(monster.name));
+        }
+
+        function getAdaptiveMonster(random = Math.random) {
             const pLevel = gameState.player.level;
+            const outOfRangeQuestMonsters = getActiveQuestMonsterPool()
+                .filter(monster => {
+                    return pLevel < monster.minLevel || pLevel > monster.maxLevel;
+                });
+            if (outOfRangeQuestMonsters.length > 0
+                && random() < ACTIVE_QUEST_TARGET_ENCOUNTER_CHANCE) {
+                return outOfRangeQuestMonsters[
+                    Math.floor(random() * outOfRangeQuestMonsters.length)
+                ];
+            }
+
             const possibleMonsters = monsterTemplates.filter(monster => {
                 return monster.minLevel <= pLevel && monster.maxLevel >= pLevel;
             });
@@ -3428,10 +3584,10 @@
             if (possibleMonsters.length === 0) {
                 const unlockedMonsters = monsterTemplates.filter(monster => monster.minLevel <= pLevel);
                 const fallbackPool = unlockedMonsters.length > 0 ? unlockedMonsters : monsterTemplates;
-                return fallbackPool[Math.floor(Math.random() * fallbackPool.length)];
+                return fallbackPool[Math.floor(random() * fallbackPool.length)];
             }
 
-            return possibleMonsters[Math.floor(Math.random() * possibleMonsters.length)];
+            return possibleMonsters[Math.floor(random() * possibleMonsters.length)];
         }
 
         function getPendingBoss() {

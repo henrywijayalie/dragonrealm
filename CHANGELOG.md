@@ -4,6 +4,20 @@ Seluruh perubahan penting pada Dragon Realm Adventure dicatat dalam file ini.
 
 Format changelog mengikuti prinsip [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Proyek belum menggunakan nomor versi resmi, sehingga perubahan terbaru ditempatkan di bagian **Unreleased**.
 
+## Deployment Update - 2026-07-30
+
+### Added
+
+- Sepuluh monster normal baru untuk level 20–50 dan sepuluh monster normal baru untuk level 50–80, lengkap dengan kurva statistik dan ability.
+
+### Changed
+
+- Menata ulang tombol Battle, Town, dan Keyboard Shortcuts dengan ukuran sentuh serta grid yang proporsional pada layar smartphone.
+
+### Fixed
+
+- Target monster dari quest aktif tetap dapat ditemui jika berada di luar batas encounter normal; target yang masih sesuai rentang level tetap menggunakan peluang kemunculan biasa.
+
 ## Deployment Update - 2026-07-29
 
 ### Added
