@@ -15,6 +15,10 @@ Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pe
 - Menambahkan hidden title `Gravewalker` setelah 100 kekalahan battle dengan efek permanen `+5 HP`.
 - Menyembunyikan seluruh hidden title dari modal `Titles & Requirements` selama terkunci, lalu menampilkannya bersama persyaratan setelah berhasil diperoleh.
 - Tidak menghitung roll statistik pertama sebagai progres `Fate Defier`.
+- Merapikan dialog pemilihan Origin menjadi tiga kolom pada desktop agar lima pilihan muat dalam dua baris tanpa scrollbar kecil.
+- Mempertahankan layout dua kolom pada tablet dan satu kolom pada smartphone agar kartu Origin tetap mudah dibaca.
+- Menampilkan jumlah re-roll Origin pada preview statistik tanpa membocorkan target hidden title.
+- Melanjutkan hitungan re-roll setelah 1.000 agar angka yang ditampilkan tetap akurat.
 - Mempertahankan Origin dan statistik milik save lama tanpa memaksa pemilihan atau roll ulang.
 - Mengunci aksi permainan sampai pemain baru selesai memilih Origin serta memulihkan dialog pilihan jika onboarding terhenti.
 - Mengubah timestamp log biasa dan kartu Turn ke format 24 jam `HH:mm:ss`.
