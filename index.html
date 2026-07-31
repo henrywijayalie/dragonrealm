@@ -1849,6 +1849,7 @@
             inBattle: false,
             areaLevel: 1,
             totalVictories: 0,
+            restlessBattleStreak: 0,
             defeatedBosses: [],
             worldResetCount: 0,
             worldStatBonus: 0,
@@ -1865,7 +1866,8 @@
                 lastStandVictories: 0,
                 consumablesUsed: 0,
                 successfulFlees: 0,
-                playerDeaths: 0
+                playerDeaths: 0,
+                restlessBattleStreak: 0
             },
             unlockedTitles: [],
             equipmentStateVersion: 10,
@@ -1923,6 +1925,7 @@
         const ELEMENTAL_SET_REQUIRED_PIECES = 6;
         const ELEMENTAL_SET_DAMAGE_REDUCTION = 0.15;
         const BATTLE_TURN_DELAY = 600;
+        const RESTLESS_TITLE_TARGET = 100;
         const ELEMENT_CONFIGS = {
             fire: { label: "Fire", status: "burn", statusLabel: "Burn", stoneId: "fire_elemental_stone", arrowId: "fire_arrow" },
             lightning: { label: "Lightning", status: "paralyzed", statusLabel: "Paralyzed", stoneId: "lightning_elemental_stone", arrowId: "lightning_arrow" },
@@ -2068,6 +2071,15 @@
                 progressKey: "playerDeaths",
                 target: 100,
                 effect: { hpBonus: 5 },
+                hidden: true
+            },
+            {
+                id: "the_restless",
+                title: "The Restless",
+                description: `Win ${RESTLESS_TITLE_TARGET} consecutive battles without using Rest.`,
+                progressKey: "restlessBattleStreak",
+                target: RESTLESS_TITLE_TARGET,
+                effect: { hpBonus: 1, mpBonus: 1, atkBonus: 1, defBonus: 1 },
                 hidden: true
             },
             {
@@ -2595,6 +2607,14 @@
                 updateTitleUI();
             }
             return true;
+        }
+
+        function resetRestlessBattleStreak() {
+            gameState.restlessBattleStreak = 0;
+            if (!gameState.unlockedTitles.includes("the_restless")
+                && gameState.titleProgress) {
+                gameState.titleProgress.restlessBattleStreak = 0;
+            }
         }
 
         function updateTitleUI() {
@@ -4020,6 +4040,10 @@
             const preservedUnlockedTitles = preserveIdentity && Array.isArray(gameState.unlockedTitles)
                 ? gameState.unlockedTitles.filter(titleId => TITLE_QUESTS.some(title => title.id === titleId))
                 : [];
+            preservedTitleProgress.restlessBattleStreak
+                = preservedUnlockedTitles.includes("the_restless")
+                    ? RESTLESS_TITLE_TARGET
+                    : 0;
             const preservedElementalEquipment = Array.isArray(
                 options.preservedElementalEquipment
             )
@@ -4089,6 +4113,7 @@
             gameState.inBattle = false;
             gameState.areaLevel = 1;
             gameState.totalVictories = 0;
+            gameState.restlessBattleStreak = 0;
             gameState.defeatedBosses = [];
             gameState.worldResetCount = preservedWorldResetCount;
             gameState.worldStatBonus = preservedWorldStatBonus;
@@ -5195,6 +5220,15 @@
             addLogEntry(`💀 You defeated the ${monster.name}!`, 'log-battle');
             gameState.totalVictories++;
             recordTitleProgress("monsterKills", 1);
+            gameState.restlessBattleStreak = Math.max(
+                0,
+                Math.floor(gameState.restlessBattleStreak || 0)
+            ) + 1;
+            const restlessTitle = getTitleDefinition("the_restless");
+            if (restlessTitle
+                && !gameState.unlockedTitles.includes(restlessTitle.id)) {
+                recordTitleProgress("restlessBattleStreak", 1);
+            }
             const equippedHands = gameState.player.equipped || {};
             const hasEquippedWeapon = [
                 equippedHands.rightHand,
@@ -5452,6 +5486,7 @@
 
         function handlePlayerDefeat() {
             addLogEntry("☠️ You have been defeated!", "log-error");
+            resetRestlessBattleStreak();
             recordTitleProgress("playerDeaths", 1);
             finishBattleResolution();
             endBattle();
@@ -6491,6 +6526,7 @@
 
         function rest() {
             if (gameState.inBattle) return;
+            resetRestlessBattleStreak();
             const p = gameState.player;
             const previousHp = p.hp;
             const previousMp = p.mp;
@@ -7459,6 +7495,11 @@
                     ];
                 })
             );
+            const restlessBattleStreak = Number.isFinite(savedState.restlessBattleStreak)
+                ? Math.max(0, Math.floor(savedState.restlessBattleStreak))
+                : Number.isFinite(savedState.titleProgress?.restlessBestStreak)
+                    ? Math.max(0, Math.floor(savedState.titleProgress.restlessBestStreak))
+                    : 0;
             const previouslyDefeatedBossIds = Array.isArray(savedState.defeatedBosses)
                 ? savedState.defeatedBosses
                 : [];
@@ -7480,6 +7521,9 @@
                 ? [...new Set(savedState.unlockedTitles
                     .filter(titleId => TITLE_QUESTS.some(title => title.id === titleId)))]
                 : [];
+            titleProgress.restlessBattleStreak = unlockedTitles.includes("the_restless")
+                ? RESTLESS_TITLE_TARGET
+                : Math.min(RESTLESS_TITLE_TARGET, restlessBattleStreak);
             TITLE_QUESTS.forEach(titleQuest => {
                 if (isTitleRequirementMet(titleQuest, titleProgress, worldResetCount)
                     && !unlockedTitles.includes(titleQuest.id)) {
@@ -7567,6 +7611,9 @@
                 totalVictories: Number.isFinite(savedState.totalVictories) && savedState.totalVictories >= 0
                     ? Math.floor(savedState.totalVictories)
                     : 0,
+                restlessBattleStreak: unlockedTitles.includes("the_restless")
+                    ? 0
+                    : titleProgress.restlessBattleStreak,
                 defeatedBosses: Array.isArray(savedState.defeatedBosses)
                     ? savedState.defeatedBosses.filter(id =>
                         [...bossTemplates, ...elementalBossTemplates]
