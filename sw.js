@@ -1,4 +1,4 @@
-const CACHE_NAME = "dragon-realm-offline-v3";
+const CACHE_NAME = "dragon-realm-offline-v4";
 const SCOPE_URL = new URL("./", self.location.href).href;
 const INDEX_URL = new URL("./index.html", self.location.href).href;
 const APP_SHELL = [SCOPE_URL, INDEX_URL];

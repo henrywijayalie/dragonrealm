@@ -5,8 +5,11 @@ Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pe
 ## 31 Juli 2026
 
 - Mengubah onboarding pemain baru menjadi dua tahap: menentukan nama, lalu memilih Origin.
-- Menambahkan lima kartu pilihan Origin yang menjelaskan fokus bermain dan statistik awal Vitalborn, Aetherborn, Warborn, Ironborn, serta Versatile.
-- Menghentikan pemberian Origin secara acak untuk karakter baru tanpa mengubah Origin dan statistik milik save lama.
+- Menambahkan lima kartu pilihan Origin yang menjelaskan fokus bermain Vitalborn, Aetherborn, Warborn, Ironborn, serta Versatile.
+- Mempertahankan delapan token statistik awal yang diacak dengan jaminan fokus Origin pilihan tetap dominan.
+- Menambahkan preview hasil statistik serta tombol `Re-roll Stats` sebelum Origin dikonfirmasi.
+- Memastikan karakter dengan Origin sama tetap dapat memiliki distribusi statistik sekunder yang berbeda.
+- Mempertahankan Origin dan statistik milik save lama tanpa memaksa pemilihan atau roll ulang.
 - Mengunci aksi permainan sampai pemain baru selesai memilih Origin serta memulihkan dialog pilihan jika onboarding terhenti.
 - Mengubah timestamp log biasa dan kartu Turn ke format 24 jam `HH:mm:ss`.
 - Menambahkan 12 monster elemental normal dan enam rare elemental boss untuk Fire, Lightning, Ice, Earth, Poison, dan Wind.
@@ -22,7 +25,7 @@ Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pe
 - Menyeimbangkan requirement `Elemental Killer` menjadi total 150 kemenangan elemental boss agar tetap endgame tanpa membutuhkan hampir 100 World Reset.
 - Mengubah wording efek title menjadi `Elemental Effect Chance +5%` agar lebih umum dan mudah dipahami.
 - Menaikkan versi state progres ke 3 serta memigrasikan status battle, rare boss, title counter, selected ammo, tempo, dan pending phase secara aman.
-- Menaikkan cache offline Service Worker ke `dragon-realm-offline-v3`.
+- Menaikkan cache offline Service Worker ke `dragon-realm-offline-v4`.
 - Memperkecil tombol `Unequip` di dialog Equipment agar proporsional pada desktop dan smartphone.
 - Menonaktifkan manual save dan melewati autosave/lifecycle save selama battle berlangsung.
 - Mengubah autosave agar hanya menulis saat state berubah dan tidak lagi memenuhi battle log dengan pesan save setiap 30 detik.

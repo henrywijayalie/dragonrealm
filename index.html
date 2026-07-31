@@ -312,6 +312,36 @@
             color: #ffd700;
         }
 
+        .origin-roll-preview {
+            display: none;
+            padding: 16px;
+            background: #17101d;
+            border: 1px solid #753047;
+            border-radius: 8px;
+        }
+
+        .origin-roll-preview h3 {
+            margin-top: 0;
+            color: #7cff00;
+        }
+
+        .origin-roll-stats {
+            color: #ffd700;
+            font-size: 1.1em;
+        }
+
+        .origin-roll-actions {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .origin-roll-actions button {
+            width: 100%;
+            margin: 0;
+        }
+
         .origin-recovery-options {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1339,6 +1369,10 @@
                 padding: 12px;
             }
 
+            .origin-roll-actions {
+                grid-template-columns: 1fr;
+            }
+
             .title-summary-value {
                 max-width: 72%;
             }
@@ -1720,6 +1754,20 @@
                 through every World Reset. Choose the style that best fits your adventure.
             </p>
             <div id="originChoiceOptions" class="origin-choice-options"></div>
+            <div id="originRollPreview" class="origin-roll-preview">
+                <h3 id="originRollName"></h3>
+                <p id="originRollDescription"></p>
+                <p id="originRollStats" class="origin-roll-stats"></p>
+                <p>
+                    These stats use eight randomized tokens. Your chosen Origin's focus is
+                    guaranteed to remain dominant. Re-roll is available only before confirmation.
+                </p>
+                <div class="origin-roll-actions">
+                    <button id="backToOriginChoicesBtn" type="button">Back to Origins</button>
+                    <button id="rerollOriginStatsBtn" type="button">Re-roll Stats</button>
+                    <button id="confirmOriginStatsBtn" type="button">Confirm Origin</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1867,6 +1915,8 @@
         const DEFAULT_ORIGIN_STATS = { hp: 100, mp: 50, atk: 10, def: 5 };
         const ORIGIN_STAT_MINIMUMS = { hp: 90, mp: 40, atk: 8, def: 3 };
         const ORIGIN_TOKEN_VALUES = { hp: 5, mp: 5, atk: 1, def: 1 };
+        const ORIGIN_TOKEN_CAPS = { hp: 5, mp: 5, atk: 4, def: 4 };
+        const ORIGIN_TOKEN_COUNT = 8;
         const ORIGIN_PROFILES = {
             Vitalborn: {
                 focus: "Endurance",
@@ -1895,6 +1945,7 @@
             }
         };
         const PLAYER_ORIGIN_NAMES = Object.keys(ORIGIN_PROFILES);
+        let pendingOriginSelection = null;
 
         const TITLE_QUESTS = [
             {
@@ -2125,6 +2176,48 @@
             return { ...profile, name: originName, allocations, stats };
         }
 
+        function generateRandomOrigin(random = Math.random) {
+            const allocations = { hp: 0, mp: 0, atk: 0, def: 0 };
+            const fields = Object.keys(allocations);
+            for (let token = 0; token < ORIGIN_TOKEN_COUNT; token++) {
+                const availableFields = fields.filter(
+                    field => allocations[field] < ORIGIN_TOKEN_CAPS[field]
+                );
+                const selectedIndex = Math.min(
+                    availableFields.length - 1,
+                    Math.max(0, Math.floor(random() * availableFields.length))
+                );
+                allocations[availableFields[selectedIndex]]++;
+            }
+
+            const stats = Object.fromEntries(fields.map(field => [
+                field,
+                ORIGIN_STAT_MINIMUMS[field]
+                    + allocations[field] * ORIGIN_TOKEN_VALUES[field]
+            ]));
+            return {
+                name: getOriginNameFromAllocations(allocations),
+                allocations,
+                stats
+            };
+        }
+
+        function rollStatsForOrigin(originName, random = Math.random) {
+            if (!PLAYER_ORIGIN_NAMES.includes(originName)) return null;
+
+            for (let attempt = 0; attempt < 1000; attempt++) {
+                const roll = generateRandomOrigin(random);
+                if (roll.name === originName) return roll;
+            }
+
+            const fallback = getOriginProfile(originName);
+            return {
+                name: originName,
+                allocations: { ...fallback.allocations },
+                stats: { ...fallback.stats }
+            };
+        }
+
         function renderOriginChoiceOptions() {
             const container = document.getElementById("originChoiceOptions");
             if (!container) return false;
@@ -2147,14 +2240,61 @@
                 description.textContent = profile.description;
                 const stats = document.createElement("span");
                 stats.className = "origin-choice-stats";
-                stats.textContent = `${profile.stats.hp} HP · ${profile.stats.mp} MP · `
-                    + `${profile.stats.atk} ATK · ${profile.stats.def} DEF`;
+                stats.textContent = "Starting stats: randomized after selection";
 
                 button.append(name, focus, description, stats);
-                button.onclick = () => choosePlayerOrigin(originName);
+                button.onclick = () => selectOriginForRoll(originName);
                 container.appendChild(button);
             });
             return true;
+        }
+
+        function updateOriginRollPreview(focusConfirm = false) {
+            if (!pendingOriginSelection) return false;
+
+            const profile = getOriginProfile(pendingOriginSelection.name);
+            const stats = pendingOriginSelection.roll.stats;
+            document.getElementById("originChoiceOptions").style.display = "none";
+            document.getElementById("originRollPreview").style.display = "block";
+            document.getElementById("originRollName").textContent
+                = `${pendingOriginSelection.name} · ${profile.focus}`;
+            document.getElementById("originRollDescription").textContent
+                = profile.description;
+            document.getElementById("originRollStats").textContent
+                = `${stats.hp} HP · ${stats.mp} MP · ${stats.atk} ATK · ${stats.def} DEF`;
+            if (focusConfirm) {
+                document.getElementById("confirmOriginStatsBtn")?.focus();
+            }
+            return true;
+        }
+
+        function showOriginChoiceOptions() {
+            pendingOriginSelection = null;
+            document.getElementById("originChoiceOptions").style.display = "grid";
+            document.getElementById("originRollPreview").style.display = "none";
+            document.querySelector(".origin-choice-button")?.focus();
+            return true;
+        }
+
+        function selectOriginForRoll(originName, random = Math.random) {
+            if (!PLAYER_ORIGIN_NAMES.includes(originName)
+                || gameState.player.originAssigned) {
+                return false;
+            }
+            pendingOriginSelection = {
+                name: originName,
+                roll: rollStatsForOrigin(originName, random)
+            };
+            return updateOriginRollPreview(true);
+        }
+
+        function rerollPendingOriginStats(random = Math.random) {
+            if (!pendingOriginSelection || gameState.player.originAssigned) return false;
+            pendingOriginSelection.roll = rollStatsForOrigin(
+                pendingOriginSelection.name,
+                random
+            );
+            return updateOriginRollPreview();
         }
 
         function openOriginChoiceDialog() {
@@ -2164,21 +2304,25 @@
             const overlay = document.getElementById("originChoiceOverlay");
             if (!overlay || !renderOriginChoiceOptions()) return false;
             overlay.style.display = "flex";
-            overlay.querySelector(".origin-choice-button")?.focus();
+            if (pendingOriginSelection) {
+                updateOriginRollPreview(true);
+            } else {
+                showOriginChoiceOptions();
+            }
             return true;
         }
 
-        function choosePlayerOrigin(originName) {
+        function confirmPlayerOrigin() {
             const player = gameState.player;
-            const origin = getOriginProfile(originName);
-            if (!player.hasChosenName || player.originAssigned || !origin) return false;
+            const selection = pendingOriginSelection;
+            if (!player.hasChosenName || player.originAssigned || !selection) return false;
 
             const completedLevels = Math.max(0, player.level - 1);
             const permanentBonus = getWorldStatBonus();
             player.originAssigned = true;
-            player.originName = origin.name;
-            player.originStats = normalizeOriginStats(origin.stats);
-            player.originAllocations = { ...origin.allocations };
+            player.originName = selection.name;
+            player.originStats = normalizeOriginStats(selection.roll.stats);
+            player.originAllocations = { ...selection.roll.allocations };
             player.originRecoveryPending = false;
             player.baseHp = player.originStats.hp + completedLevels * 10 + permanentBonus;
             player.baseMp = player.originStats.mp + completedLevels * 5 + permanentBonus;
@@ -2191,9 +2335,10 @@
             player.mp = player.maxMp;
             document.getElementById("originChoiceOverlay").style.display = "none";
             addLogEntry(
-                `✨ Origin awakened: ${origin.name} — ${player.originStats.hp} HP, ${player.originStats.mp} MP, ${player.originStats.atk} ATK, ${player.originStats.def} DEF.`,
+                `✨ Origin awakened: ${selection.name} — ${player.originStats.hp} HP, ${player.originStats.mp} MP, ${player.originStats.atk} ATK, ${player.originStats.def} DEF.`,
                 "log-level-up"
             );
+            pendingOriginSelection = null;
             updateDisplay();
             updateBattleButtons();
             updatePlayerNameControls();
@@ -2219,6 +2364,7 @@
                 return openOriginChoiceDialog();
             }
             if (choiceOverlay) choiceOverlay.style.display = "none";
+            pendingOriginSelection = null;
 
             if (player.originRecoveryPending) {
                 return openOriginRecoveryDialog();
@@ -3870,6 +4016,7 @@
             gameState.battleSpeed = "fast";
             gameState.battleTurnNumber = 0;
             gameState.pendingBattlePhase = null;
+            pendingOriginSelection = null;
 
             addLogEntry("Welcome to Dragon Realm Adventure!");
             addLogEntry("Explore dungeons, defeat monsters, grow stronger!");
@@ -8534,6 +8681,12 @@
             document.querySelectorAll('[data-origin-recovery]').forEach(button => {
                 button.onclick = () => recoverOriginName(button.dataset.originRecovery);
             });
+            document.getElementById("backToOriginChoicesBtn").onclick
+                = showOriginChoiceOptions;
+            document.getElementById("rerollOriginStatsBtn").onclick
+                = () => rerollPendingOriginStats();
+            document.getElementById("confirmOriginStatsBtn").onclick
+                = confirmPlayerOrigin;
             document.getElementById('shortcutHelpBtn').onclick = () => toggleKeyboardShortcutHelp();
             document.addEventListener('keydown', handleGameKeyboardShortcut);
             document.getElementById('playerNameInput').onkeydown = event => {

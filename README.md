@@ -77,15 +77,15 @@ Service Worker menyimpan halaman game, sedangkan save tetap berada di `localStor
 
 ### Origin Stats
 
-Setelah menentukan nama, pemain baru memilih satu dari lima Origin. Dialog menampilkan fokus, penjelasan, dan statistik sebelum pilihan dibuat. Origin tidak dapat diganti dan tetap dipertahankan ketika melakukan World Reset.
+Setelah menentukan nama, pemain baru memilih satu dari lima Origin. Origin menentukan stat yang harus menjadi fokus dominan, tetapi delapan token statistik awal tetap diacak agar karakter dengan Origin sama tidak selalu identik. Hasil roll ditampilkan sebelum konfirmasi dan dapat diacak ulang melalui tombol `Re-roll Stats`. Origin tidak dapat diganti setelah dikonfirmasi dan tetap dipertahankan ketika melakukan World Reset.
 
-| Origin | Fokus | Statistik awal |
-| --- | --- | --- |
-| Vitalborn | Daya tahan dan cadangan HP | 115 HP, 45 MP, 9 ATK, 4 DEF |
-| Aetherborn | Magic Strike dan cadangan MP | 95 HP, 65 MP, 9 ATK, 4 DEF |
-| Warborn | Serangan fisik | 95 HP, 45 MP, 12 ATK, 5 DEF |
-| Ironborn | Pertahanan | 95 HP, 45 MP, 10 ATK, 7 DEF |
-| Versatile | Perkembangan seimbang | 100 HP, 50 MP, 10 ATK, 5 DEF |
+| Origin | Fokus yang dijamin dominan |
+| --- | --- |
+| Vitalborn | HP dan daya tahan |
+| Aetherborn | MP dan penggunaan Magic Strike |
+| Warborn | ATK dan serangan fisik |
+| Ironborn | DEF dan pengurangan damage |
+| Versatile | Alokasi tertinggi yang berimbang |
 
 Setiap profil tetap menggunakan delapan token stat di atas fondasi `90 HP`, `40 MP`, `8 ATK`, dan `3 DEF`. Token HP/MP bernilai `+5`, sedangkan token ATK/DEF bernilai `+1`.
 
