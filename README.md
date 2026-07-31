@@ -17,7 +17,7 @@ Tidak ada framework, dependency, proses build, atau backend. Cukup buka game di 
 - Blacksmith untuk refine hingga `+10`, downgrade, salvage, Tier Fusion, dan crafting Elemental Arrow.
 - Tavern dengan tiga tawaran quest persisten dan cooldown refresh satu jam.
 - Quest tier Bronze, Silver, Gold, Mythic, dan Primordial.
-- Origin Stats acak yang membuat setiap karakter baru memiliki atribut awal berbeda.
+- Lima pilihan Origin dengan fokus dan statistik awal berbeda untuk membentuk gaya bermain karakter baru.
 - Title permanen dari title quest dan boss. Semua title yang terbuka aktif secara akumulatif.
 - World Reset mulai level 100 dengan bonus stat permanen dan tingkat kesulitan yang terus meningkat.
 - Save migration untuk mempertahankan kompatibilitas dengan save versi lama.
@@ -65,7 +65,7 @@ Service Worker menyimpan halaman game, sedangkan save tetap berada di `localStor
 
 ## Alur permainan
 
-1. Tentukan nama karakter dan dapatkan Origin Stats.
+1. Tentukan nama karakter, lalu pilih Origin yang sesuai dengan gaya bermain.
 2. Jelajahi dungeon untuk mencari monster.
 3. Menangkan pertarungan untuk memperoleh EXP, gold, loot, dan kemungkinan blacksmith ore.
 4. Gunakan Tavern untuk mengambil quest dan Shop untuk mengelola item.
@@ -77,7 +77,17 @@ Service Worker menyimpan halaman game, sedangkan save tetap berada di `localStor
 
 ### Origin Stats
 
-Karakter baru memperoleh delapan token stat acak di atas fondasi `90 HP`, `40 MP`, `8 ATK`, dan `3 DEF`. Token HP/MP bernilai `+5`, sedangkan token ATK/DEF bernilai `+1`. Origin ditentukan oleh alokasi yang paling dominan: Vitalborn untuk HP, Aetherborn untuk MP, Warborn untuk ATK, Ironborn untuk DEF, dan Versatile ketika alokasi tertinggi berimbang.
+Setelah menentukan nama, pemain baru memilih satu dari lima Origin. Dialog menampilkan fokus, penjelasan, dan statistik sebelum pilihan dibuat. Origin tidak dapat diganti dan tetap dipertahankan ketika melakukan World Reset.
+
+| Origin | Fokus | Statistik awal |
+| --- | --- | --- |
+| Vitalborn | Daya tahan dan cadangan HP | 115 HP, 45 MP, 9 ATK, 4 DEF |
+| Aetherborn | Magic Strike dan cadangan MP | 95 HP, 65 MP, 9 ATK, 4 DEF |
+| Warborn | Serangan fisik | 95 HP, 45 MP, 12 ATK, 5 DEF |
+| Ironborn | Pertahanan | 95 HP, 45 MP, 10 ATK, 7 DEF |
+| Versatile | Perkembangan seimbang | 100 HP, 50 MP, 10 ATK, 5 DEF |
+
+Setiap profil tetap menggunakan delapan token stat di atas fondasi `90 HP`, `40 MP`, `8 ATK`, dan `3 DEF`. Token HP/MP bernilai `+5`, sedangkan token ATK/DEF bernilai `+1`.
 
 `Legacy` bukan jenis origin pemain. Label tersebut sebelumnya hanya menjadi fallback save lama. Save yang kehilangan label origin kini meminta pemulihan satu kali; pemain memilih kembali nama origin sebelumnya tanpa mengubah statistik atau progres. Jika data alokasi masih tersedia, nama origin dipulihkan secara otomatis.
 
