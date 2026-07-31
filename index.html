@@ -1845,7 +1845,13 @@
                 bossesDefeated: 0,
                 upgradesSucceeded: 0,
                 worldResets: 0,
-                primordialDragonsDefeated: 0
+                primordialDragonsDefeated: 0,
+                originRerolls: 0,
+                unarmedVictories: 0,
+                lastStandVictories: 0,
+                consumablesUsed: 0,
+                successfulFlees: 0,
+                playerDeaths: 0
             },
             unlockedTitles: [],
             equipmentStateVersion: 10,
@@ -1995,6 +2001,60 @@
                 progressKey: "worldResets",
                 target: 100,
                 effect: { atkBonus: 5, defBonus: 5, hpBonus: 50, mpBonus: 50 }
+            },
+            {
+                id: "fate_defier",
+                title: "Fate Defier",
+                description: "Re-roll your starting Origin stats 1,000 times.",
+                progressKey: "originRerolls",
+                target: 1000,
+                effect: { hpBonus: 2 },
+                hidden: true
+            },
+            {
+                id: "iron_fist",
+                title: "Iron Fist",
+                description: "Defeat 500 monsters without a weapon equipped.",
+                progressKey: "unarmedVictories",
+                target: 500,
+                effect: { atkBonus: 1 },
+                hidden: true
+            },
+            {
+                id: "deaths_door",
+                title: "Death's Door",
+                description: "Win 100 battles while at or below 10% of maximum HP.",
+                progressKey: "lastStandVictories",
+                target: 100,
+                effect: { defBonus: 1 },
+                hidden: true
+            },
+            {
+                id: "bottomless_flask",
+                title: "Bottomless Flask",
+                description: "Successfully use 1,000 restorative consumables.",
+                progressKey: "consumablesUsed",
+                target: 1000,
+                effect: { mpBonus: 3 },
+                hidden: true
+            },
+            {
+                id: "vanishing_act",
+                title: "Vanishing Act",
+                description: "Successfully flee from 500 battles.",
+                progressKey: "successfulFlees",
+                target: 500,
+                effect: { defBonus: 1 },
+                hidden: true
+            },
+            {
+                id: "gravewalker",
+                title: "Gravewalker",
+                description: "Be defeated in battle 100 times.",
+                progressKey: "playerDeaths",
+                target: 100,
+                effect: { hpBonus: 5 },
+                hidden: true
             },
             {
                 id: "dragonbane",
@@ -2294,6 +2354,14 @@
                 pendingOriginSelection.name,
                 random
             );
+            const title = getTitleDefinition("fate_defier");
+            const currentProgress = gameState.titleProgress?.originRerolls || 0;
+            if (title && currentProgress < title.target) {
+                recordTitleProgress("originRerolls", 1, { updateUi: false });
+                if (gameState.titleProgress.originRerolls >= title.target) {
+                    saveGame({ silent: true });
+                }
+            }
             return updateOriginRollPreview();
         }
 
@@ -2495,7 +2563,7 @@
             return newlyUnlocked;
         }
 
-        function recordTitleProgress(progressKey, amount = 1) {
+        function recordTitleProgress(progressKey, amount = 1, options = {}) {
             if (!Object.hasOwn(getDefaultTitleProgress(), progressKey)) return false;
             gameState.titleProgress[progressKey] = Math.max(
                 0,
@@ -2504,7 +2572,7 @@
             const newlyUnlocked = checkTitleQuestUnlocks();
             if (newlyUnlocked.length > 0) {
                 updatePlayerStatsFromEquipment();
-            } else {
+            } else if (options.updateUi !== false) {
                 updateTitleUI();
             }
             return true;
@@ -2524,8 +2592,9 @@
 
             questList.innerHTML = '';
             TITLE_QUESTS.forEach(titleQuest => {
-                const requirements = getTitleRequirements(titleQuest);
                 const unlocked = gameState.unlockedTitles.includes(titleQuest.id);
+                if (titleQuest.hidden && !unlocked) return;
+                const requirements = getTitleRequirements(titleQuest);
                 const requirementsMet = isTitleRequirementMet(titleQuest);
                 const legacyUnlock = unlocked && !requirementsMet;
                 const progressHtml = requirements.map(requirement => {
@@ -4795,6 +4864,7 @@
             }
 
             gameState.inventory.splice(index, 1);
+            recordTitleProgress("consumablesUsed", 1);
             updateDisplay();
             updateInventoryDisplay();
             return true;
@@ -5106,6 +5176,19 @@
             addLogEntry(`💀 You defeated the ${monster.name}!`, 'log-battle');
             gameState.totalVictories++;
             recordTitleProgress("monsterKills", 1);
+            const equippedHands = gameState.player.equipped || {};
+            const hasEquippedWeapon = [
+                equippedHands.rightHand,
+                equippedHands.leftHand,
+                equippedHands.twoHand
+            ].some(item => item?.type === "weapon");
+            if (!hasEquippedWeapon) {
+                recordTitleProgress("unarmedVictories", 1);
+            }
+            if (gameState.player.maxHp > 0
+                && gameState.player.hp / gameState.player.maxHp <= 0.10) {
+                recordTitleProgress("lastStandVictories", 1);
+            }
             if (/goblin/i.test(monster.name)) {
                 recordTitleProgress("goblinsDefeated", 1);
             }
@@ -5350,6 +5433,7 @@
 
         function handlePlayerDefeat() {
             addLogEntry("☠️ You have been defeated!", "log-error");
+            recordTitleProgress("playerDeaths", 1);
             finishBattleResolution();
             endBattle();
             initGame({ preserveIdentity: true, preserveWorldReset: true });
@@ -5498,6 +5582,7 @@
             return runPlayerTurn(() => {
                 if (Math.random() < 0.5) {
                     addLogEntry("🏃 You successfully fled from battle!", "log-battle");
+                    recordTitleProgress("successfulFlees", 1);
                     endBattle();
                 } else {
                     addLogEntry("🚫 You failed to flee!", "log-battle");

@@ -79,6 +79,8 @@ Service Worker menyimpan halaman game, sedangkan save tetap berada di `localStor
 
 Setelah menentukan nama, pemain baru memilih satu dari lima Origin. Origin menentukan stat yang harus menjadi fokus dominan, tetapi delapan token statistik awal tetap diacak agar karakter dengan Origin sama tidak selalu identik. Hasil roll ditampilkan sebelum konfirmasi dan dapat diacak ulang melalui tombol `Re-roll Stats`. Origin tidak dapat diganti setelah dikonfirmasi dan tetap dipertahankan ketika melakukan World Reset.
 
+Terdapat beberapa hidden title untuk perilaku bermain tertentu, termasuk `Fate Defier` bagi pemain yang melakukan 1.000 re-roll statistik awal. Hidden title tidak ditampilkan dalam modal `Titles & Requirements` selama masih terkunci. Setelah diperoleh, title, persyaratan, progres, dan efeknya akan ditampilkan seperti title lain. Roll pertama setelah memilih Origin tidak dihitung sebagai re-roll.
+
 | Origin | Fokus yang dijamin dominan |
 | --- | --- |
 | Vitalborn | HP dan daya tahan |
