@@ -1926,6 +1926,8 @@
         const ELEMENTAL_SET_DAMAGE_REDUCTION = 0.15;
         const BATTLE_TURN_DELAY = 600;
         const RESTLESS_TITLE_TARGET = 100;
+        const PLAYER_DEFEAT_EXP_LOSS_RATE = 0.10;
+        const PLAYER_DEFEAT_RECOVERY_RATE = 0.10;
         const ELEMENT_CONFIGS = {
             fire: { label: "Fire", status: "burn", statusLabel: "Burn", stoneId: "fire_elemental_stone", arrowId: "fire_arrow" },
             lightning: { label: "Lightning", status: "paralyzed", statusLabel: "Paralyzed", stoneId: "lightning_elemental_stone", arrowId: "lightning_arrow" },
@@ -5485,12 +5487,37 @@
         }
 
         function handlePlayerDefeat() {
+            const player = gameState.player;
             addLogEntry("☠️ You have been defeated!", "log-error");
             resetRestlessBattleStreak();
             recordTitleProgress("playerDeaths", 1);
+
+            const previousExp = Math.max(0, Math.floor(player.exp || 0));
+            const lostExp = previousExp > 0
+                ? Math.max(1, Math.ceil(previousExp * PLAYER_DEFEAT_EXP_LOSS_RATE))
+                : 0;
+            player.exp = Math.max(0, previousExp - lostExp);
+            player.hp = Math.max(
+                1,
+                Math.floor(player.maxHp * PLAYER_DEFEAT_RECOVERY_RATE)
+            );
+            player.mp = Math.max(
+                0,
+                Math.floor(player.maxMp * PLAYER_DEFEAT_RECOVERY_RATE)
+            );
+            addLogEntry(
+                lostExp > 0
+                    ? `Defeat penalty: ${lostExp} EXP lost. Level ${player.level} and all other progress are retained.`
+                    : `Defeat penalty: no EXP was available to lose. Level ${player.level} and all other progress are retained.`,
+                "log-error"
+            );
+            addLogEntry(
+                `You revive in town with ${player.hp}/${player.maxHp} HP and ${player.mp}/${player.maxMp} MP.`,
+                "log-heal"
+            );
             finishBattleResolution();
             endBattle();
-            initGame({ preserveIdentity: true, preserveWorldReset: true });
+            saveGame({ silent: true });
         }
 
         function prepareNextPlayerPhase() {

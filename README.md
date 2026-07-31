@@ -115,6 +115,8 @@ Rentang encounter Eclipse Seraph, Astral Juggernaut, Rift Stalker, Starforged Go
 
 DEF tetap mengurangi damage sebesar setengah nilainya, tetapi tidak dapat lagi menurunkan semua serangan menjadi 1 damage. Monster normal memiliki minimum damage sebesar 10%–25% ATK berdasarkan level, sedangkan boss selalu memberikan minimal 30% ATK sebelum efek ability. Dengan demikian, build DEF tetap memperpanjang daya tahan tanpa membuat Unique, Legendary, atau Mythical armor menghapus seluruh risiko pertarungan.
 
+Kekalahan battle tidak mereset karakter ke level 1. Pemain hanya kehilangan 10% EXP yang sedang dimiliki pada level tersebut dan tidak dapat turun level. Pemain hidup kembali di town dengan 10% HP dan MP, sedangkan inventory, equipment, gold, quest, title, World Tier, dan progres lainnya tetap dipertahankan.
+
 Tersedia 21 variasi accessory untuk dua slot aktif. Pilihannya mencakup spesialis ATK, DEF, HP, MP, serta hybrid, mulai dari Copper Ring dan Mana Bead sampai Void Locket, Titan Emblem, Lich Crown, dan Hydra Heart. Empat accessory common tersedia langsung di Shop; variasi lain diperoleh dari loot, quest, atau boss. Rarity meningkatkan seluruh stat dasar yang dimiliki accessory.
 
 Blacksmith memiliki batas `+10`. Setiap percobaan membutuhkan ore dan gold. Biaya dasar serta peluang sukses bergantung pada rarity:

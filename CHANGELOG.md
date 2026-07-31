@@ -15,6 +15,9 @@ Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pe
 - Menambahkan hidden title `Gravewalker` setelah 100 kekalahan battle dengan efek permanen `+5 HP`.
 - Menambahkan hidden title `The Restless` setelah 100 kemenangan beruntun tanpa menggunakan Rest dengan efek permanen `+1 HP`, `+1 MP`, `+1 ATK`, dan `+1 DEF`.
 - Mereset progres `The Restless` ke nol ketika pemain Rest, kalah, atau menjalankan World Reset; title tetap permanen setelah berhasil terbuka.
+- Menghapus reset karakter ke level 1 ketika pemain kalah dalam battle.
+- Mengubah hukuman kekalahan menjadi kehilangan 10% EXP saat ini tanpa menurunkan level atau menghapus progres lain.
+- Menghidupkan kembali pemain di town dengan 10% HP dan MP setelah kalah.
 - Menyembunyikan seluruh hidden title dari modal `Titles & Requirements` selama terkunci, lalu menampilkannya bersama persyaratan setelah berhasil diperoleh.
 - Tidak menghitung roll statistik pertama sebagai progres `Fate Defier`.
 - Merapikan dialog pemilihan Origin menjadi tiga kolom pada desktop agar lima pilihan muat dalam dua baris tanpa scrollbar kecil.
