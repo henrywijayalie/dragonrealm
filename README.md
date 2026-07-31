@@ -165,7 +165,7 @@ Rare elemental boss memiliki peluang encounter 1% ketika tidak ada boss utama pe
 
 Elemental Sovereign Set merupakan satu-satunya equipment yang bertahan saat World Reset. Seluruh instance—termasuk duplikat, rarity hasil fusion, refine, dan rolled stats—dilepas lalu dipindahkan ke inventory. Stone, elemental arrow, serta equipment lain tetap di-reset.
 
-Title permanen `Elemental Killer` membutuhkan 100 kemenangan atas masing-masing dari enam rare elemental boss dan minimal World Tier 100. Efeknya menaikkan peluang proc Elemental Arrow pemain dari 10% menjadi 15%; peluang skill monster tetap 10%.
+Title permanen `Elemental Killer` membutuhkan 25 kemenangan atas masing-masing dari enam rare elemental boss dan minimal World Tier 25. Totalnya 150 kemenangan elemental boss. Efeknya ditampilkan sebagai `Elemental Effect Chance +5%`, yaitu menaikkan peluang efek elemental pemain dari 10% menjadi 15%; peluang skill monster tetap 10%.
 
 Battle log dikelompokkan menjadi kartu `Turn N` bertimestamp dengan tempo tetap Fast (600 ms). Potion dan upaya Flee adalah aksi turn, sementara kontrol dikunci selama response monster diselesaikan.
 

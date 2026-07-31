@@ -13,7 +13,9 @@ Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pe
 - Menambahkan enam equipment Epic Elemental Sovereign Set dengan peluang drop 15% dari rare elemental boss.
 - Menambahkan bonus enam bagian Elemental Ward yang mengurangi direct damage monster elemental sebesar 15%.
 - Mempertahankan seluruh instance Elemental Sovereign Set saat World Reset dan memindahkannya ke inventory tanpa mengubah rarity, refine, atau rolled stats.
-- Menambahkan title permanen `Elemental Killer`, terbuka setelah keenam elemental boss masing-masing dikalahkan 100 kali dan World Tier mencapai 100.
+- Menambahkan title permanen `Elemental Killer`, terbuka setelah keenam elemental boss masing-masing dikalahkan 25 kali dan World Tier mencapai 25.
+- Menyeimbangkan requirement `Elemental Killer` menjadi total 150 kemenangan elemental boss agar tetap endgame tanpa membutuhkan hampir 100 World Reset.
+- Mengubah wording efek title menjadi `Elemental Effect Chance +5%` agar lebih umum dan mudah dipahami.
 - Menaikkan versi state progres ke 3 serta memigrasikan status battle, rare boss, title counter, selected ammo, tempo, dan pending phase secara aman.
 - Menaikkan cache offline Service Worker ke `dragon-realm-offline-v2`.
 - Memperkecil tombol `Unequip` di dialog Equipment agar proporsional pada desktop dan smartphone.

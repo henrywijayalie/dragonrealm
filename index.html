@@ -1109,13 +1109,21 @@
             }
 
             h1 {
-                font-size: clamp(1.35rem, 7vw, 1.8rem);
-                line-height: 1.2;
+                font-size: clamp(1.05rem, 5.3vw, 1.3rem);
+                line-height: 1.15;
+                margin-bottom: 10px;
             }
 
-            h2,
-            h3 {
+            h2 {
+                font-size: 1.12rem;
+                line-height: 1.2;
                 margin-bottom: 10px;
+            }
+
+            h3 {
+                font-size: 1rem;
+                line-height: 1.2;
+                margin-bottom: 9px;
             }
 
             .player-stat {
@@ -1954,16 +1962,16 @@
             {
                 id: "elemental_killer",
                 title: "Elemental Killer",
-                description: "Defeat every Elemental Boss 100 times across all worlds.",
+                description: "Defeat every Elemental Boss 25 times across all worlds.",
                 requirements: [
-                    { progressKey: "boss_ifrit", label: "Ifrit", target: 100 },
-                    { progressKey: "boss_raijin", label: "Raijin", target: 100 },
-                    { progressKey: "boss_skadi", label: "Skadi", target: 100 },
-                    { progressKey: "boss_gaia_colossus", label: "Gaia Colossus", target: 100 },
-                    { progressKey: "boss_venom_sovereign", label: "Venom Sovereign", target: 100 },
-                    { progressKey: "boss_aeolus", label: "Aeolus", target: 100 }
+                    { progressKey: "boss_ifrit", label: "Ifrit", target: 25 },
+                    { progressKey: "boss_raijin", label: "Raijin", target: 25 },
+                    { progressKey: "boss_skadi", label: "Skadi", target: 25 },
+                    { progressKey: "boss_gaia_colossus", label: "Gaia Colossus", target: 25 },
+                    { progressKey: "boss_venom_sovereign", label: "Venom Sovereign", target: 25 },
+                    { progressKey: "boss_aeolus", label: "Aeolus", target: 25 }
                 ],
-                minimumWorldTier: 100,
+                minimumWorldTier: 25,
                 specialEffect: { elementalArrowProcChance: ELEMENTAL_ARROW_TITLE_PROC_CHANCE }
             }
         ];
@@ -2133,8 +2141,9 @@
             if (statText !== "No stat effect") parts.push(statText);
             if (titleQuest?.specialEffect?.elementalArrowProcChance) {
                 parts.push(
-                    `Elemental Arrow proc ${Math.round(
-                        titleQuest.specialEffect.elementalArrowProcChance * 100
+                    `Elemental Effect Chance +${Math.round(
+                        (titleQuest.specialEffect.elementalArrowProcChance
+                            - ELEMENTAL_ARROW_BASE_PROC_CHANCE) * 100
                     )}%`
                 );
             }
@@ -3763,7 +3772,10 @@
                 title => title.specialEffect?.elementalArrowProcChance
             )) {
                 activeTitleEffectParts.push(
-                    `Elemental Arrow ${Math.round(getElementalArrowProcChance() * 100)}%`
+                    `Elemental Effect Chance +${Math.round(
+                        (getElementalArrowProcChance()
+                            - ELEMENTAL_ARROW_BASE_PROC_CHANCE) * 100
+                    )}%`
                 );
             }
             document.getElementById('playerTitle').textContent = unlockedTitleDefinitions.length > 0
