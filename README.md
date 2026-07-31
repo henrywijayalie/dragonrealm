@@ -7,21 +7,23 @@ Tidak ada framework, dependency, proses build, atau backend. Cukup buka game di 
 ## Fitur utama
 
 - Pertarungan turn-based dengan serangan biasa, magic strike, HP/MP potion dari inventory, dan flee.
-- 28 monster biasa dan 12 boss dari level rendah hingga level 100.
+- Monster biasa, boss utama, 12 monster elemental, dan enam rare elemental boss dari level rendah hingga level 100.
 - Ability monster: Heavy Strike, Venom, Mana Burn, Regeneration, dan Life Drain.
 - Empat area: Whispering Woods, Ashen Caverns, Wyrmspire Ruins, dan Dragon's Crown.
 - Slot equipment mencakup Right Hand, Left Hand untuk off-hand/shield, Two-Handed Weapon, Body Armor, Helmet, Bottom, Shoes, serta dua accessory.
-- Rarity dinamis dari Common hingga Legendary; item dengan nama dasar yang sama dapat memiliki rarity dan bonus stat berbeda.
+- Rarity drop dinamis dari Common hingga Epic; Unique, Legendary, dan Mythical hanya dapat dibuat melalui Tier Fusion.
 - Shop untuk membeli dan menjual item, lengkap dengan deskripsi dan harga yang menyesuaikan World Tier.
-- Blacksmith untuk meningkatkan seluruh stat yang dimiliki equipment hingga `+5`.
+- Equipment dan Inventory berada dalam satu dialog khusus agar tampilan utama tetap ringkas.
+- Blacksmith untuk refine hingga `+10`, downgrade, salvage, Tier Fusion, dan crafting Elemental Arrow.
 - Tavern dengan tiga tawaran quest persisten dan cooldown refresh satu jam.
 - Quest tier Bronze, Silver, Gold, Mythic, dan Primordial.
 - Origin Stats acak yang membuat setiap karakter baru memiliki atribut awal berbeda.
 - Title permanen dari title quest dan boss. Semua title yang terbuka aktif secara akumulatif.
 - World Reset mulai level 100 dengan bonus stat permanen dan tingkat kesulitan yang terus meningkat.
 - Save migration untuk mempertahankan kompatibilitas dengan save versi lama.
-- Autosave setiap 30 detik, manual save/load, dan keyboard shortcut.
+- Autosave berbasis perubahan yang diperiksa setiap 30 detik, manual save/load, dan keyboard shortcut. Save tidak dijalankan selama battle.
 - Offline cache dan pemulihan lifecycle untuk Chrome mobile.
+- Ikon SVG lokal pada navigasi, battle, dan dialog tanpa ketergantungan CDN sehingga tetap tampil saat offline.
 
 ## Mulai bermain
 
@@ -83,29 +85,67 @@ Karakter baru memperoleh delapan token stat acak di atas fondasi `90 HP`, `40 MP
 
 Equipment dapat meningkatkan ATK, DEF, HP, dan MP. Weapon atau gear lain yang memiliki lebih dari satu bonus stat akan meningkatkan seluruh bonus tersebut ketika upgrade berhasil.
 
+Tombol `Inventory` membuka satu dialog yang menampilkan seluruh equipment terpasang dan isi inventory secara berdampingan. Pada layar smartphone, kedua bagian disusun vertikal dan dapat digulir. Equip, unequip, dan penggunaan item dilakukan langsung dari dialog ini.
+
 Right Hand menerima seluruh weapon satu tangan. Left Hand menerima shield atau weapon ringan yang memiliki kompatibilitas off-hand; weapon main-hand-only tidak dapat dipasang di sana. Weapon dua tangan memakai kedua tangan sekaligus: memasangnya otomatis melepas weapon kanan dan kiri, sedangkan memasang shield atau weapon satu tangan akan melepas weapon dua tangan. Kontribusi ATK weapon dua tangan dikalikan `×1,5`, tetapi statistiknya hanya dihitung satu kali.
 
-Bow membutuhkan satu Arrow untuk setiap Normal Attack atau Magic Strike. Shop menjual paket berisi 10 Arrow dan inventory menampilkannya sebagai stack. Ketika Arrow habis, bow tidak memberikan bonus ATK sehingga serangan memakai kekuatan karakter tanpa weapon. Format ammo sudah menyimpan jenis serta efek Arrow standar sebagai fondasi crafting Arrow berefek pada pengembangan Blacksmith berikutnya.
+Bow membutuhkan satu Arrow untuk setiap Normal Attack atau Magic Strike. Shop menjual Arrow per unit melalui input jumlah dan inventory menampilkannya sebagai stack. Ketika Arrow habis, bow tidak memberikan bonus ATK sehingga serangan memakai kekuatan karakter tanpa weapon. Format ammo sudah menyimpan jenis serta efek Arrow standar sebagai fondasi crafting Arrow berefek pada pengembangan Blacksmith berikutnya.
 
 Tersedia tujuh basis bow: Hunter Bow, Recurve Bow, Ironwood Warbow, Arcane Longbow, Stormcaller Bow, Dragonwing Bow, dan Celestial Starbow. Hanya Hunter Bow yang dijual di Shop; enam bow lainnya diperoleh melalui loot atau reward quest sesuai tier. Setiap basis bow tetap dapat memiliki rarity dan hasil upgrade yang berbeda.
 
 Armor kini khusus slot tubuh. Katalog defensif menyediakan 10 shield, 13 body armor, 10 helmet, 10 bottom, dan 10 shoes dari common hingga legendary. Setiap slot memiliki pilihan spesialis DEF/HP/MP serta hybrid ATK agar build tidak bergantung pada satu jalur gear. Equipment endgame tertentu hanya tersedia dari quest tier Mythic atau Primordial. Save lama otomatis memigrasikan base stat defensif sambil mempertahankan rarity dan level upgrade.
 
-Statistik monster mempertimbangkan perluasan equipment secara bertahap. Early dan mid game memperoleh tambahan HP/ATK ringan, boss mendapat scaling tersendiri, sedangkan multiplier Area untuk monster normal dibuat lebih landai dan dibatasi agar level tinggi tetap menantang tanpa lonjakan statistik berlebihan.
+Statistik monster mempertimbangkan perluasan equipment dan Tier Fusion secara bertahap. Early game tetap mendekati statistik dasar, kemudian scaling HP/ATK meningkat pada level 20, 40, 60, 80, dan 100. Monster normal level 100 memperoleh multiplier equipment-balance `×1,85 HP` dan `×1,34 ATK`, sedangkan boss level 100 memperoleh `×2,50 HP` dan `×1,90 ATK`, sebelum World Tier diterapkan.
+
+Monster normal tetap memakai Area scaling hingga maksimum `×1,60`. Boss sekarang memiliki Area scaling terpisah yang lebih landai hingga maksimum `×1,35`, sehingga boss level tinggi tidak menjadi lebih lemah daripada encounter normal pada area yang sama.
+
+Rentang encounter Eclipse Seraph, Astral Juggernaut, Rift Stalker, Starforged Golem, Nether Phoenix, dan Chaos Dragon diperpanjang bertahap sampai level 100. Ini mencegah pool monster kembali ke musuh lama yang jauh lebih lemah setelah pemain melewati level 80.
+
+DEF tetap mengurangi damage sebesar setengah nilainya, tetapi tidak dapat lagi menurunkan semua serangan menjadi 1 damage. Monster normal memiliki minimum damage sebesar 10%–25% ATK berdasarkan level, sedangkan boss selalu memberikan minimal 30% ATK sebelum efek ability. Dengan demikian, build DEF tetap memperpanjang daya tahan tanpa membuat Unique, Legendary, atau Mythical armor menghapus seluruh risiko pertarungan.
 
 Tersedia 21 variasi accessory untuk dua slot aktif. Pilihannya mencakup spesialis ATK, DEF, HP, MP, serta hybrid, mulai dari Copper Ring dan Mana Bead sampai Void Locket, Titan Emblem, Lich Crown, dan Hydra Heart. Empat accessory common tersedia langsung di Shop; variasi lain diperoleh dari loot, quest, atau boss. Rarity meningkatkan seluruh stat dasar yang dimiliki accessory.
 
-Blacksmith memiliki batas `+5`. Biaya dan peluang sukses bergantung pada rarity:
+Blacksmith memiliki batas `+10`. Setiap percobaan membutuhkan ore dan gold. Biaya dasar serta peluang sukses bergantung pada rarity:
 
-| Rarity | Biaya dasar | Peluang sukses |
-| --- | ---: | ---: |
-| Common | 1 ore | 80% |
-| Uncommon | 2 ore | 60% |
-| Rare | 3 ore | 50% |
-| Epic | 5 ore | 40% |
-| Legendary | 7 ore | 30% |
+| Rarity | Ore dasar | Gold dasar | Peluang sukses |
+| --- | ---: | ---: | ---: |
+| Common | 1 | 200 | 80% |
+| Uncommon | 2 | 600 | 60% |
+| Rare | 3 | 1.500 | 50% |
+| Epic | 5 | 4.000 | 40% |
+| Unique | 6 | 7.000 | 35% |
+| Legendary | 7 | 10.000 | 30% |
+| Mythical | 10 | 25.000 | 20% |
 
-Biaya aktual adalah biaya dasar ditambah level upgrade saat ini. Upgrade yang gagal hanya menghabiskan ore; equipment tidak hancur dan levelnya tidak turun.
+Biaya ore aktual adalah ore dasar ditambah level refine saat ini. Biaya gold adalah gold dasar dikali `(level refine saat ini + 1)`, kemudian disesuaikan dengan multiplier harga World Tier. Pada World Tier 0, percobaan Legendary dari `+9` ke `+10` membutuhkan 16 ore dan 100.000 gold.
+
+Kegagalan selalu menghabiskan ore dan gold, dengan konsekuensi berdasarkan level saat percobaan dimulai:
+
+| Percobaan refine | Konsekuensi jika gagal |
+| --- | --- |
+| `+0 → +1` sampai `+3 → +4` | Level tetap |
+| `+4 → +5` dan `+5 → +6` | Turun 1 level |
+| `+6 → +7` dan `+7 → +8` | Turun 2 level |
+| `+8 → +9` | Turun 3 level |
+| `+9 → +10` | 80% equipment hancur permanen; 20% kembali ke `+0` |
+
+Percobaan `+9 → +10` selalu menampilkan konfirmasi risiko sebelum resource dipotong.
+
+Blacksmith juga menyediakan tiga layanan lain:
+
+- `Downgrade` menurunkan equipment terpasang satu refine level per transaksi hingga `+0`. Ore yang kembali adalah 50%—dibulatkan ke bawah—dari biaya ore level yang dilepas. Setiap downgrade juga memiliki ongkos gold.
+- `Salvage` menghancurkan equipment yang berada di inventory menjadi Forge Scrap. Rarity dan refine level yang lebih tinggi memberikan lebih banyak scrap. Equipment terpasang tidak muncul dalam daftar salvage.
+- `Tier Fusion` mempertahankan satu equipment pilihan sebagai core lalu mengonsumsi dua salinan equipment `+0` dengan nama dasar dan rarity yang sama. Refine level milik core dipertahankan, sedangkan catalyst yang sudah memiliki refine tidak dapat digunakan.
+
+Contohnya, Wooden Sword Common `+3` dapat dipilih sebagai core bersama dua Wooden Sword Common `+0`. Hasilnya adalah Wooden Sword Uncommon `+3`. Jika equipment `+3` tidak dipilih sebagai core, equipment tersebut tidak dapat dikonsumsi sebagai catalyst.
+
+Urutan fusion adalah Common → Uncommon → Rare → Epic → Unique → Legendary → Mythical. Biaya dasarnya adalah 2.500, 7.500, 25.000, 75.000, 125.000, dan 200.000 gold untuk setiap tahap tersebut. Seluruh ongkos Blacksmith menyesuaikan multiplier harga World Tier.
+
+Mythical adalah rarity maksimum. Unique, Legendary, dan Mythical sama-sama eksklusif Tier Fusion; monster normal, boss, dan reward Tavern hanya dapat memberikan equipment sampai Epic. Shop juga tidak menjual ketiga rarity tersebut. Equipment Mythical masih dapat di-refine hingga `+10`, dengan biaya lebih tinggi dan peluang sukses dasar 20%.
+
+Multiplier stat rarity tingkat tinggi dibuat bertahap: Epic `×1,95`, Unique `×2,25`, Legendary `×2,70`, dan Mythical `×3,20`. Refine tetap ditambahkan sesudah multiplier rarity sehingga investasi Blacksmith terasa kuat, tetapi lonjakan dari Legendary ke Mythical tidak terlalu ekstrem.
+
+Refine, Downgrade, Salvage, Tier Fusion, dan Craft Elemental Arrows dipisahkan menjadi lima menu. Hanya daftar layanan yang sedang dipilih yang ditampilkan. Tombol kembali atau `Esc` kembali ke menu Blacksmith terlebih dahulu; `Esc` berikutnya meninggalkan Blacksmith.
 
 ### Material monster
 
@@ -113,7 +153,41 @@ Monster biasa memiliki peluang 60% menjatuhkan material crafting, sedangkan boss
 
 Monster level 50 ke atas menjatuhkan dua unit material. Boss memperoleh satu unit tambahan. Material tersimpan di inventory dan dapat dijual, tetapi penggunaannya sebagai resep equipment akan ditambahkan pada pengembangan Blacksmith berikutnya.
 
-Item non-equipment dengan ID yang sama ditampilkan sebagai satu stack, misalnya `Small HP Potion ×5`. Shop juga menampilkan satu baris per stack; tombol `Sell` menjual satu unit setiap kali ditekan. Equipment tetap terpisah karena setiap instance dapat memiliki rarity, statistik, dan upgrade berbeda.
+Forge Scrap tidak berasal dari monster. Material ini diperoleh dengan menghancurkan equipment melalui layanan Salvage dan disimpan sebagai stack di inventory untuk sistem crafting berikutnya.
+
+### Elemental combat
+
+Enam elemen—Fire, Lightning, Ice, Earth, Poison, dan Wind—memiliki monster, stone, arrow, dan status masing-masing. Monster elemental memiliki peluang 10% memicu skill elemennya. Monster kebal terhadap status dari elemen yang sama, tetapi tetap menerima base damage serangan.
+
+Elemental Arrow juga memiliki peluang proc dasar 10%. Bow menampilkan pilihan `Next Arrow`; pilihan tersimpan dan otomatis berpindah ke elemental arrow tertua yang tersedia, lalu Arrow standar, ketika ammo terpilih habis. Normal Attack dan Magic Strike sama-sama memakai satu arrow. Blacksmith mengubah 10 Arrow standar, satu stone terkait, dan ongkos 250 gold sebelum multiplier World Tier menjadi 10 Elemental Arrow.
+
+Rare elemental boss memiliki peluang encounter 1% ketika tidak ada boss utama pending dan hanya dapat dikalahkan satu kali per World Tier. Kemenangan menjamin lima stone dan memiliki peluang 15% menjatuhkan satu bagian Epic Elemental Sovereign Set. Enam bagian set mengaktifkan `Elemental Ward`, yang mengurangi direct damage monster elemental sebesar 15%.
+
+Elemental Sovereign Set merupakan satu-satunya equipment yang bertahan saat World Reset. Seluruh instance—termasuk duplikat, rarity hasil fusion, refine, dan rolled stats—dilepas lalu dipindahkan ke inventory. Stone, elemental arrow, serta equipment lain tetap di-reset.
+
+Title permanen `Elemental Killer` membutuhkan 100 kemenangan atas masing-masing dari enam rare elemental boss dan minimal World Tier 100. Efeknya menaikkan peluang proc Elemental Arrow pemain dari 10% menjadi 15%; peluang skill monster tetap 10%.
+
+Battle log dikelompokkan menjadi kartu `Turn N` bertimestamp dengan tempo tetap Fast (600 ms). Potion dan upaya Flee adalah aksi turn, sementara kontrol dikunci selama response monster diselesaikan.
+
+### Magic Strike
+
+Biaya dasar Magic Strike meningkat mengikuti level pemain: 10 MP pada level 1–10, kemudian bertambah 10 MP setiap memasuki kelompok sepuluh level berikutnya. Level 91–100 memiliki biaya dasar 100 MP. Jenis weapon yang digunakan menentukan damage dan efisiensi akhirnya:
+
+| Weapon | Damage Magic Strike | Biaya MP |
+| --- | ---: | ---: |
+| Staff | 200% ATK | 125% biaya dasar |
+| Wand | 175% ATK | 75% biaya dasar |
+| Weapon lain atau tanpa weapon | 150% ATK | 100% biaya dasar |
+
+Biaya akhir dibulatkan ke atas ke kelipatan 5 MP. Pada level 100, Magic Strike membutuhkan 125 MP dengan Staff, 75 MP dengan Wand, dan 100 MP dengan weapon lain. Staff adalah Two-Handed Weapon untuk burst damage tinggi, sedangkan Wand adalah Main-Hand Weapon yang hanya dapat dipasang di Right Hand dan lebih hemat MP. Karena bonus ATK Staff masih memperoleh multiplier Two-Handed `×1,5`, setiap 1 ATK Staff berkontribusi sampai 3 damage Magic Strike sebelum bonus ATK lain—lebih kuat daripada weapon standar tanpa mencapai efektivitas 3,6 dari profil lama.
+
+Tersedia lima Staff: Oak Staff, Runebark Staff, Enchanted Staff, Stormcaller Staff, dan Astral Staff. Tersedia enam Wand: Apprentice Wand, Runic Wand, Ember Wand, Voidglass Wand, Moonveil Wand, dan Archon Wand. Oak Staff dan Apprentice Wand tersedia di Shop; equipment berikutnya diperoleh melalui loot atau quest sesuai progres. Stormcaller Staff dan Moonveil Wand mulai tersedia sebagai reward Tavern Gold, sedangkan Astral Staff dan Archon Wand merupakan reward Tavern Epic untuk tier Mythic ke atas. Seluruhnya tetap dapat dinaikkan rarity-nya melalui Tier Fusion.
+
+Save lama yang memiliki Enchanted Staff otomatis mengenalinya sebagai Staff. Jika save sementara pernah memiliki Wand di Left Hand, migrasi memindahkannya dengan aman ke inventory. Tombol battle dan deskripsi equipment menampilkan profil Magic Strike yang sedang aktif.
+
+Bow tetap memakai profil standar dan membutuhkan satu Arrow. Jika Arrow habis, perhitungan Magic Strike mengabaikan bonus ATK bow seperti serangan normal.
+
+Item non-equipment dengan ID yang sama ditampilkan sebagai satu stack, misalnya `Small HP Potion ×5`. Daftar Sell menyediakan input jumlah untuk menjual sebagian atau seluruh stack, sedangkan equipment tetap dijual satu instance karena setiap equipment dapat memiliki rarity, statistik, dan upgrade berbeda. Harga menggunakan wording konsisten `Buy`, `Sell`, `Buy total`, dan `Sell total`.
 
 ### Tavern dan quest
 
@@ -153,6 +227,7 @@ Shortcut diabaikan ketika pemain sedang mengetik dan tidak akan menjalankan tomb
 | --- | --- | --- |
 | Town | `E` | Explore |
 | Town | `R` | Rest |
+| Town | `I` | Buka Equipment & Inventory |
 | Town | `S` | Buka Shop |
 | Town | `T` | Buka Tavern |
 | Town | `B` | Buka Blacksmith |
@@ -162,7 +237,7 @@ Shortcut diabaikan ketika pemain sedang mengetik dan tidak akan menjalankan tomb
 | Battle | `N` atau `4` | Gunakan MP potion |
 | Battle | `F` | Flee |
 | Global | `Ctrl+S` / `Cmd+S` | Manual save |
-| Global | `Esc` | Tutup panel lokasi atau bantuan |
+| Global | `Esc` | Tutup dialog, panel lokasi, atau bantuan |
 | Global | `?` | Tampilkan bantuan shortcut |
 
 ## Struktur proyek

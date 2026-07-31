@@ -2,6 +2,87 @@
 
 Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pengerjaan.
 
+## 31 Juli 2026
+
+- Menambahkan 12 monster elemental normal dan enam rare elemental boss untuk Fire, Lightning, Ice, Earth, Poison, dan Wind.
+- Menambahkan rare encounter elemental boss 1% setelah prioritas boss utama; setiap boss hanya dapat dikalahkan satu kali per World Tier.
+- Menambahkan Elemental Stone dengan drop khusus 40%, enam jenis Elemental Arrow, pilihan ammo bow, fallback ammo otomatis, dan crafting Blacksmith.
+- Menambahkan status elemental dua arah: Burn, Paralyzed, Chill, Shattered, Poisoned, dan Pierce, termasuk imunitas monster terhadap elemennya sendiri.
+- Menetapkan battle pacing tetap Fast 600 ms dan menambahkan battle log berkartu per Turn dengan phase Player, Status, dan Monster.
+- Mengubah HP Potion, MP Potion, dan Flee menjadi aksi turn yang memberi monster kesempatan merespons.
+- Menambahkan enam equipment Epic Elemental Sovereign Set dengan peluang drop 15% dari rare elemental boss.
+- Menambahkan bonus enam bagian Elemental Ward yang mengurangi direct damage monster elemental sebesar 15%.
+- Mempertahankan seluruh instance Elemental Sovereign Set saat World Reset dan memindahkannya ke inventory tanpa mengubah rarity, refine, atau rolled stats.
+- Menambahkan title permanen `Elemental Killer`, terbuka setelah keenam elemental boss masing-masing dikalahkan 100 kali dan World Tier mencapai 100.
+- Menaikkan versi state progres ke 3 serta memigrasikan status battle, rare boss, title counter, selected ammo, tempo, dan pending phase secara aman.
+- Menaikkan cache offline Service Worker ke `dragon-realm-offline-v2`.
+- Memperkecil tombol `Unequip` di dialog Equipment agar proporsional pada desktop dan smartphone.
+- Menonaktifkan manual save dan melewati autosave/lifecycle save selama battle berlangsung.
+- Mengubah autosave agar hanya menulis saat state berubah dan tidak lagi memenuhi battle log dengan pesan save setiap 30 detik.
+- Merapikan breakpoint smartphone dengan panel full-width, battle log lebih ringkas, battle options responsif, serta tombol battle yang tidak mudah terpotong atau membungkus berlebihan.
+- Menghapus selector Battle Speed agar seluruh pemain menggunakan tempo Fast 600 ms tanpa pengaturan tambahan.
+- Menambahkan input jumlah pembelian untuk potion dan Arrow, lengkap dengan total harga serta validasi 1–999 unit.
+- Mengubah harga Arrow dari paket 10 unit seharga 20 gold menjadi harga satuan 2 gold.
+- Menambahkan input jumlah pada Sell untuk seluruh item stack; equipment tetap dijual per instance.
+- Menyamakan wording transaksi menjadi `Buy`, `Sell`, `Buy total`, dan `Sell total`.
+- Memindahkan Equipment dan Inventory dari side panel ke satu dialog khusus yang responsif.
+- Menambahkan tombol `Inventory` dan shortcut `I` untuk membuka dialog Equipment & Inventory.
+- Menata tombol utama secara tetap dalam urutan Explore Dungeon, Rest, Inventory, Visit Shop, Visit Tavern, Blacksmith, Save, dan Load tanpa mengubah wording tombol lama.
+- Menghapus pembuatan tombol Blacksmith, Save, dan Load secara dinamis agar urutan serta event tombol konsisten saat halaman dimuat atau dipulihkan secara offline.
+- Mempertahankan World Reset sebagai tombol terpisah yang hanya terlihat setelah pemain memenuhi syarat level.
+- Menambahkan sprite ikon SVG lokal untuk tombol navigasi, aksi battle, bantuan shortcut, title, dan dialog Equipment & Inventory.
+- Menyimpan seluruh ikon langsung di `index.html` agar tidak membutuhkan CDN dan tetap tersedia dalam mode offline.
+- Menambahkan biaya gold pada setiap percobaan upgrade Blacksmith.
+- Menentukan gold dasar berdasarkan rarity: Common 200, Uncommon 600, Rare 1.500, Epic 4.000, Unique 7.000, Legendary 10.000, dan Mythical 25.000.
+- Mengalikan gold dasar dengan `(level refine saat ini + 1)` agar biaya meningkat dari `+0` sampai `+10`.
+- Menampilkan saldo gold, biaya ore, biaya gold, dan peluang sukses pada panel Blacksmith.
+- Mencegah pemotongan resource jika ore atau gold tidak mencukupi.
+- Refine yang gagal menghabiskan ore dan gold, dengan konsekuensi level mengikuti rentang refine saat ini.
+- Memperluas batas refine Blacksmith dari `+5` menjadi `+10`.
+- Refine gagal pada percobaan `+0 → +1` sampai `+3 → +4` tidak menurunkan level.
+- Refine gagal pada percobaan menuju `+5/+6`, `+7/+8`, dan `+9` masing-masing menurunkan 1, 2, dan 3 level.
+- Refine `+9 → +10` yang gagal memiliki peluang 80% menghancurkan equipment dan 20% meresetnya ke `+0`.
+- Menambahkan peringatan serta konfirmasi khusus sebelum percobaan refine `+9 → +10`.
+- Menampilkan alert hasil refine yang menjelaskan keberhasilan, level baru, downgrade, reset, kehancuran equipment, dan resource yang terpakai.
+- Menambahkan layanan downgrade satu tingkat hingga `+0` dengan pengembalian 50% biaya ore tingkat yang dilepas, dibulatkan ke bawah.
+- Menambahkan Forge Scrap dan layanan salvage untuk menghancurkan equipment inventory menjadi material berdasarkan rarity serta refine level.
+- Menambahkan Tier Fusion yang mengonsumsi satu core dan dua salinan equipment `+0` dengan nama dasar serta rarity sama untuk menaikkan rarity core.
+- Memungkinkan pemain memilih instance equipment sebagai core dan mempertahankan refine level core pada hasil fusion.
+- Mencegah equipment yang memiliki refine level digunakan sebagai catalyst agar peningkatannya tidak hilang karena salah pilih.
+- Menetapkan biaya Tier Fusion Common/Uncommon/Rare/Epic sebesar 2.500/7.500/25.000/75.000 gold sebelum multiplier World Tier.
+- Menerapkan ongkos gold pada refine, downgrade, salvage, dan Tier Fusion serta menyesuaikannya dengan multiplier harga World Tier.
+- Menambahkan konfirmasi sebelum downgrade, salvage, dan Tier Fusion agar equipment atau refine level tidak hilang akibat salah tekan.
+- Memisahkan Refine, Downgrade, Salvage, Tier Fusion, dan Craft Elemental Arrows menjadi lima menu Blacksmith agar daftar equipment tidak tampil bersamaan.
+- Menambahkan tombol kembali pada setiap layanan; tombol `Esc` kembali ke menu Blacksmith sebelum meninggalkan lokasi.
+- Menampilkan progres catalyst dan gold secara terpisah pada Tier Fusion serta menjelaskan kekurangan resource langsung pada tombol disabled.
+- Menambahkan rarity Unique di antara Epic dan Legendary serta rarity Mythical di atas Legendary; ketiganya hanya dapat diperoleh melalui Tier Fusion.
+- Mengubah jalur rarity menjadi Common → Uncommon → Rare → Epic → Unique → Legendary → Mythical.
+- Menetapkan biaya dasar fusion Epic → Unique sebesar 75.000 gold dan Unique → Legendary sebesar 125.000 gold.
+- Menambahkan fusion Legendary → Mythical dengan biaya dasar 200.000 gold sebelum multiplier World Tier.
+- Membatasi equipment dari monster normal, boss, dan reward Tavern maksimal Epic; Shop juga tidak menyediakan Legendary atau Mythical.
+- Menambahkan scaling statistik, nilai jual, warna UI, biaya refine, biaya salvage, dan peluang refine 20% untuk equipment Mythical.
+- Menyeimbangkan multiplier stat equipment tingkat tinggi menjadi Epic 1,95, Unique 2,25, Legendary 2,70, dan Mythical 3,20.
+- Menaikkan scaling HP/ATK monster normal secara bertahap hingga 1,85/1,34 pada level 100.
+- Menaikkan scaling HP/ATK boss secara terpisah hingga 2,50/1,90 pada level 100.
+- Menambahkan Area scaling khusus boss hingga maksimum 1,35 agar boss level tinggi tetap berada di atas encounter normal.
+- Menambahkan minimum damage monster normal sebesar 10%–25% ATK berdasarkan level dan minimum damage boss sebesar 30% ATK agar DEF tinggi tidak membuat seluruh serangan menjadi 1 damage.
+- Memperpanjang rentang enam monster endgame secara bertahap hingga level 100 agar encounter level 81–100 tidak kembali ke pool monster lama yang lebih lemah.
+- Mengubah biaya Magic Strike dari 10 MP tetap menjadi biaya bertingkat yang naik 10 MP setiap sepuluh level pemain.
+- Menetapkan biaya Magic Strike level 91–100 sebesar 100 MP agar equipment dan potion MP tetap relevan pada endgame.
+- Menampilkan biaya dan kekurangan MP pada tooltip Magic Strike, termasuk ketika pemain menggunakan bow.
+- Menyeimbangkan profil Magic Strike Staff menjadi damage 200% ATK dengan biaya 125% dari biaya MP dasar; multiplier Two-Handed tetap berlaku pada bonus ATK Staff.
+- Menambahkan profil Magic Strike khusus Wand: damage 175% ATK dengan biaya 75% dari biaya MP dasar.
+- Menetapkan Staff sebagai Two-Handed Weapon dan seluruh Wand sebagai Main-Hand Weapon khusus Right Hand.
+- Memindahkan Wand yang tersimpan secara tidak valid di Left Hand kembali ke inventory saat save dimigrasikan.
+- Mempertahankan profil standar sebesar 150% ATK dan 100% biaya MP untuk weapon lain serta serangan tanpa weapon.
+- Membulatkan biaya akhir Magic Strike ke atas ke kelipatan 5 MP dan memperbarui tombol, tooltip, deskripsi equipment, serta battle log sesuai weapon yang sedang digunakan.
+- Menambahkan lima jalur Staff: Oak, Runebark, Enchanted, Stormcaller, dan Astral Staff.
+- Menambahkan enam jalur Wand: Apprentice, Runic, Ember, Voidglass, Moonveil, dan Archon Wand.
+- Menyebarkan Staff dan Wand baru pada loot serta reward Tavern Silver, Gold, Mythic, dan Primordial sesuai kekuatannya.
+- Membatasi Stormcaller Staff dan Moonveil Wand mulai reward Tavern Gold agar tidak jatuh terlalu dini dari monster level rendah.
+- Menetapkan Astral Staff dan Archon Wand sebagai equipment Epic khusus reward Tavern yang tetap dapat diproses melalui Tier Fusion.
+- Menandai Enchanted Staff lama sebagai weapon class Staff melalui migrasi template save tanpa menghapus rarity, stat, atau refine level milik pemain.
+
 ## 30 Juli 2026
 
 - Menambahkan sepuluh monster normal untuk level 20–50 dan sepuluh monster normal untuk level 50–80, lengkap dengan kurva statistik dan ability.
@@ -16,7 +97,7 @@ Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pe
 - Monster biasa memiliki peluang 60% memperoleh material, sedangkan boss memiliki peluang 40% agar material boss lebih menantang diperoleh.
 - Jenis material mengikuti keluarga atau ability monster; monster level 50 ke atas dan boss menghasilkan jumlah lebih banyak.
 - Menggabungkan item non-equipment sejenis menjadi satu stack pada Inventory dan daftar Sell.
-- Tombol `Sell` menjual satu unit dari stack setiap kali ditekan, sedangkan equipment tetap ditampilkan per instance.
+- Daftar `Sell` menerima jumlah item stack yang ingin dijual, sedangkan equipment tetap ditampilkan dan dijual per instance.
 - Menambahkan Supply Request di Tavern untuk mengumpulkan dan menyerahkan material sebagai quest.
 - Material quest dikurangi sesuai kebutuhan saat diserahkan; menjual material akan menurunkan jumlah yang siap dikumpulkan.
 - Monster sumber material quest tetap dapat ditemui jika pemain sudah melewati rentang encounter normalnya.
@@ -37,7 +118,7 @@ Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pe
 - Membuat scaling Area monster normal lebih landai dan membatasinya agar statistik level tinggi tidak melonjak berlebihan.
 - Memberikan kurva scaling terpisah kepada boss agar pertarungan tetap menantang dari level rendah sampai level 100.
 - Memberikan multiplier kontribusi ATK `×1,5` kepada seluruh weapon dua tangan dan menormalisasi statistik dasarnya agar bonus tidak dihitung ganda.
-- Menambahkan Arrow sebagai ammo bow; Shop menjual paket 10 Arrow dan inventory menampilkannya sebagai stack.
+- Menambahkan Arrow sebagai ammo bow; Shop menjual Arrow per unit sesuai jumlah yang dimasukkan dan inventory menampilkannya sebagai stack.
 - Normal Attack serta Magic Strike dengan bow mengonsumsi satu Arrow; saat Arrow habis, bonus ATK bow dinonaktifkan dan serangan menggunakan damage tanpa weapon.
 - Memberikan peringatan ketika Arrow terakhir ditembakkan bahwa serangan tersebut masih memakai damage bow dan serangan berikutnya akan menggunakan damage tanpa weapon.
 - Memperluas pilihan menjadi tujuh basis bow dari Hunter Bow hingga Celestial Starbow dengan jalur statistik early, mid, dan endgame.
