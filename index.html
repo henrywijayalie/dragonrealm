@@ -1158,6 +1158,10 @@
             }
 
             #magicStrikeBtn {
+                grid-column: auto;
+            }
+
+            #fleeBtn {
                 grid-column: 1 / -1;
             }
 
@@ -1539,6 +1543,9 @@
                 <div id="battleControls">
                     <button id="attackBtn" class="icon-button"><svg class="game-icon" aria-hidden="true"><use
                                 href="#icon-sword"></use></svg><span>Attack!</span></button>
+                    <button id="magicStrikeBtn" class="icon-button"><svg class="game-icon" aria-hidden="true"><use
+                                href="#icon-magic"></use></svg><span>Magic Strike (<span
+                                id="magicStrikeCost"></span> MP)</span></button>
                     <button id="useHpPotionBtn" class="icon-button"><svg class="game-icon" aria-hidden="true"><use
                                 href="#icon-heart"></use></svg><span>Use HP Potion (<span
                                 id="hpPotionCount">0</span>)</span></button>
@@ -1547,9 +1554,6 @@
                                 id="mpPotionCount">0</span>)</span></button>
                     <button id="fleeBtn" class="icon-button"><svg class="game-icon" aria-hidden="true"><use
                                 href="#icon-flee"></use></svg><span>Flee!</span></button>
-                    <button id="magicStrikeBtn" class="icon-button"><svg class="game-icon" aria-hidden="true"><use
-                                href="#icon-magic"></use></svg><span>Magic Strike (<span
-                                id="magicStrikeCost"></span> MP)</span></button>
                 </div>
             </div>
 

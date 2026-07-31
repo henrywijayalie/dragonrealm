@@ -18,6 +18,8 @@ Catatan perkembangan Dragon Realm Adventure dikelompokkan berdasarkan tanggal pe
 - Menghapus reset karakter ke level 1 ketika pemain kalah dalam battle.
 - Mengubah hukuman kekalahan menjadi kehilangan 10% EXP saat ini tanpa menurunkan level atau menghapus progres lain.
 - Menghidupkan kembali pemain di town dengan 10% HP dan MP setelah kalah.
+- Menata ulang tombol battle menjadi Attack/Magic Strike, HP/MP Potion, lalu Flee agar urutannya lebih natural pada smartphone.
+- Membuat tombol Flee selebar satu baris pada layout dua kolom mobile.
 - Menyembunyikan seluruh hidden title dari modal `Titles & Requirements` selama terkunci, lalu menampilkannya bersama persyaratan setelah berhasil diperoleh.
 - Tidak menghitung roll statistik pertama sebagai progres `Fate Defier`.
 - Merapikan dialog pemilihan Origin menjadi tiga kolom pada desktop agar lima pilihan muat dalam dua baris tanpa scrollbar kecil.
